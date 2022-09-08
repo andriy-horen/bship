@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 .App {
   text-align: center;
 }
@@ -5,6 +11,14 @@
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+.player-grid {
+  position: relative;
+}
+
+.player-grid .fleet-grid {
+  position: absolute;
 }
 
 @media (prefers-reduced-motion: no-preference) {

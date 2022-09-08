@@ -3,25 +3,21 @@ import { RootState } from "../../app/store";
 
 export enum GridSquare {
   Empty,
-  Hit,
+  Pending,
   Miss,
-}
-
-export enum ShipOrientation {
-  Vertical,
-  Horizontal,
+  Hit,
 }
 
 export interface Ship {
   size: number;
-  orientation: ShipOrientation;
+  orientation: "v" | "h";
   coordinates: [number, number];
 }
 
 export interface GameState {
   playerGrid: GridSquare[][];
   opponentGrid: GridSquare[][];
-  ships: Ship[];
+  fleet: Ship[];
 }
 
 const initialState: GameState = {
@@ -31,7 +27,18 @@ const initialState: GameState = {
   opponentGrid: Array(10)
     .fill(0)
     .map(() => Array(10).fill(GridSquare.Empty)),
-  ships: [],
+  fleet: [
+    { size: 1, orientation: "h", coordinates: [0, 0] },
+    { size: 1, orientation: "h", coordinates: [0, 2] },
+    { size: 1, orientation: "h", coordinates: [0, 4] },
+    { size: 1, orientation: "h", coordinates: [0, 6] },
+    { size: 2, orientation: "h", coordinates: [2, 0] },
+    { size: 2, orientation: "h", coordinates: [2, 3] },
+    { size: 2, orientation: "h", coordinates: [2, 6] },
+    { size: 3, orientation: "h", coordinates: [4, 0] },
+    { size: 3, orientation: "v", coordinates: [4, 4] },
+    { size: 4, orientation: "v", coordinates: [6, 0] },
+  ],
 };
 
 export interface SetSquarePayload {
@@ -56,27 +63,29 @@ export interface SetSquarePayload {
 export const gameSlice = createSlice({
   name: "game",
   initialState,
-  // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    setPlayerSquare: (state, action: PayloadAction<SetSquarePayload>) => {
-      const [x, y] = action.payload.coordinates;
-
-      state.playerGrid[x][y] = action.payload.value;
+    setPlayerSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
+      const [x, y] = payload.coordinates;
+      state.playerGrid[x][y] = payload.value;
     },
-    setOpponentSquare: (state, action: PayloadAction<SetSquarePayload>) => {
-      const [x, y] = action.payload.coordinates;
-
-      state.opponentGrid[x][y] = action.payload.value;
+    setOpponentSquare: (
+      state,
+      { payload }: PayloadAction<SetSquarePayload>
+    ) => {
+      const [x, y] = payload.coordinates;
+      state.opponentGrid[x][y] = payload.value;
+    },
+    setPlayerFleet: (state, action: PayloadAction<Ship[]>) => {
+      state.fleet = action.payload;
     },
   },
 });
 
-export const { setPlayerSquare, setOpponentSquare } = gameSlice.actions;
+export const { setPlayerSquare, setOpponentSquare, setPlayerFleet } =
+  gameSlice.actions;
 
-// The function below is called a selector and allows us to select a value from
-// the state. Selectors can also be defined inline where they're used instead of
-// in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectPlayerGrid = (state: RootState) => state.game.playerGrid;
 export const selectOpponentGrid = (state: RootState) => state.game.opponentGrid;
+export const selectFleet = (state: RootState) => state.game.fleet;
 
 export default gameSlice.reducer;
