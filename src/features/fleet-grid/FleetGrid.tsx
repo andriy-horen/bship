@@ -1,3 +1,5 @@
+import { useDrop } from "react-dnd";
+import { ItemTypes } from "../../app/item-types";
 import { Battleship } from "../battleship/Battleship";
 import { Ship } from "../game/gameSlice";
 import "./FleetGrid.css";
@@ -7,10 +9,18 @@ export interface FleetGridProps {
 }
 
 export function FleetGrid({ fleet }: FleetGridProps) {
+  const [, drop] = useDrop(() => ({
+    accept: ItemTypes.Battleship,
+    drop: () => {
+      console.log("droppped");
+    },
+  }));
+
   return (
-    <div className="fleet-grid">
+    <div ref={drop} className="fleet-grid">
       {fleet.map((ship, index) => (
         <div
+          key={index}
           className="ship-location"
           style={{
             top: `${ship.position[0] * 24 + ship.position[0]}px`,

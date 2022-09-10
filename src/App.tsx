@@ -1,3 +1,5 @@
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import "./App.css";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import { Counter } from "./features/counter/Counter";
@@ -27,11 +29,13 @@ function App() {
 
   return (
     <div className="App">
-      <Counter />
+      {/* <Counter /> */}
       <div>
         <h3>Player's Grid</h3>
         <div className="player-grid">
-          <FleetGrid fleet={fleet} />
+          <DndProvider backend={HTML5Backend}>
+            <FleetGrid fleet={fleet} />
+          </DndProvider>
           <Grid grid={playerGrid} />
         </div>
       </div>
