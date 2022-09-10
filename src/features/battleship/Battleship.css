@@ -1,0 +1,46 @@
+.battleship {
+  display: flex;
+  --battleship-size: 24px;
+}
+
+.battleship.vertical {
+  flex-direction: column;
+}
+
+.battleship-section {
+  background-color: #cacbd8;
+  height: var(--battleship-size);
+  width: var(--battleship-size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.battleship-section::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-color: #b3b4c1;
+  border-radius: 50%;
+}
+
+.battleship.horizontal .battleship-section.head {
+  border-top-left-radius: var(--battleship-size);
+  border-bottom-left-radius: var(--battleship-size);
+}
+
+.battleship.horizontal .battleship-section.tail {
+  border-top-right-radius: var(--battleship-size);
+  border-bottom-right-radius: var(--battleship-size);
+}
+
+.battleship.vertical .battleship-section.head {
+  border-top-left-radius: var(--battleship-size);
+  border-top-right-radius: var(--battleship-size);
+}
+
+.battleship.vertical .battleship-section.tail {
+  border-bottom-left-radius: var(--battleship-size);
+  border-bottom-right-radius: var(--battleship-size);
+}

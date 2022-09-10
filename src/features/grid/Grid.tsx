@@ -12,7 +12,6 @@ export function Grid({ grid, onSquareClick }: GridProps) {
   const classes = new Map<GridSquare, string>([
     [GridSquare.Hit, "square-hit"],
     [GridSquare.Miss, "square-miss"],
-    [GridSquare.Pending, "square-pending"],
   ]);
 
   const getClassName = (x: number, y: number): string => {

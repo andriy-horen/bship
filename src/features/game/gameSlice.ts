@@ -3,7 +3,6 @@ import { RootState } from "../../app/store";
 
 export enum GridSquare {
   Empty,
-  Pending,
   Miss,
   Hit,
 }

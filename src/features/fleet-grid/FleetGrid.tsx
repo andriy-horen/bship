@@ -1,3 +1,4 @@
+import { Battleship } from "../battleship/Battleship";
 import { Ship } from "../game/gameSlice";
 import "./FleetGrid.css";
 
@@ -9,14 +10,10 @@ export function FleetGrid({ fleet }: FleetGridProps) {
   return (
     <div className="fleet-grid">
       {fleet.map((ship, index) => (
-        <div
-          key={index}
-          style={{
-            top: `${ship.coordinates[0] * 24}px`,
-            left: `${ship.coordinates[1] * 24}px`,
-          }}
-          className={`ship ship-size-${ship.size} ship-orientation-${ship.orientation}`}
-        ></div>
+        <Battleship
+          size={ship.size}
+          orientation={ship.orientation}
+        ></Battleship>
       ))}
     </div>
   );

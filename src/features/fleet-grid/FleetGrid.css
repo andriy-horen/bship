@@ -2,37 +2,4 @@
   position: relative;
   width: 250px;
   height: 250px;
-  left: 5px;
-}
-
-.ship {
-  width: 25px;
-  height: 25px;
-  border: 2px solid #00f;
-  background: #0000ff0d;
-  position: absolute;
-}
-
-.ship-size-2.ship-orientation-h {
-  width: 50px;
-}
-
-.ship-size-3.ship-orientation-h {
-  width: 75px;
-}
-
-.ship-size-4.ship-orientation-h {
-  width: 100px;
-}
-
-.ship-size-2.ship-orientation-v {
-  height: 50px;
-}
-
-.ship-size-3.ship-orientation-v {
-  height: 75px;
-}
-
-.ship-size-4.ship-orientation-v {
-  height: 100px;
 }
