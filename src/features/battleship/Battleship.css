@@ -1,6 +1,8 @@
 .battleship {
   display: flex;
-  --battleship-size: 24px;
+  --battleship-size: 25px;
+  margin-bottom: -1px;
+  margin-right: -1px;
 }
 
 .battleship.vertical {
@@ -26,21 +28,21 @@
 }
 
 .battleship.horizontal .battleship-section.head {
-  border-top-left-radius: var(--battleship-size);
-  border-bottom-left-radius: var(--battleship-size);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 
 .battleship.horizontal .battleship-section.tail {
-  border-top-right-radius: var(--battleship-size);
-  border-bottom-right-radius: var(--battleship-size);
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
 }
 
 .battleship.vertical .battleship-section.head {
-  border-top-left-radius: var(--battleship-size);
-  border-top-right-radius: var(--battleship-size);
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .battleship.vertical .battleship-section.tail {
-  border-bottom-left-radius: var(--battleship-size);
-  border-bottom-right-radius: var(--battleship-size);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 }

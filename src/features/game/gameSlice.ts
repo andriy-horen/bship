@@ -10,7 +10,7 @@ export enum GridSquare {
 export interface Ship {
   size: number;
   orientation: "v" | "h";
-  coordinates: [number, number];
+  position: [number, number];
 }
 
 export interface GameState {
@@ -27,16 +27,16 @@ const initialState: GameState = {
     .fill(0)
     .map(() => Array(10).fill(GridSquare.Empty)),
   fleet: [
-    { size: 1, orientation: "h", coordinates: [0, 0] },
-    { size: 1, orientation: "h", coordinates: [0, 2] },
-    { size: 1, orientation: "h", coordinates: [0, 4] },
-    { size: 1, orientation: "h", coordinates: [0, 6] },
-    { size: 2, orientation: "h", coordinates: [2, 0] },
-    { size: 2, orientation: "h", coordinates: [2, 3] },
-    { size: 2, orientation: "h", coordinates: [2, 6] },
-    { size: 3, orientation: "h", coordinates: [4, 0] },
-    { size: 3, orientation: "v", coordinates: [4, 4] },
-    { size: 4, orientation: "v", coordinates: [6, 0] },
+    { size: 1, orientation: "h", position: [0, 0] },
+    { size: 1, orientation: "h", position: [0, 2] },
+    { size: 1, orientation: "h", position: [0, 4] },
+    { size: 1, orientation: "h", position: [0, 6] },
+    { size: 2, orientation: "h", position: [2, 0] },
+    { size: 2, orientation: "h", position: [2, 3] },
+    { size: 2, orientation: "h", position: [2, 6] },
+    { size: 3, orientation: "h", position: [4, 0] },
+    { size: 3, orientation: "v", position: [4, 4] },
+    { size: 4, orientation: "v", position: [6, 0] },
   ],
 };
 
