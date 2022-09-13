@@ -2,7 +2,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "./App.css";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { Counter } from "./features/counter/Counter";
+import { CustomDragLayer } from "./features/dnd/CustomDragLayer";
 import { FleetGrid } from "./features/fleet-grid/FleetGrid";
 import {
   selectFleet,
@@ -29,12 +29,12 @@ function App() {
 
   return (
     <div className="App">
-      {/* <Counter /> */}
       <div>
         <h3>Player's Grid</h3>
         <div className="player-grid">
           <DndProvider backend={HTML5Backend}>
             <FleetGrid fleet={fleet} />
+            <CustomDragLayer />
           </DndProvider>
           <Grid grid={playerGrid} />
         </div>

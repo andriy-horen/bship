@@ -1,8 +1,9 @@
 import { useDrop } from "react-dnd";
-import { ItemTypes } from "../../app/item-types";
+import { ItemTypes } from "../dnd/itemTypes";
 import { Battleship } from "../battleship/Battleship";
 import { Ship } from "../game/gameSlice";
 import "./FleetGrid.css";
+import { BattleshipDrag } from "../dnd/battleshipDrag";
 
 export interface FleetGridProps {
   fleet: Ship[];
@@ -11,8 +12,13 @@ export interface FleetGridProps {
 export function FleetGrid({ fleet }: FleetGridProps) {
   const [, drop] = useDrop(() => ({
     accept: ItemTypes.Battleship,
-    drop: () => {
-      console.log("droppped");
+    drop(item: BattleshipDrag, monitor) {
+      const delta = monitor.getDifferenceFromInitialOffset() as {
+        x: number;
+        y: number;
+      };
+
+      console.log(delta);
     },
   }));
 

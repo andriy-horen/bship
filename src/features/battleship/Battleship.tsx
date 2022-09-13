@@ -2,7 +2,9 @@ import classNames from "classnames";
 import { range } from "lodash-es";
 import { useDrag } from "react-dnd";
 import "./Battleship.css";
-import { ItemTypes } from "../../app/item-types";
+import { ItemTypes } from "../dnd/itemTypes";
+import { useEffect } from "react";
+import { getEmptyImage } from "react-dnd-html5-backend";
 
 export interface BattleshipProps {
   size: number;
@@ -10,12 +12,17 @@ export interface BattleshipProps {
 }
 
 export function Battleship({ size, orientation }: BattleshipProps) {
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: ItemTypes.Battleship,
+    item: { size, orientation },
     collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+      isDragging: monitor.isDragging(),
     }),
   }));
+
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
 
   return (
     <div
