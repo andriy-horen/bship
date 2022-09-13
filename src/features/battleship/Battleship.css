@@ -10,7 +10,8 @@
 }
 
 .battleship-section {
-  background-color: #cacbd8;
+  /* background-color: #cacbd8; */
+  background-color: #afb1c1;
   height: var(--battleship-size);
   width: var(--battleship-size);
   display: flex;
@@ -23,7 +24,8 @@
   display: block;
   width: 10px;
   height: 10px;
-  background-color: #b3b4c1;
+  /* background-color: #b3b4c1; */
+  background-color: #87899b;
   border-radius: 50%;
 }
 
