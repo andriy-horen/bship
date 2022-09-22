@@ -56,7 +56,13 @@ export const CustomDragLayer: FC = () => {
   function renderItem() {
     switch (itemType) {
       case ItemTypes.Battleship:
-        return <Battleship size={item.size} orientation={item.orientation} />;
+        return (
+          <Battleship
+            size={item.size}
+            orientation={item.orientation}
+            position={item.position}
+          />
+        );
       default:
         return null;
     }

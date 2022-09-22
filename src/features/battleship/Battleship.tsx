@@ -9,12 +9,13 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 export interface BattleshipProps {
   size: number;
   orientation: "v" | "h";
+  position: [number, number];
 }
 
-export function Battleship({ size, orientation }: BattleshipProps) {
+export function Battleship({ size, orientation, position }: BattleshipProps) {
   const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: ItemTypes.Battleship,
-    item: { size, orientation },
+    item: { size, orientation, position },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),

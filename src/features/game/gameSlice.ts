@@ -77,11 +77,32 @@ export const gameSlice = createSlice({
     setPlayerFleet: (state, action: PayloadAction<Ship[]>) => {
       state.fleet = action.payload;
     },
+    setShipPosition(
+      state,
+      action: PayloadAction<{
+        currentPosition: [number, number];
+        newPosition: [number, number];
+      }>
+    ) {
+      const ship = state.fleet.find(
+        ({ position }) =>
+          position[0] === action.payload.currentPosition[0] &&
+          position[1] === action.payload.currentPosition[1]
+      );
+
+      if (ship) {
+        ship.position = action.payload.newPosition;
+      }
+    },
   },
 });
 
-export const { setPlayerSquare, setOpponentSquare, setPlayerFleet } =
-  gameSlice.actions;
+export const {
+  setPlayerSquare,
+  setOpponentSquare,
+  setPlayerFleet,
+  setShipPosition,
+} = gameSlice.actions;
 
 export const selectPlayerGrid = (state: RootState) => state.game.playerGrid;
 export const selectOpponentGrid = (state: RootState) => state.game.opponentGrid;
