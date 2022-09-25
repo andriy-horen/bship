@@ -1,7 +1,7 @@
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "../dnd/itemTypes";
 import { Battleship } from "../battleship/Battleship";
-import { setShipPosition, Ship } from "../game/gameSlice";
+import { setShipOrientation, setShipPosition, Ship } from "../game/gameSlice";
 import "./FleetGrid.css";
 import { BattleshipDrag } from "../dnd/battleshipDrag";
 import { snapToGrid } from "../dnd/snap";
@@ -31,6 +31,18 @@ export function FleetGrid({ fleet }: FleetGridProps) {
     },
   }));
 
+  const changeOrientation = (
+    position: [number, number],
+    orientation: "v" | "h"
+  ) => {
+    store.dispatch(
+      setShipOrientation({
+        position,
+        orientation: orientation === "v" ? "h" : "v",
+      })
+    );
+  };
+
   return (
     <div ref={drop} className="fleet-grid">
       {fleet.map((ship, index) => (
@@ -46,6 +58,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
             size={ship.size}
             orientation={ship.orientation}
             position={ship.position}
+            onClick={changeOrientation}
           ></Battleship>
         </div>
       ))}
