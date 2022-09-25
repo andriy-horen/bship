@@ -5,6 +5,8 @@ import "./Battleship.css";
 import { ItemTypes } from "../dnd/itemTypes";
 import { useEffect } from "react";
 import { getEmptyImage } from "react-dnd-html5-backend";
+import { store } from "../../app/store";
+import { setShipOrientation } from "../game/gameSlice";
 
 export interface BattleshipProps {
   size: number;
@@ -13,17 +15,29 @@ export interface BattleshipProps {
 }
 
 export function Battleship({ size, orientation, position }: BattleshipProps) {
-  const [{ isDragging }, drag, preview] = useDrag(() => ({
-    type: ItemTypes.Battleship,
-    item: { size, orientation, position },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
+  const [{ isDragging }, drag, preview] = useDrag(
+    () => ({
+      type: ItemTypes.Battleship,
+      item: { size, orientation, position },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
     }),
-  }));
+    [position, orientation]
+  );
 
   useEffect(() => {
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);
+
+  const changeOrientation = () => {
+    store.dispatch(
+      setShipOrientation({
+        position,
+        orientation: orientation === "v" ? "h" : "v",
+      })
+    );
+  };
 
   return (
     <div
@@ -33,6 +47,7 @@ export function Battleship({ size, orientation, position }: BattleshipProps) {
         vertical: orientation === "v",
         horizontal: orientation === "h",
       })}
+      onClick={changeOrientation}
     >
       {range(size).map((index) => (
         <div

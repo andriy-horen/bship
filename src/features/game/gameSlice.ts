@@ -88,11 +88,24 @@ export const gameSlice = createSlice({
         ({ position }) =>
           position[0] === action.payload.currentPosition[0] &&
           position[1] === action.payload.currentPosition[1]
-      );
+      )!;
 
-      if (ship) {
-        ship.position = action.payload.newPosition;
-      }
+      ship.position = action.payload.newPosition;
+    },
+    setShipOrientation(
+      state,
+      action: PayloadAction<{
+        position: [number, number];
+        orientation: "v" | "h";
+      }>
+    ) {
+      const ship = state.fleet.find(
+        ({ position }) =>
+          position[0] === action.payload.position[0] &&
+          position[1] === action.payload.position[1]
+      )!;
+
+      ship.orientation = action.payload.orientation;
     },
   },
 });
@@ -102,6 +115,7 @@ export const {
   setOpponentSquare,
   setPlayerFleet,
   setShipPosition,
+  setShipOrientation,
 } = gameSlice.actions;
 
 export const selectPlayerGrid = (state: RootState) => state.game.playerGrid;
