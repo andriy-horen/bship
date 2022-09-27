@@ -1,0 +1,3 @@
+# bship
+
+Battleship strategy game
