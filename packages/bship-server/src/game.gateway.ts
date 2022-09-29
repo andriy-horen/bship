@@ -10,9 +10,8 @@ import {
 import { Server } from 'socket.io';
 
 @WebSocketGateway<GatewayMetadata>({
-  namespace: 'game',
   cors: {
-    origin: '*',
+    origin: 'http://localhost:3000',
   },
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -23,7 +22,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('events')
-  handleEvent(@MessageBody() data: string): string {
+  handleEvent(@MessageBody() data: any): any {
+    console.log(data);
+
     return data;
   }
 
