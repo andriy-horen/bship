@@ -1,5 +1,4 @@
 import {
-  GatewayMetadata,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -7,13 +6,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server } from 'ws';
 
-@WebSocketGateway<GatewayMetadata>({
-  cors: {
-    origin: 'http://localhost:3000',
-  },
-})
+@WebSocketGateway()
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 

@@ -11,24 +11,11 @@ import {
   setOpponentSquare,
 } from "./features/game/gameSlice";
 import { Grid } from "./features/grid/Grid";
-import io, { Socket } from "socket.io-client";
-import { useEffect, useState } from "react";
 
 function App() {
   const dispatch = useAppDispatch();
   const playerGrid = useAppSelector(selectPlayerGrid);
   const opponentGrid = useAppSelector(selectOpponentGrid);
-
-  const [socket, setSocket] = useState<Socket | null>(null);
-
-  useEffect(() => {
-    const newSocket = io(`http://${window.location.hostname}:3030`);
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.close();
-    };
-  }, [setSocket]);
 
   const handleSquareClick = (x: number, y: number) => {
     const value = opponentGrid[x][y];
@@ -41,7 +28,7 @@ function App() {
   const fleet = useAppSelector(selectFleet);
 
   const startGame = () => {
-    socket?.emit("events", { message: "bar" });
+    console.log("start game click");
   };
 
   return (
