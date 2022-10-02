@@ -21,7 +21,7 @@ function App() {
   const websocket = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3001");
+    const ws = new WebSocket("ws://localhost:3001/game");
 
     ws.onopen = () => {};
 

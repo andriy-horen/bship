@@ -7,10 +7,15 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'ws';
+import { GameService } from './game.service';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  path: '/game',
+})
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
+
+  constructor(private gameSerive: GameService) {}
 
   @SubscribeMessage('events')
   handleEvent(@MessageBody() data: any): any {
@@ -19,11 +24,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return data;
   }
 
-  handleConnection(client: any, ...args: any[]) {
-    console.log(client);
+  handleConnection(client: any, req: any) {
+    console.log(req);
   }
 
   handleDisconnect(client: any) {
-    console.log(client);
+    //console.log(client);
   }
 }
