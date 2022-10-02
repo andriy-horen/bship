@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "./App.css";
@@ -17,6 +18,20 @@ function App() {
   const playerGrid = useAppSelector(selectPlayerGrid);
   const opponentGrid = useAppSelector(selectOpponentGrid);
 
+  const websocket = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3001");
+
+    ws.onopen = () => {};
+
+    websocket.current = ws;
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
   const handleSquareClick = (x: number, y: number) => {
     const value = opponentGrid[x][y];
 
@@ -28,7 +43,7 @@ function App() {
   const fleet = useAppSelector(selectFleet);
 
   const startGame = () => {
-    console.log("start game click");
+    websocket?.current?.send(JSON.stringify({ event: "events", data: "foo" }));
   };
 
   return (
