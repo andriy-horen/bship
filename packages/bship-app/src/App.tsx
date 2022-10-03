@@ -12,6 +12,7 @@ import {
   setOpponentSquare,
 } from "./features/game/gameSlice";
 import { Grid } from "./features/grid/Grid";
+import { GameCommand } from "bship-contracts";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -43,6 +44,8 @@ function App() {
   const fleet = useAppSelector(selectFleet);
 
   const startGame = () => {
+    const foo = GameCommand.CreateGame;
+
     websocket?.current?.send(JSON.stringify({ event: "events", data: {} }));
   };
 
