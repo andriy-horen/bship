@@ -43,7 +43,7 @@ function App() {
   const fleet = useAppSelector(selectFleet);
 
   const startGame = () => {
-    websocket?.current?.send(JSON.stringify({ event: "events", data: "foo" }));
+    websocket?.current?.send(JSON.stringify({ event: "events", data: {} }));
   };
 
   return (
