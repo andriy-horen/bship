@@ -1,3 +1,8 @@
+export interface GameEvent {
+  command: GameCommand;
+  payload?: any;
+}
+
 export enum GameCommand {
   CreateGame = "create_game",
   Attack = "attack",
@@ -28,7 +33,8 @@ export interface MarkPayload {
   next: Players;
 }
 
-export interface Message {
-  command: GameCommand;
-  payload?: any;
+export interface Battleship {
+  size: number;
+  orientation: "v" | "h";
+  position: [number, number];
 }

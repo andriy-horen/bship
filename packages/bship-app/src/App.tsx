@@ -44,9 +44,17 @@ function App() {
   const fleet = useAppSelector(selectFleet);
 
   const startGame = () => {
-    const foo = GameCommand.CreateGame;
-
-    websocket?.current?.send(JSON.stringify({ event: "events", data: {} }));
+    websocket?.current?.send(
+      JSON.stringify({
+        event: "game",
+        data: {
+          command: GameCommand.CreateGame,
+          payload: {
+            fleet,
+          },
+        },
+      })
+    );
   };
 
   return (

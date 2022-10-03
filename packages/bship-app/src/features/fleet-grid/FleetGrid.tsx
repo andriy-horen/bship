@@ -1,14 +1,15 @@
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "../dnd/itemTypes";
 import { Battleship } from "../battleship/Battleship";
-import { setShipOrientation, setShipPosition, Ship } from "../game/gameSlice";
+import { setShipOrientation, setShipPosition } from "../game/gameSlice";
 import "./FleetGrid.css";
 import { BattleshipDrag } from "../dnd/battleshipDrag";
 import { snapToGrid } from "../dnd/snap";
 import { store } from "../../app/store";
+import { Battleship as BattleshipModel } from "bship-contracts";
 
 export interface FleetGridProps {
-  fleet: Ship[];
+  fleet: BattleshipModel[];
 }
 
 export function FleetGrid({ fleet }: FleetGridProps) {

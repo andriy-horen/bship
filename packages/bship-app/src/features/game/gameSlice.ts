@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
+import { Battleship } from "bship-contracts";
 
 export enum GridSquare {
   Empty,
@@ -7,16 +8,10 @@ export enum GridSquare {
   Hit,
 }
 
-export interface Ship {
-  size: number;
-  orientation: "v" | "h";
-  position: [number, number];
-}
-
 export interface GameState {
   playerGrid: GridSquare[][];
   opponentGrid: GridSquare[][];
-  fleet: Ship[];
+  fleet: Battleship[];
 }
 
 const initialState: GameState = {
@@ -74,7 +69,7 @@ export const gameSlice = createSlice({
       const [x, y] = payload.coordinates;
       state.opponentGrid[x][y] = payload.value;
     },
-    setPlayerFleet: (state, action: PayloadAction<Ship[]>) => {
+    setPlayerFleet: (state, action: PayloadAction<Battleship[]>) => {
       state.fleet = action.payload;
     },
     setShipPosition(

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'ws';
 import { GameService } from './game.service';
+import { GameCommand, GameEvent } from 'bship-contracts';
 
 @WebSocketGateway({
   path: '/game',
@@ -17,8 +18,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(private gameSerive: GameService) {}
 
-  @SubscribeMessage('events')
-  handleEvent(@MessageBody() data: any): any {
+  @SubscribeMessage('game')
+  handleGameEvent(@MessageBody() data: GameEvent): any {
+    if (!data) {
+      return;
+    }
+
+    switch (data.command) {
+      case GameCommand.CreateGame:
+        return this.gameSerive.createGame(data.payload.fleet);
+    }
+
+    return data;
+  }
+
+  @SubscribeMessage('chat')
+  handleChatEvent(@MessageBody() data: any): any {
     console.log(data);
 
     return data;
