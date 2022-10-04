@@ -7,8 +7,8 @@ export class IdGeneratorService {
   private readonly nanoid: (size?: number) => string;
 
   constructor(config: ConfigService) {
-    const alphabet = config.get<string>('idGeneration.alphabet');
-    const size = config.get<number>('idGeneration.size');
+    const alphabet = config.get<string>('idGenerator.alphabet');
+    const size = config.get<number>('idGenerator.size');
 
     this.nanoid = customAlphabet(alphabet, size);
   }
