@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
-
-export enum MoveStatus {
-  Hit,
-  Miss,
-  Sunk,
-  Invalid,
-}
+import { AttackStatus, Coordinates, Player } from 'bship-contracts';
+import { mapLastEntry } from './utils';
 
 @Injectable()
 export class GameStoreService {
@@ -15,34 +10,29 @@ export class GameStoreService {
 }
 
 export interface GameStateEvent {
-  player: number;
-  position: { y: number; x: number };
+  player: Player;
+  coordinates: Coordinates;
 }
 
 export interface GameStateUpdateResult {
   nextPlayer: number;
-  moveStatus: MoveStatus;
+  moveStatus: AttackStatus;
+  isValidMove?: boolean;
 }
 
-function isEqual(event1: GameStateEvent, event2: GameStateEvent): boolean {
-  const {
-    player: player1,
-    position: { x: x1, y: y1 },
-  } = event1;
+export const INVALID_MOVE: GameStateUpdateResult = {
+  nextPlayer: Player.Player0,
+  moveStatus: AttackStatus.Miss,
+  isValidMove: false,
+};
 
-  const {
-    player: player2,
-    position: { x: x2, y: y2 },
-  } = event2;
-
-  return player1 === player2 && x1 === x2 && y1 === y2;
-}
+type StringGameEvent = `p${number}:${number},${number}`;
 
 export class GameState {
-  private readonly _state: GameStateEvent[] = [];
-
   private readonly _fleet1: number[][] = [];
   private readonly _fleet2: number[][] = [];
+
+  private readonly _state = new Map<StringGameEvent, GameStateUpdateResult>();
 
   constructor(fleet1: number[][], fleet2: number[][]) {
     this._fleet1 = fleet1;
@@ -53,46 +43,62 @@ export class GameState {
     /**
      * When move is repeated (duplicate) return invalid state
      */
-    const duplicate = this._state.some((e) => isEqual(e, event));
-    if (duplicate) {
-      return {
-        nextPlayer: 0,
-        moveStatus: MoveStatus.Invalid,
-      };
+    if (this._state.has(gameEventToString(event))) {
+      return INVALID_MOVE;
     }
 
     /**
      * When move is outside the grid
      */
     if (
-      event.position.x < 0 ||
-      event.position.y < 0 ||
-      event.position.x > 9 ||
-      event.position.y > 9
+      event.coordinates.x < 0 ||
+      event.coordinates.y < 0 ||
+      event.coordinates.x > 9 ||
+      event.coordinates.y > 9
     ) {
-      return {
-        nextPlayer: 0,
-        moveStatus: MoveStatus.Invalid,
-      };
+      return INVALID_MOVE;
     }
   }
 
-  get lastEvent(): GameStateEvent {
-    return this._state[this._state.length - 1];
+  get lastUpdate(): GameStateUpdateResult {
+    const [, last] = mapLastEntry(this._state);
+
+    return last;
   }
 
   get isNewGame(): boolean {
-    return this._state.length === 0;
+    return this._state.size === 0;
   }
 
-  getUpdateResult({ player, position }: GameStateEvent): GameStateUpdateResult {
+  getUpdateResult({
+    player,
+    coordinates,
+  }: GameStateEvent): GameStateUpdateResult {
     const targetFleet = player === 0 ? this._fleet2 : this._fleet1;
-    if (targetFleet[position.y][position.x] > 0) {
+    if (targetFleet[coordinates.y][coordinates.x] > 0) {
     }
 
     return {
       nextPlayer: 0,
-      moveStatus: MoveStatus.Hit,
+      moveStatus: AttackStatus.Hit,
     };
   }
+}
+
+function gameEventToString(event: GameStateEvent): StringGameEvent {
+  return `p${event.player}:${event.coordinates.y},${event.coordinates.y}`;
+}
+
+function isEqual(event1: GameStateEvent, event2: GameStateEvent): boolean {
+  const {
+    player: player1,
+    coordinates: { x: x1, y: y1 },
+  } = event1;
+
+  const {
+    player: player2,
+    coordinates: { x: x2, y: y2 },
+  } = event2;
+
+  return player1 === player2 && x1 === x2 && y1 === y2;
 }
