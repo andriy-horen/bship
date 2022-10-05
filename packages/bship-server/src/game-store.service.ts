@@ -68,7 +68,7 @@ export class GameState {
     /**
      * When update comes from player out of turn
      */
-    if (event.player !== this.lastUpdate.nextPlayer) {
+    if (!this.isNewGame && event.player !== this.lastUpdate!.nextPlayer) {
       return INVALID_MOVE;
     }
 
@@ -78,10 +78,10 @@ export class GameState {
     return update;
   }
 
-  get lastUpdate(): GameStateUpdateResult {
-    const [, last] = mapLastEntry(this._state);
+  get lastUpdate(): GameStateUpdateResult | undefined {
+    const lastEntry = mapLastEntry(this._state);
 
-    return last;
+    return lastEntry?.[1];
   }
 
   get isNewGame(): boolean {

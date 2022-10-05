@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { GameCommand } from "bship-contracts";
+import { nanoid } from "nanoid";
+import { useEffect, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "./App.css";
@@ -12,7 +14,6 @@ import {
   setOpponentSquare,
 } from "./features/game/gameSlice";
 import { Grid } from "./features/grid/Grid";
-import { GameCommand } from "bship-contracts";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -22,7 +23,7 @@ function App() {
   const websocket = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3001/game");
+    const ws = new WebSocket(`ws://localhost:3001/game?id=${nanoid()}`);
 
     ws.onopen = () => {};
 

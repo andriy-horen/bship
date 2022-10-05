@@ -12,5 +12,8 @@
     "build": "tsc"
   },
   "author": "",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^18.8.2"
+  }
 }

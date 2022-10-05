@@ -6,15 +6,17 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'ws';
-import { GameService } from './game.service';
 import { GameCommand, GameEvent } from 'bship-contracts';
+import { IncomingMessage } from 'node:http';
+import url from 'node:url';
+import { Server, WebSocket } from 'ws';
+import { GameService } from './game.service';
 
 @WebSocketGateway({
   path: '/game',
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
+  @WebSocketServer() server!: Server;
 
   constructor(private gameSerive: GameService) {}
 
@@ -39,11 +41,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return data;
   }
 
-  handleConnection(client: any, req: any) {
-    console.log(req);
+  handleConnection(client: WebSocket, req: IncomingMessage) {
+    const { query } = url.parse(req.url ?? '', true);
+
+    console.log(query?.id);
   }
 
-  handleDisconnect(client: any) {
+  handleDisconnect(client: WebSocket) {
     //console.log(client);
   }
 }
