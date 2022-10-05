@@ -5,6 +5,8 @@ export interface Coordinates {
 
 export type StringCoordinates = `${number},${number}`;
 
+export type ShipCoordinates = [Coordinates, Coordinates];
+
 export interface GameEvent {
   command: GameCommand;
   payload?: any;

@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { AttackStatus, Coordinates, Player } from 'bship-contracts';
+import {
+  AttackStatus,
+  Coordinates,
+  Player,
+  ShipCoordinates,
+} from 'bship-contracts';
 import { mapLastEntry } from './utils';
 
 @Injectable()
@@ -29,21 +34,22 @@ export const INVALID_MOVE: GameStateUpdateResult = {
 type StringGameEvent = `p${number}:${number},${number}`;
 
 export class GameState {
-  private readonly _fleet1: number[][] = [];
-  private readonly _fleet2: number[][] = [];
+  private readonly _fleet1: readonly ShipCoordinates[] = [];
+  private readonly _fleet2: readonly ShipCoordinates[] = [];
 
   private readonly _state = new Map<StringGameEvent, GameStateUpdateResult>();
 
-  constructor(fleet1: number[][], fleet2: number[][]) {
-    this._fleet1 = fleet1;
-    this._fleet2 = fleet2;
+  constructor(fleet1: ShipCoordinates[], fleet2: ShipCoordinates[]) {
+    this._fleet1 = Object.freeze(fleet1);
+    this._fleet2 = Object.freeze(fleet2);
   }
 
   update(event: GameStateEvent): GameStateUpdateResult {
+    const key = gameStateKey(event.player, event.coordinates);
     /**
      * When move is repeated (duplicate) return invalid state
      */
-    if (this._state.has(gameEventToString(event))) {
+    if (this._state.has(key)) {
       return INVALID_MOVE;
     }
 
@@ -58,6 +64,18 @@ export class GameState {
     ) {
       return INVALID_MOVE;
     }
+
+    /**
+     * When update comes from player out of turn
+     */
+    if (event.player !== this.lastUpdate.nextPlayer) {
+      return INVALID_MOVE;
+    }
+
+    const update = this.getUpdateResult(event);
+    this._state.set(key, update);
+
+    return update;
   }
 
   get lastUpdate(): GameStateUpdateResult {
@@ -75,30 +93,48 @@ export class GameState {
     coordinates,
   }: GameStateEvent): GameStateUpdateResult {
     const targetFleet = player === 0 ? this._fleet2 : this._fleet1;
-    if (targetFleet[coordinates.y][coordinates.x] > 0) {
+
+    const target = targetFleet.find((ship) => isShipHit(ship, coordinates));
+    if (!target) {
+      return {
+        nextPlayer: takeTurn(player),
+        moveStatus: AttackStatus.Miss,
+      };
     }
 
+    const isSunk = expandShip(target)
+      .filter(({ x, y }) => x !== coordinates.x && y !== coordinates.y)
+      .every((coord) => this._state.get(gameStateKey(player, coord)));
+
     return {
-      nextPlayer: 0,
-      moveStatus: AttackStatus.Hit,
+      nextPlayer: player,
+      moveStatus: isSunk ? AttackStatus.Sunk : AttackStatus.Hit,
     };
   }
 }
 
-function gameEventToString(event: GameStateEvent): StringGameEvent {
-  return `p${event.player}:${event.coordinates.y},${event.coordinates.y}`;
+function gameStateKey(player: Player, coord: Coordinates): StringGameEvent {
+  return `p${player}:${coord.y},${coord.x}`;
 }
 
-function isEqual(event1: GameStateEvent, event2: GameStateEvent): boolean {
-  const {
-    player: player1,
-    coordinates: { x: x1, y: y1 },
-  } = event1;
+function isShipHit(
+  [head, tail]: ShipCoordinates,
+  { x, y }: Coordinates,
+): boolean {
+  return x >= head.x && x <= tail.x && y >= head.y && y <= tail.y;
+}
 
-  const {
-    player: player2,
-    coordinates: { x: x2, y: y2 },
-  } = event2;
+function takeTurn(current: Player): Player {
+  return current === Player.Player0 ? Player.Player1 : Player.Player0;
+}
 
-  return player1 === player2 && x1 === x2 && y1 === y2;
+function expandShip([head, tail]: ShipCoordinates): Coordinates[] {
+  const result: Coordinates[] = [];
+  for (let x = head.x; x <= tail.x; x++) {
+    for (let y = head.y; y <= tail.y; y++) {
+      result.push({ x, y });
+    }
+  }
+
+  return result;
 }
