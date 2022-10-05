@@ -1,5 +1,4 @@
-import { GameCommand } from "bship-contracts";
-import { nanoid } from "nanoid";
+import { GameMessageType } from "bship-contracts";
 import { useEffect, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -23,9 +22,15 @@ function App() {
   const websocket = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:3001/game?id=${nanoid()}`);
+    const ws = new WebSocket(`ws://localhost:3001/game`);
 
-    ws.onopen = () => {};
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          event: GameMessageType.Connect,
+        })
+      );
+    };
 
     websocket.current = ws;
 
@@ -47,12 +52,9 @@ function App() {
   const startGame = () => {
     websocket?.current?.send(
       JSON.stringify({
-        event: "game",
+        event: GameMessageType.CreateGame,
         data: {
-          command: GameCommand.CreateGame,
-          payload: {
-            fleet,
-          },
+          fleet,
         },
       })
     );

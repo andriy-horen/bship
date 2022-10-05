@@ -13,6 +13,6 @@ export class GameService {
   public createGame(fleet: Battleship[]): CreateGameResult {
     console.log(fleet);
 
-    return { gameId: this.idGenerator.id };
+    return { gameId: this.idGenerator.generate() };
   }
 }

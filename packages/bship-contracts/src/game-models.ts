@@ -7,12 +7,13 @@ export type StringCoordinates = `${number},${number}`;
 
 export type ShipCoordinates = [Coordinates, Coordinates];
 
-export interface GameEvent {
-  command: GameCommand;
-  payload?: any;
+export interface GameMessage {
+  event: GameMessageType;
+  data?: any;
 }
 
-export enum GameCommand {
+export enum GameMessageType {
+  Connect = "connect",
   CreateGame = "create_game",
   Attack = "attack",
   Acknowledge = "acknowledge",
@@ -24,10 +25,11 @@ export enum AttackStatus {
   Sunk,
 }
 
-export enum ServerCommand {
-  GameStarted,
-  Mark,
-  GameAborted,
+export enum GameResponseType {
+  Connected = "connected",
+  GameStarted = "game_started",
+  Mark = "mark",
+  GameAborted = "game_aborted",
 }
 
 export enum Player {

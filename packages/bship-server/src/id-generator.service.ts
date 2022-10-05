@@ -13,7 +13,7 @@ export class IdGeneratorService {
     this.nanoid = customAlphabet(alphabet, size);
   }
 
-  get id(): string {
+  generate(): string {
     return this.nanoid();
   }
 }

@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -6,11 +7,15 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { GameCommand, GameEvent } from 'bship-contracts';
+import { GameMessageType, GameResponseType } from 'bship-contracts';
 import { IncomingMessage } from 'node:http';
-import url from 'node:url';
 import { Server, WebSocket } from 'ws';
 import { GameService } from './game.service';
+import { IdGeneratorService } from './id-generator.service';
+
+interface GameWebSocket extends WebSocket {
+  connectionId: string | undefined;
+}
 
 @WebSocketGateway({
   path: '/game',
@@ -18,20 +23,36 @@ import { GameService } from './game.service';
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server!: Server;
 
-  constructor(private gameSerive: GameService) {}
+  private readonly clients = new Map<string, GameWebSocket>();
 
-  @SubscribeMessage('game')
-  handleGameEvent(@MessageBody() data: GameEvent): any {
-    if (!data) {
+  constructor(
+    private gameSerive: GameService,
+    private idGenerator: IdGeneratorService,
+  ) {
+    setInterval(() => {
+      console.log([...this.clients.keys()]);
+    }, 1000);
+  }
+
+  @SubscribeMessage(GameMessageType.Connect)
+  handleConnect(@ConnectedSocket() client: GameWebSocket) {
+    const connectionId = this.idGenerator.generate();
+    client.connectionId = connectionId;
+    this.clients.set(connectionId, client);
+
+    return { event: GameResponseType.Connected };
+  }
+
+  @SubscribeMessage(GameMessageType.CreateGame)
+  handleCreateGame(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: GameWebSocket,
+  ): any {
+    if (!client.connectionId) {
       return;
     }
 
-    switch (data.command) {
-      case GameCommand.CreateGame:
-        return this.gameSerive.createGame(data.payload.fleet);
-    }
-
-    return data;
+    return this.gameSerive.createGame(data.fleet);
   }
 
   @SubscribeMessage('chat')
@@ -41,13 +62,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return data;
   }
 
-  handleConnection(client: WebSocket, req: IncomingMessage) {
-    const { query } = url.parse(req.url ?? '', true);
-
-    console.log(query?.id);
+  handleConnection(client: GameWebSocket, req: IncomingMessage): any {
+    // TODO: implement re-connect logic when connection was lost
+    // const { query } = url.parse(req.url ?? '', true);
   }
 
-  handleDisconnect(client: WebSocket) {
-    //console.log(client);
+  handleDisconnect(client: GameWebSocket) {
+    if (client.connectionId) {
+      this.clients.delete(client.connectionId);
+    }
   }
 }
