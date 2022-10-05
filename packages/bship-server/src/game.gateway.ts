@@ -46,13 +46,25 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(GameMessageType.CreateGame)
   handleCreateGame(
     @MessageBody() data: any,
-    @ConnectedSocket() client: GameWebSocket,
+    @ConnectedSocket() { connectionId }: GameWebSocket,
   ): any {
-    if (!client.connectionId) {
+    if (!connectionId) {
       return;
     }
 
-    return this.gameSerive.createGame(data.fleet);
+    return this.gameSerive.createGame(data.fleet, connectionId);
+  }
+
+  @SubscribeMessage(GameMessageType.Move)
+  handleMove(
+    @MessageBody() data: any,
+    @ConnectedSocket() { connectionId }: GameWebSocket,
+  ): any {
+    if (!connectionId) {
+      return;
+    }
+
+    // return this.gameSerive.createGame(data.fleet, connectionId);
   }
 
   @SubscribeMessage('chat')

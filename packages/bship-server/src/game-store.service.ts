@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
-  AttackStatus,
   Coordinates,
+  MoveStatus,
   Player,
   ShipCoordinates,
 } from 'bship-contracts';
@@ -21,13 +21,13 @@ export interface GameStateEvent {
 
 export interface GameStateUpdateResult {
   nextPlayer: number;
-  moveStatus: AttackStatus;
+  moveStatus: MoveStatus;
   isValidMove?: boolean;
 }
 
 export const INVALID_MOVE: GameStateUpdateResult = {
   nextPlayer: Player.Player0,
-  moveStatus: AttackStatus.Miss,
+  moveStatus: MoveStatus.Miss,
   isValidMove: false,
 };
 
@@ -98,7 +98,7 @@ export class GameState {
     if (!target) {
       return {
         nextPlayer: takeTurn(player),
-        moveStatus: AttackStatus.Miss,
+        moveStatus: MoveStatus.Miss,
       };
     }
 
@@ -108,7 +108,7 @@ export class GameState {
 
     return {
       nextPlayer: player,
-      moveStatus: isSunk ? AttackStatus.Sunk : AttackStatus.Hit,
+      moveStatus: isSunk ? MoveStatus.Sunk : MoveStatus.Hit,
     };
   }
 }

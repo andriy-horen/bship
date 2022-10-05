@@ -15,11 +15,11 @@ export interface GameMessage {
 export enum GameMessageType {
   Connect = "connect",
   CreateGame = "create_game",
-  Attack = "attack",
+  Move = "move",
   Acknowledge = "acknowledge",
 }
 
-export enum AttackStatus {
+export enum MoveStatus {
   Hit,
   Miss,
   Sunk,
@@ -40,7 +40,7 @@ export enum Player {
 export interface MarkPayload {
   position: { y: number; x: number };
   grid: Player;
-  status: AttackStatus;
+  status: MoveStatus;
   next: Player;
 }
 

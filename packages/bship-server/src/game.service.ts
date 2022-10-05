@@ -10,7 +10,10 @@ export interface CreateGameResult {
 export class GameService {
   constructor(private idGenerator: IdGeneratorService) {}
 
-  public createGame(fleet: Battleship[]): CreateGameResult {
+  public createGame(
+    fleet: Battleship[],
+    connectionId: string,
+  ): CreateGameResult {
     console.log(fleet);
 
     return { gameId: this.idGenerator.generate() };
