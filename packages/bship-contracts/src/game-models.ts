@@ -28,6 +28,7 @@ export enum MoveStatus {
 export enum GameResponseType {
   Connected = "connected",
   GameStarted = "game_started",
+  WaitForOpponent = "wait_for_opponent",
   Mark = "mark",
   GameAborted = "game_aborted",
 }

@@ -10,7 +10,7 @@ import {
 import { GameMessageType, GameResponseType } from 'bship-contracts';
 import { IncomingMessage } from 'node:http';
 import { Server, WebSocket } from 'ws';
-import { GameService } from './game.service';
+import { GameService, NewGameResult } from './game.service';
 import { IdGeneratorService } from './id-generator.service';
 
 interface GameWebSocket extends WebSocket {
@@ -52,7 +52,28 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    return this.gameSerive.createGame(data.fleet, connectionId);
+    const newGameResult = this.gameSerive.requestNewGame(
+      data.fleet,
+      connectionId,
+    );
+
+    if (newGameResult.gameReady) {
+      const { connections } = newGameResult;
+      const party1 = this.clients.get(connections![0]);
+      const party2 = this.clients.get(connections![1]);
+
+      if (!party1 || !party2) {
+        party1?.emit(JSON.stringify({ event: GameResponseType.GameAborted }));
+        party2?.send(JSON.stringify({ event: GameResponseType.GameAborted }));
+        return;
+      }
+
+      party1.send(JSON.stringify(getNewGameResponse(newGameResult)));
+      party2.send(JSON.stringify(getNewGameResponse(newGameResult)));
+      return;
+    }
+
+    return getNewGameResponse(newGameResult);
   }
 
   @SubscribeMessage(GameMessageType.Move)
@@ -79,9 +100,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // const { query } = url.parse(req.url ?? '', true);
   }
 
-  handleDisconnect(client: GameWebSocket) {
+  handleDisconnect(client: GameWebSocket): void {
     if (client.connectionId) {
       this.clients.delete(client.connectionId);
     }
   }
+}
+
+function getNewGameResponse(request: NewGameResult) {
+  return request.gameReady
+    ? { event: GameResponseType.GameStarted, gameId: request.gameId }
+    : { event: GameResponseType.WaitForOpponent };
 }

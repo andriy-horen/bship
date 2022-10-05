@@ -1,21 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { Battleship } from 'bship-contracts';
+import { ShipCoordinates } from 'bship-contracts';
 import { IdGeneratorService } from './id-generator.service';
 
-export interface CreateGameResult {
-  gameId: string;
+export interface NewGameResult {
+  gameReady: boolean;
+  gameId?: string;
+  connections?: [string, string];
+}
+
+export interface NewGameRequest {
+  connectionId: string;
+  fleet: ShipCoordinates[];
+  timestamp: Date;
 }
 
 @Injectable()
 export class GameService {
+  private readonly newGameQueue: NewGameRequest[] = [];
+
   constructor(private idGenerator: IdGeneratorService) {}
 
-  public createGame(
-    fleet: Battleship[],
+  public requestNewGame(
+    fleet: ShipCoordinates[],
     connectionId: string,
-  ): CreateGameResult {
-    console.log(fleet);
+  ): NewGameResult {
+    if (this.newGameQueue.length > 0) {
+      const request = this.newGameQueue.shift()!;
 
-    return { gameId: this.idGenerator.generate() };
+      return {
+        gameReady: true,
+        gameId: this.idGenerator.generate(),
+        connections: [request.connectionId, connectionId],
+      };
+    }
+
+    this.newGameQueue.push({
+      fleet,
+      connectionId,
+      timestamp: new Date(),
+    });
+
+    return { gameReady: false };
   }
 }

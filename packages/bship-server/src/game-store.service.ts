@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   Coordinates,
   MoveStatus,
@@ -6,13 +5,6 @@ import {
   ShipCoordinates,
 } from 'bship-contracts';
 import { mapLastEntry } from './utils';
-
-@Injectable()
-export class GameStoreService {
-  private readonly _games = new Map<string, GameState>();
-
-  addGame(gameId: string): void {}
-}
 
 export interface GameStateEvent {
   player: Player;
