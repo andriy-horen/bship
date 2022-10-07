@@ -1,10 +1,36 @@
-import {
-  Coordinates,
-  MoveStatus,
-  Player,
-  ShipCoordinates,
-} from 'bship-contracts';
+import { Injectable } from '@nestjs/common';
+import { Coordinates, MoveStatus, Player, ShipCoordinates } from 'bship-contracts';
+import { IdGeneratorService } from './id-generator.service';
 import { mapLastEntry } from './utils';
+
+export interface AddGameRequest {
+  fleet1: ShipCoordinates[];
+  fleet2: ShipCoordinates[];
+}
+
+@Injectable()
+export class GameStoreService {
+  private readonly _games = new Map<string, GameState>();
+
+  constructor(private idGenerator: IdGeneratorService) {}
+
+  addGame(game: AddGameRequest): string {
+    const gameId = this.idGenerator.generate();
+    this._games.set(gameId, new GameState(game.fleet1, game.fleet2));
+
+    return gameId;
+  }
+
+  updateGame(gameId: string): GameStateUpdateResult {
+    const gameState = this._games.get(gameId);
+
+    if (!gameState) {
+      throw new Error('game not found');
+    }
+
+    return gameState.update({ player: Player.Player0, coordinates: { x: 0, y: 0 } });
+  }
+}
 
 export interface GameStateEvent {
   player: Player;
@@ -80,10 +106,7 @@ export class GameState {
     return this._state.size === 0;
   }
 
-  getUpdateResult({
-    player,
-    coordinates,
-  }: GameStateEvent): GameStateUpdateResult {
+  getUpdateResult({ player, coordinates }: GameStateEvent): GameStateUpdateResult {
     const targetFleet = player === 0 ? this._fleet2 : this._fleet1;
 
     const target = targetFleet.find((ship) => isShipHit(ship, coordinates));
@@ -109,10 +132,7 @@ function gameStateKey(player: Player, coord: Coordinates): StringGameEvent {
   return `p${player}:${coord.y},${coord.x}`;
 }
 
-function isShipHit(
-  [head, tail]: ShipCoordinates,
-  { x, y }: Coordinates,
-): boolean {
+function isShipHit([head, tail]: ShipCoordinates, { x, y }: Coordinates): boolean {
   return x >= head.x && x <= tail.x && y >= head.y && y <= tail.y;
 }
 

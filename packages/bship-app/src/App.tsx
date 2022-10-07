@@ -58,6 +58,18 @@ function App() {
     );
   };
 
+  const makeMove = () => {
+    websocket?.current?.send(
+      JSON.stringify({
+        event: GameMessageType.Move,
+        data: {
+          player: 0,
+          coordinates: { x: 100, y: 500 },
+        },
+      })
+    );
+  };
+
   return (
     <div className="App">
       <div>
@@ -76,6 +88,7 @@ function App() {
         <Grid grid={opponentGrid} onSquareClick={handleSquareClick} />
       </div>
       <button onClick={startGame}>Play!</button>
+      <button onClick={makeMove}>Make a move</button>
     </div>
   );
 }
