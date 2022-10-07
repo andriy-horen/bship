@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Coordinates, MoveStatus, Player, ShipCoordinates } from 'bship-contracts';
+import { BattleshipCoord, Coordinates, MoveStatus, Player } from 'bship-contracts';
 import { IdGeneratorService } from './id-generator.service';
 import { mapLastEntry } from './utils';
 
 export interface AddGameRequest {
-  fleet1: ShipCoordinates[];
-  fleet2: ShipCoordinates[];
+  fleet1: BattleshipCoord[];
+  fleet2: BattleshipCoord[];
 }
 
 @Injectable()
@@ -52,12 +52,12 @@ export const INVALID_MOVE: GameStateUpdateResult = {
 type StringGameEvent = `p${number}:${number},${number}`;
 
 export class GameState {
-  private readonly _fleet1: readonly ShipCoordinates[] = [];
-  private readonly _fleet2: readonly ShipCoordinates[] = [];
+  private readonly _fleet1: readonly BattleshipCoord[] = [];
+  private readonly _fleet2: readonly BattleshipCoord[] = [];
 
   private readonly _state = new Map<StringGameEvent, GameStateUpdateResult>();
 
-  constructor(fleet1: ShipCoordinates[], fleet2: ShipCoordinates[]) {
+  constructor(fleet1: BattleshipCoord[], fleet2: BattleshipCoord[]) {
     this._fleet1 = Object.freeze(fleet1);
     this._fleet2 = Object.freeze(fleet2);
   }
@@ -132,7 +132,7 @@ function gameStateKey(player: Player, coord: Coordinates): StringGameEvent {
   return `p${player}:${coord.y},${coord.x}`;
 }
 
-function isShipHit([head, tail]: ShipCoordinates, { x, y }: Coordinates): boolean {
+function isShipHit([head, tail]: BattleshipCoord, { x, y }: Coordinates): boolean {
   return x >= head.x && x <= tail.x && y >= head.y && y <= tail.y;
 }
 
@@ -140,7 +140,7 @@ function takeTurn(current: Player): Player {
   return current === Player.Player0 ? Player.Player1 : Player.Player0;
 }
 
-function expandShip([head, tail]: ShipCoordinates): Coordinates[] {
+function expandShip([head, tail]: BattleshipCoord): Coordinates[] {
   const result: Coordinates[] = [];
   for (let x = head.x; x <= tail.x; x++) {
     for (let y = head.y; y <= tail.y; y++) {

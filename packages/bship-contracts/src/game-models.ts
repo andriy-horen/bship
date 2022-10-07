@@ -5,7 +5,9 @@ export interface Coordinates {
 
 export type StringCoordinates = `${number},${number}`;
 
-export type ShipCoordinates = [Coordinates, Coordinates];
+export type BattleshipCoord = [Coordinates, Coordinates];
+
+export type Orientation = 'v' | 'h';
 
 export interface GameMessage {
   event: GameMessageType;
@@ -13,10 +15,10 @@ export interface GameMessage {
 }
 
 export enum GameMessageType {
-  Connect = "connect",
-  CreateGame = "create_game",
-  Move = "move",
-  Acknowledge = "acknowledge",
+  Connect = 'connect',
+  CreateGame = 'create_game',
+  Move = 'move',
+  Acknowledge = 'acknowledge',
 }
 
 export enum MoveStatus {
@@ -26,11 +28,11 @@ export enum MoveStatus {
 }
 
 export enum GameResponseType {
-  Connected = "connected",
-  GameStarted = "game_started",
-  WaitForOpponent = "wait_for_opponent",
-  Mark = "mark",
-  GameAborted = "game_aborted",
+  Connected = 'connected',
+  GameStarted = 'game_started',
+  WaitForOpponent = 'wait_for_opponent',
+  Mark = 'mark',
+  GameAborted = 'game_aborted',
 }
 
 export enum Player {
@@ -47,8 +49,8 @@ export interface MarkPayload {
 
 export interface Battleship {
   size: number;
-  orientation: "v" | "h";
-  position: [number, number];
+  orientation: Orientation;
+  coordinates: Coordinates;
 }
 
 export const GRID_LOWER_BOUND = 0;

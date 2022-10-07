@@ -1,4 +1,4 @@
-import { Battleship as BattleshipModel } from 'bship-contracts';
+import { Battleship as BattleshipModel, Coordinates, Orientation } from 'bship-contracts';
 import { useDrop } from 'react-dnd';
 import { store } from '../../app/store';
 import { Battleship } from '../battleship/Battleship';
@@ -25,17 +25,17 @@ export function FleetGrid({ fleet }: FleetGridProps) {
 
       store.dispatch(
         setShipPosition({
-          currentPosition: item.position,
-          newPosition: [item.position[0] + y / 25, item.position[1] + x / 25],
+          currentPosition: item.coordinates,
+          newPosition: { y: item.coordinates.y + y / 25, x: item.coordinates.x + x / 25 },
         })
       );
     },
   }));
 
-  const changeOrientation = (position: [number, number], orientation: 'v' | 'h') => {
+  const changeOrientation = (coordinates: Coordinates, orientation: Orientation) => {
     store.dispatch(
       setShipOrientation({
-        position,
+        coordinates,
         orientation: orientation === 'v' ? 'h' : 'v',
       })
     );
@@ -48,16 +48,11 @@ export function FleetGrid({ fleet }: FleetGridProps) {
           key={index}
           className="ship-location"
           style={{
-            top: `${ship.position[0] * 24 + ship.position[0]}px`,
-            left: `${ship.position[1] * 24 + ship.position[1]}px`,
+            top: `${ship.coordinates.y * 24 + ship.coordinates.y}px`,
+            left: `${ship.coordinates.x * 24 + ship.coordinates.x}px`,
           }}
         >
-          <Battleship
-            size={ship.size}
-            orientation={ship.orientation}
-            position={ship.position}
-            onClick={changeOrientation}
-          ></Battleship>
+          <Battleship model={ship} onClick={changeOrientation}></Battleship>
         </div>
       ))}
     </div>

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Battleship } from 'bship-contracts';
+import { Battleship, Coordinates, Orientation } from 'bship-contracts';
 import { RootState } from '../../app/store';
 
 export enum GridSquare {
@@ -22,22 +22,22 @@ const initialState: GameState = {
     .fill(0)
     .map(() => Array(10).fill(GridSquare.Empty)),
   fleet: [
-    { size: 1, orientation: 'h', position: [0, 0] },
-    { size: 1, orientation: 'h', position: [0, 2] },
-    { size: 1, orientation: 'h', position: [0, 4] },
-    { size: 1, orientation: 'h', position: [0, 6] },
-    { size: 2, orientation: 'h', position: [2, 0] },
-    { size: 2, orientation: 'h', position: [2, 3] },
-    { size: 2, orientation: 'h', position: [2, 6] },
-    { size: 3, orientation: 'h', position: [4, 0] },
-    { size: 3, orientation: 'v', position: [4, 4] },
-    { size: 4, orientation: 'v', position: [6, 0] },
+    { size: 1, orientation: 'h', coordinates: { y: 0, x: 0 } },
+    { size: 1, orientation: 'h', coordinates: { y: 0, x: 2 } },
+    { size: 1, orientation: 'h', coordinates: { y: 0, x: 4 } },
+    { size: 1, orientation: 'h', coordinates: { y: 0, x: 6 } },
+    { size: 2, orientation: 'h', coordinates: { y: 2, x: 0 } },
+    { size: 2, orientation: 'h', coordinates: { y: 2, x: 3 } },
+    { size: 2, orientation: 'h', coordinates: { y: 2, x: 6 } },
+    { size: 3, orientation: 'h', coordinates: { y: 4, x: 0 } },
+    { size: 3, orientation: 'v', coordinates: { y: 4, x: 4 } },
+    { size: 4, orientation: 'v', coordinates: { y: 6, x: 0 } },
   ],
 };
 
 export interface SetSquarePayload {
   value: GridSquare;
-  coordinates: [number, number];
+  coordinates: Coordinates;
 }
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -59,11 +59,11 @@ export const gameSlice = createSlice({
   initialState,
   reducers: {
     setPlayerSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
-      const [x, y] = payload.coordinates;
+      const { x, y } = payload.coordinates;
       state.playerGrid[x][y] = payload.value;
     },
     setOpponentSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
-      const [x, y] = payload.coordinates;
+      const { x, y } = payload.coordinates;
       state.opponentGrid[x][y] = payload.value;
     },
     setPlayerFleet: (state, action: PayloadAction<Battleship[]>) => {
@@ -72,28 +72,29 @@ export const gameSlice = createSlice({
     setShipPosition(
       state,
       action: PayloadAction<{
-        currentPosition: [number, number];
-        newPosition: [number, number];
+        currentPosition: Coordinates;
+        newPosition: Coordinates;
       }>
     ) {
       const ship = state.fleet.find(
-        ({ position }) =>
-          position[0] === action.payload.currentPosition[0] &&
-          position[1] === action.payload.currentPosition[1]
+        ({ coordinates }) =>
+          coordinates.y === action.payload.currentPosition.y &&
+          coordinates.x === action.payload.currentPosition.x
       )!;
 
-      ship.position = action.payload.newPosition;
+      ship.coordinates = action.payload.newPosition;
     },
     setShipOrientation(
       state,
       action: PayloadAction<{
-        position: [number, number];
-        orientation: 'v' | 'h';
+        coordinates: Coordinates;
+        orientation: Orientation;
       }>
     ) {
       const ship = state.fleet.find(
-        ({ position }) =>
-          position[0] === action.payload.position[0] && position[1] === action.payload.position[1]
+        ({ coordinates }) =>
+          coordinates.y === action.payload.coordinates.y &&
+          coordinates.x === action.payload.coordinates.x
       )!;
 
       ship.orientation = action.payload.orientation;

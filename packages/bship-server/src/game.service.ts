@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ShipCoordinates } from 'bship-contracts';
+import { BattleshipCoord } from 'bship-contracts';
 import { IdGeneratorService } from './id-generator.service';
 
 export interface NewGameResult {
@@ -10,7 +10,7 @@ export interface NewGameResult {
 
 export interface NewGameRequest {
   connectionId: string;
-  fleet: ShipCoordinates[];
+  fleet: BattleshipCoord[];
   timestamp: Date;
 }
 
@@ -20,10 +20,7 @@ export class GameService {
 
   constructor(private idGenerator: IdGeneratorService) {}
 
-  public requestNewGame(
-    fleet: ShipCoordinates[],
-    connectionId: string,
-  ): NewGameResult {
+  public requestNewGame(fleet: BattleshipCoord[], connectionId: string): NewGameResult {
     if (this.newGameQueue.length > 0) {
       const request = this.newGameQueue.shift()!;
 

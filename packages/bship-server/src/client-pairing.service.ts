@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { GameResponseType, ShipCoordinates } from 'bship-contracts';
+import { BattleshipCoord, GameResponseType } from 'bship-contracts';
 import { RawData, WebSocket } from 'ws';
 import { GameStoreService } from './game-store.service';
 
 export interface ClientPairingRequest {
   connectionId: string;
   socket: WebSocket;
-  fleet: ShipCoordinates[];
+  fleet: BattleshipCoord[];
 }
 
 export interface MatchGameResult {

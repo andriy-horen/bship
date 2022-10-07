@@ -1,5 +1,7 @@
+import { Coordinates, Orientation } from 'bship-contracts';
+
 export interface BattleshipDrag {
   size: number;
-  orientation: 'v' | 'h';
-  position: [number, number];
+  orientation: Orientation;
+  coordinates: Coordinates;
 }

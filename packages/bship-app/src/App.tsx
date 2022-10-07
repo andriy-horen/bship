@@ -42,7 +42,7 @@ function App() {
   const handleSquareClick = (x: number, y: number) => {
     const value = opponentGrid[x][y];
 
-    dispatch(setOpponentSquare({ coordinates: [x, y], value: (value + 1) % 4 }));
+    dispatch(setOpponentSquare({ coordinates: { x, y }, value: (value + 1) % 4 }));
   };
 
   const fleet = useAppSelector(selectFleet);

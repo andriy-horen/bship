@@ -1,3 +1,4 @@
+import { Battleship as BattleshipModel, Coordinates, Orientation } from 'bship-contracts';
 import classNames from 'classnames';
 import { range } from 'lodash-es';
 import { useEffect } from 'react';
@@ -7,22 +8,23 @@ import { ItemTypes } from '../dnd/itemTypes';
 import './Battleship.css';
 
 export interface BattleshipProps {
-  size: number;
-  orientation: 'v' | 'h';
-  position: [number, number];
-  onClick?: (position: [number, number], orientation: 'v' | 'h') => void;
+  model: BattleshipModel;
+  onClick?: (coordinates: Coordinates, orientation: Orientation) => void;
 }
 
-export function Battleship({ size, orientation, position, onClick }: BattleshipProps) {
+export function Battleship({
+  model: { size, orientation, coordinates },
+  onClick,
+}: BattleshipProps) {
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
       type: ItemTypes.Battleship,
-      item: { size, orientation, position },
+      item: { size, orientation, coordinates },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
     }),
-    [position, orientation]
+    [coordinates, orientation]
   );
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export function Battleship({ size, orientation, position, onClick }: BattleshipP
         vertical: orientation === 'v',
         horizontal: orientation === 'h',
       })}
-      onClick={() => onClick?.(position, orientation)}
+      onClick={() => onClick?.(coordinates, orientation)}
     >
       {range(size).map((index) => (
         <div
