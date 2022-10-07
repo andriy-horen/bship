@@ -10,7 +10,8 @@ import {
 import { GameMessageType, GameResponseType } from 'bship-contracts';
 import { IncomingMessage } from 'node:http';
 import { Server, WebSocket } from 'ws';
-import { ClientPairingService, GameContext } from './client-pairing.service';
+import { ClientPairingService } from './client-pairing.service';
+import { GameContext } from './game-context';
 import { IdGeneratorService } from './id-generator.service';
 
 interface GameWebSocket extends WebSocket {
