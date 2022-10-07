@@ -4,8 +4,8 @@ import { ClientPairingRequest } from './client-pairing.service';
 import { GameStoreService } from './game-store.service';
 
 export class GameContext {
-  private readonly _player1: WebSocket;
-  private readonly _player2: WebSocket;
+  private readonly _client1: WebSocket;
+  private readonly _client2: WebSocket;
 
   private readonly _gameId: string;
 
@@ -14,26 +14,35 @@ export class GameContext {
     player2: ClientPairingRequest,
     private _gameStore: GameStoreService
   ) {
-    this._player1 = player1.socket;
-    this._player2 = player2.socket;
+    this._client1 = player1.socket;
+    this._client2 = player2.socket;
 
     this._gameId = this._gameStore.addGame({
       fleet1: player1.fleet,
       fleet2: player2.fleet,
     });
 
-    this.notifyClients(GameResponseType.GameStarted, { gameId: this._gameId });
+    // TODO: next player is hardcoded here and instead should be provided by game state obj
+    this.notifyClient(this._client1, {
+      event: GameResponseType.GameStarted,
+      data: { gameId: this._gameId, next: true },
+    });
+
+    this.notifyClient(this._client2, {
+      event: GameResponseType.GameStarted,
+      data: { gameId: this._gameId, next: false },
+    });
+
     this.subscribe();
   }
 
-  notifyClients(event: GameResponseType, data?: any): void {
-    this._player1.send(JSON.stringify({ event, data }));
-    this._player2.send(JSON.stringify({ event, data }));
+  notifyClient(client: WebSocket, message: { event: GameResponseType; data?: any }): void {
+    client.send(JSON.stringify(message));
   }
 
   subscribe(): void {
-    this._player1.on('message', this.messageHandlerFactory(Player.Player0));
-    this._player2.on('message', this.messageHandlerFactory(Player.Player1));
+    this._client1.on('message', this.messageHandlerFactory(Player.Player0));
+    this._client2.on('message', this.messageHandlerFactory(Player.Player1));
   }
 
   private messageHandlerFactory = (player: Player) => {
@@ -56,29 +65,25 @@ export class GameContext {
         return;
       }
 
-      this._player1.send(
-        JSON.stringify({
-          event: GameResponseType.Mark,
-          data: {
-            coordinates: data.coordinates,
-            value: updateResult.moveStatus,
-            next: updateResult.nextPlayer === Player.Player0,
-            self: player === Player.Player1,
-          },
-        })
-      );
+      this.notifyClient(this._client1, {
+        event: GameResponseType.Mark,
+        data: {
+          coordinates: data.coordinates,
+          value: updateResult.moveStatus,
+          next: updateResult.nextPlayer === Player.Player0,
+          self: player === Player.Player1,
+        },
+      });
 
-      this._player2.send(
-        JSON.stringify({
-          event: GameResponseType.Mark,
-          data: {
-            coordinates: data.coordinates,
-            value: updateResult.moveStatus,
-            next: updateResult.nextPlayer === Player.Player1,
-            self: player === Player.Player0,
-          },
-        })
-      );
+      this.notifyClient(this._client2, {
+        event: GameResponseType.Mark,
+        data: {
+          coordinates: data.coordinates,
+          value: updateResult.moveStatus,
+          next: updateResult.nextPlayer === Player.Player1,
+          self: player === Player.Player0,
+        },
+      });
     };
   };
 }

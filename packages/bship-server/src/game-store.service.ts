@@ -49,13 +49,21 @@ export const INVALID_MOVE: GameStateUpdateResult = {
   invalidMove: true,
 };
 
-type StringGameEvent = `p${number}:${number},${number}`;
+type StringGameEvent = `p${number}:${number},${number}` | 'init';
 
 export class GameState {
   private readonly _fleet1: readonly BattleshipCoord[] = [];
   private readonly _fleet2: readonly BattleshipCoord[] = [];
 
-  private readonly _state = new Map<StringGameEvent, GameStateUpdateResult>();
+  private readonly _state = new Map<StringGameEvent, GameStateUpdateResult>([
+    [
+      'init',
+      {
+        nextPlayer: Player.Player0,
+        moveStatus: MoveStatus.Miss,
+      },
+    ],
+  ]);
 
   constructor(fleet1: BattleshipCoord[], fleet2: BattleshipCoord[]) {
     this._fleet1 = Object.freeze(fleet1);
@@ -86,7 +94,7 @@ export class GameState {
     /**
      * When update comes from player out of turn
      */
-    if (!this.isNewGame && event.player !== this.lastUpdate!.nextPlayer) {
+    if (event.player !== this.lastUpdate!.nextPlayer) {
       return INVALID_MOVE;
     }
 
@@ -103,7 +111,7 @@ export class GameState {
   }
 
   get isNewGame(): boolean {
-    return this._state.size === 0;
+    return this._state.size === 1;
   }
 
   getUpdateResult({ player, coordinates }: GameStateEvent): GameStateUpdateResult {
