@@ -1,18 +1,18 @@
-import { GameMessageType } from "bship-contracts";
-import { useEffect, useRef } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import "./App.css";
-import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { CustomDragLayer } from "./features/dnd/CustomDragLayer";
-import { FleetGrid } from "./features/fleet-grid/FleetGrid";
+import { GameMessageType } from 'bship-contracts';
+import { useEffect, useRef } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import './App.css';
+import { useAppDispatch, useAppSelector } from './app/hooks';
+import { CustomDragLayer } from './features/dnd/CustomDragLayer';
+import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
   selectFleet,
   selectOpponentGrid,
   selectPlayerGrid,
   setOpponentSquare,
-} from "./features/game/gameSlice";
-import { Grid } from "./features/grid/Grid";
+} from './features/game/gameSlice';
+import { Grid } from './features/grid/Grid';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -42,9 +42,7 @@ function App() {
   const handleSquareClick = (x: number, y: number) => {
     const value = opponentGrid[x][y];
 
-    dispatch(
-      setOpponentSquare({ coordinates: [x, y], value: (value + 1) % 4 })
-    );
+    dispatch(setOpponentSquare({ coordinates: [x, y], value: (value + 1) % 4 }));
   };
 
   const fleet = useAppSelector(selectFleet);

@@ -1,24 +1,19 @@
-import classNames from "classnames";
-import { range } from "lodash-es";
-import { useDrag } from "react-dnd";
-import "./Battleship.css";
-import { ItemTypes } from "../dnd/itemTypes";
-import { useEffect } from "react";
-import { getEmptyImage } from "react-dnd-html5-backend";
+import classNames from 'classnames';
+import { range } from 'lodash-es';
+import { useEffect } from 'react';
+import { useDrag } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { ItemTypes } from '../dnd/itemTypes';
+import './Battleship.css';
 
 export interface BattleshipProps {
   size: number;
-  orientation: "v" | "h";
+  orientation: 'v' | 'h';
   position: [number, number];
-  onClick?: (position: [number, number], orientation: "v" | "h") => void;
+  onClick?: (position: [number, number], orientation: 'v' | 'h') => void;
 }
 
-export function Battleship({
-  size,
-  orientation,
-  position,
-  onClick,
-}: BattleshipProps) {
+export function Battleship({ size, orientation, position, onClick }: BattleshipProps) {
   const [{ isDragging }, drag, preview] = useDrag(
     () => ({
       type: ItemTypes.Battleship,
@@ -39,8 +34,8 @@ export function Battleship({
       ref={drag}
       className={classNames({
         battleship: true,
-        vertical: orientation === "v",
-        horizontal: orientation === "h",
+        vertical: orientation === 'v',
+        horizontal: orientation === 'h',
       })}
       onClick={() => onClick?.(position, orientation)}
     >
@@ -48,7 +43,7 @@ export function Battleship({
         <div
           key={index}
           className={classNames({
-            "battleship-section": true,
+            'battleship-section': true,
             head: index === 0,
             tail: index === size - 1,
           })}

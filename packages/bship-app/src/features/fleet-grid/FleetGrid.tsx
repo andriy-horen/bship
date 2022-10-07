@@ -1,12 +1,12 @@
-import { useDrop } from "react-dnd";
-import { ItemTypes } from "../dnd/itemTypes";
-import { Battleship } from "../battleship/Battleship";
-import { setShipOrientation, setShipPosition } from "../game/gameSlice";
-import "./FleetGrid.css";
-import { BattleshipDrag } from "../dnd/battleshipDrag";
-import { snapToGrid } from "../dnd/snap";
-import { store } from "../../app/store";
-import { Battleship as BattleshipModel } from "bship-contracts";
+import { Battleship as BattleshipModel } from 'bship-contracts';
+import { useDrop } from 'react-dnd';
+import { store } from '../../app/store';
+import { Battleship } from '../battleship/Battleship';
+import { BattleshipDrag } from '../dnd/battleshipDrag';
+import { ItemTypes } from '../dnd/itemTypes';
+import { snapToGrid } from '../dnd/snap';
+import { setShipOrientation, setShipPosition } from '../game/gameSlice';
+import './FleetGrid.css';
 
 export interface FleetGridProps {
   fleet: BattleshipModel[];
@@ -32,14 +32,11 @@ export function FleetGrid({ fleet }: FleetGridProps) {
     },
   }));
 
-  const changeOrientation = (
-    position: [number, number],
-    orientation: "v" | "h"
-  ) => {
+  const changeOrientation = (position: [number, number], orientation: 'v' | 'h') => {
     store.dispatch(
       setShipOrientation({
         position,
-        orientation: orientation === "v" ? "h" : "v",
+        orientation: orientation === 'v' ? 'h' : 'v',
       })
     );
   };

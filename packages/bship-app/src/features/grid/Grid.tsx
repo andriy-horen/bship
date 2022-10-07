@@ -1,5 +1,5 @@
-import { GridSquare } from "../game/gameSlice";
-import "./Grid.css";
+import { GridSquare } from '../game/gameSlice';
+import './Grid.css';
 
 export interface GridProps {
   grid: GridSquare[][];
@@ -10,13 +10,13 @@ export function Grid({ grid, onSquareClick }: GridProps) {
   const gridSize = 10;
 
   const classes = new Map<GridSquare, string>([
-    [GridSquare.Hit, "square-hit"],
-    [GridSquare.Miss, "square-miss"],
+    [GridSquare.Hit, 'square-hit'],
+    [GridSquare.Miss, 'square-miss'],
   ]);
 
   const getClassName = (x: number, y: number): string => {
     const square = grid[x][y];
-    return classes.get(square) ?? "";
+    return classes.get(square) ?? '';
   };
 
   const get2DIndicies = (index: number): [number, number] => {
@@ -31,11 +31,7 @@ export function Grid({ grid, onSquareClick }: GridProps) {
           const [x, y] = get2DIndicies(index);
 
           return (
-            <div
-              key={index}
-              className={getClassName(x, y)}
-              onClick={() => onSquareClick?.(x, y)}
-            >
+            <div key={index} className={getClassName(x, y)} onClick={() => onSquareClick?.(x, y)}>
               &nbsp;
             </div>
           );

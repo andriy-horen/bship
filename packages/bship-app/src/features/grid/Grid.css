@@ -26,7 +26,7 @@
 }
 
 .grid > div:hover::before {
-  content: "";
+  content: '';
   display: block;
   position: absolute;
   background: #40bf440d;
@@ -38,15 +38,15 @@
 }
 
 .grid > .square-hit::after {
-  content: "H";
+  content: 'H';
 }
 
 .grid > .square-miss::after {
-  content: "M";
+  content: 'M';
 }
 
 .grid > .square-pending::after {
-  content: "P";
+  content: 'P';
 }
 
 .grid {

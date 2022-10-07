@@ -1,5 +1,5 @@
 export interface BattleshipDrag {
   size: number;
-  orientation: "v" | "h";
+  orientation: 'v' | 'h';
   position: [number, number];
 }

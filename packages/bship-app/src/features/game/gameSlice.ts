@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../../app/store";
-import { Battleship } from "bship-contracts";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Battleship } from 'bship-contracts';
+import { RootState } from '../../app/store';
 
 export enum GridSquare {
   Empty,
@@ -22,16 +22,16 @@ const initialState: GameState = {
     .fill(0)
     .map(() => Array(10).fill(GridSquare.Empty)),
   fleet: [
-    { size: 1, orientation: "h", position: [0, 0] },
-    { size: 1, orientation: "h", position: [0, 2] },
-    { size: 1, orientation: "h", position: [0, 4] },
-    { size: 1, orientation: "h", position: [0, 6] },
-    { size: 2, orientation: "h", position: [2, 0] },
-    { size: 2, orientation: "h", position: [2, 3] },
-    { size: 2, orientation: "h", position: [2, 6] },
-    { size: 3, orientation: "h", position: [4, 0] },
-    { size: 3, orientation: "v", position: [4, 4] },
-    { size: 4, orientation: "v", position: [6, 0] },
+    { size: 1, orientation: 'h', position: [0, 0] },
+    { size: 1, orientation: 'h', position: [0, 2] },
+    { size: 1, orientation: 'h', position: [0, 4] },
+    { size: 1, orientation: 'h', position: [0, 6] },
+    { size: 2, orientation: 'h', position: [2, 0] },
+    { size: 2, orientation: 'h', position: [2, 3] },
+    { size: 2, orientation: 'h', position: [2, 6] },
+    { size: 3, orientation: 'h', position: [4, 0] },
+    { size: 3, orientation: 'v', position: [4, 4] },
+    { size: 4, orientation: 'v', position: [6, 0] },
   ],
 };
 
@@ -55,17 +55,14 @@ export interface SetSquarePayload {
 // );
 
 export const gameSlice = createSlice({
-  name: "game",
+  name: 'game',
   initialState,
   reducers: {
     setPlayerSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
       const [x, y] = payload.coordinates;
       state.playerGrid[x][y] = payload.value;
     },
-    setOpponentSquare: (
-      state,
-      { payload }: PayloadAction<SetSquarePayload>
-    ) => {
+    setOpponentSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
       const [x, y] = payload.coordinates;
       state.opponentGrid[x][y] = payload.value;
     },
@@ -91,13 +88,12 @@ export const gameSlice = createSlice({
       state,
       action: PayloadAction<{
         position: [number, number];
-        orientation: "v" | "h";
+        orientation: 'v' | 'h';
       }>
     ) {
       const ship = state.fleet.find(
         ({ position }) =>
-          position[0] === action.payload.position[0] &&
-          position[1] === action.payload.position[1]
+          position[0] === action.payload.position[0] && position[1] === action.payload.position[1]
       )!;
 
       ship.orientation = action.payload.orientation;

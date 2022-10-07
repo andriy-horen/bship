@@ -20,7 +20,7 @@
 }
 
 .battleship-section::before {
-  content: "";
+  content: '';
   display: block;
   width: 10px;
   height: 10px;
