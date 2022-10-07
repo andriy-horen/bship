@@ -1,4 +1,4 @@
-import { GameMessageType } from 'bship-contracts';
+import { Coordinates, GameMessageType, GameResponseType, MoveStatus } from 'bship-contracts';
 import { useEffect, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -7,10 +7,12 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
+  GridSquare,
   selectFleet,
   selectOpponentGrid,
   selectPlayerGrid,
   setOpponentSquare,
+  setPlayerSquare,
 } from './features/game/gameSlice';
 import { Grid } from './features/grid/Grid';
 import { toBattleshipCoord } from './utils';
@@ -31,6 +33,18 @@ function App() {
           event: GameMessageType.Connect,
         })
       );
+
+      ws.onmessage = ({ data }) => {
+        if (!data) return;
+        const message = JSON.parse(data);
+        if (message.event !== GameResponseType.Mark) return;
+
+        const action = message.data.self ? setPlayerSquare : setOpponentSquare;
+        const isMiss = message.data.value === MoveStatus.Miss;
+        const coordinates = message.data.coordinates;
+
+        dispatch(action({ value: isMiss ? GridSquare.Miss : GridSquare.Hit, coordinates }));
+      };
     };
 
     websocket.current = ws;
@@ -38,12 +52,17 @@ function App() {
     return () => {
       ws.close();
     };
-  }, []);
+  }, [dispatch]);
 
-  const handleSquareClick = (x: number, y: number) => {
-    const value = opponentGrid[x][y];
-
-    dispatch(setOpponentSquare({ coordinates: { x, y }, value: (value + 1) % 4 }));
+  const handleSquareClick = (coordinates: Coordinates) => {
+    websocket.current?.send(
+      JSON.stringify({
+        event: GameMessageType.Move,
+        data: {
+          coordinates,
+        },
+      })
+    );
   };
 
   const fleet = useAppSelector(selectFleet);

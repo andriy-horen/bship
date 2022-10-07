@@ -1,9 +1,10 @@
+import { Coordinates } from 'bship-contracts';
 import { GridSquare } from '../game/gameSlice';
 import './Grid.css';
 
 export interface GridProps {
   grid: GridSquare[][];
-  onSquareClick?: (x: number, y: number) => void;
+  onSquareClick?: (coordinates: Coordinates) => void;
 }
 
 export function Grid({ grid, onSquareClick }: GridProps) {
@@ -14,13 +15,13 @@ export function Grid({ grid, onSquareClick }: GridProps) {
     [GridSquare.Miss, 'square-miss'],
   ]);
 
-  const getClassName = (x: number, y: number): string => {
-    const square = grid[x][y];
+  const getClassName = ({ x, y }: Coordinates): string => {
+    const square = grid[y][x];
     return classes.get(square) ?? '';
   };
 
-  const get2DIndicies = (index: number): [number, number] => {
-    return [Math.floor(index / 10), index % 10];
+  const get2DIndicies = (index: number): Coordinates => {
+    return { x: index % 10, y: Math.floor(index / 10) };
   };
 
   return (
@@ -28,10 +29,10 @@ export function Grid({ grid, onSquareClick }: GridProps) {
       {Array(gridSize * gridSize)
         .fill(0)
         .map((_, index) => {
-          const [x, y] = get2DIndicies(index);
+          const coord = get2DIndicies(index);
 
           return (
-            <div key={index} className={getClassName(x, y)} onClick={() => onSquareClick?.(x, y)}>
+            <div key={index} className={getClassName(coord)} onClick={() => onSquareClick?.(coord)}>
               &nbsp;
             </div>
           );

@@ -22,9 +22,9 @@ export enum GameMessageType {
 }
 
 export enum MoveStatus {
-  Hit,
-  Miss,
-  Sunk,
+  Hit = 'hit',
+  Miss = 'miss',
+  Sunk = 'sunk',
 }
 
 export enum GameResponseType {

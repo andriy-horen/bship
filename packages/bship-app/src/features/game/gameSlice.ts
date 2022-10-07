@@ -60,11 +60,11 @@ export const gameSlice = createSlice({
   reducers: {
     setPlayerSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
       const { x, y } = payload.coordinates;
-      state.playerGrid[x][y] = payload.value;
+      state.playerGrid[y][x] = payload.value;
     },
     setOpponentSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
       const { x, y } = payload.coordinates;
-      state.opponentGrid[x][y] = payload.value;
+      state.opponentGrid[y][x] = payload.value;
     },
     setPlayerFleet: (state, action: PayloadAction<Battleship[]>) => {
       state.fleet = action.payload;

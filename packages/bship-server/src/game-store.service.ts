@@ -21,14 +21,14 @@ export class GameStoreService {
     return gameId;
   }
 
-  updateGame(gameId: string): GameStateUpdateResult {
+  updateGame(gameId: string, event: GameStateEvent): GameStateUpdateResult {
     const gameState = this._games.get(gameId);
 
     if (!gameState) {
       throw new Error('game not found');
     }
 
-    return gameState.update({ player: Player.Player0, coordinates: { x: 0, y: 0 } });
+    return gameState.update(event);
   }
 }
 
@@ -40,13 +40,13 @@ export interface GameStateEvent {
 export interface GameStateUpdateResult {
   nextPlayer: number;
   moveStatus: MoveStatus;
-  isValidMove?: boolean;
+  invalidMove?: boolean;
 }
 
 export const INVALID_MOVE: GameStateUpdateResult = {
   nextPlayer: Player.Player0,
   moveStatus: MoveStatus.Miss,
-  isValidMove: false,
+  invalidMove: true,
 };
 
 type StringGameEvent = `p${number}:${number},${number}`;
