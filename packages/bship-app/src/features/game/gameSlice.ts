@@ -22,16 +22,16 @@ const initialState: GameState = {
     .fill(0)
     .map(() => Array(10).fill(GridSquare.Empty)),
   fleet: [
-    { size: 1, orientation: 'h', coordinates: { y: 0, x: 0 } },
-    { size: 1, orientation: 'h', coordinates: { y: 0, x: 2 } },
-    { size: 1, orientation: 'h', coordinates: { y: 0, x: 4 } },
-    { size: 1, orientation: 'h', coordinates: { y: 0, x: 6 } },
-    { size: 2, orientation: 'h', coordinates: { y: 2, x: 0 } },
-    { size: 2, orientation: 'h', coordinates: { y: 2, x: 3 } },
-    { size: 2, orientation: 'h', coordinates: { y: 2, x: 6 } },
-    { size: 3, orientation: 'h', coordinates: { y: 4, x: 0 } },
-    { size: 3, orientation: 'v', coordinates: { y: 4, x: 4 } },
-    { size: 4, orientation: 'v', coordinates: { y: 6, x: 0 } },
+    { size: 1, orientation: 'h', coordinates: { x: 0, y: 0 } },
+    { size: 1, orientation: 'h', coordinates: { x: 2, y: 0 } },
+    { size: 1, orientation: 'h', coordinates: { x: 4, y: 0 } },
+    { size: 1, orientation: 'h', coordinates: { x: 6, y: 0 } },
+    { size: 2, orientation: 'h', coordinates: { x: 0, y: 2 } },
+    { size: 2, orientation: 'h', coordinates: { x: 3, y: 2 } },
+    { size: 2, orientation: 'h', coordinates: { x: 6, y: 2 } },
+    { size: 3, orientation: 'h', coordinates: { x: 0, y: 4 } },
+    { size: 3, orientation: 'v', coordinates: { x: 4, y: 4 } },
+    { size: 4, orientation: 'v', coordinates: { x: 0, y: 6 } },
   ],
 };
 

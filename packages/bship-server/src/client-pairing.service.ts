@@ -49,11 +49,10 @@ export class GameContext {
 
   private messageHandlerFactory = (client: WebSocket) => {
     return (message: RawData) => {
-      // const updateResult = this._gameStore.updateGame(this._gameId);
+      const updateResult = this._gameStore.updateGame(this._gameId);
 
       this.notifyClients(JSON.parse(message.toString()));
-
-      // console.log(updateResult);
+      this.notifyClients(GameResponseType.Mark, updateResult);
     };
   };
 }

@@ -13,6 +13,7 @@ import {
   setOpponentSquare,
 } from './features/game/gameSlice';
 import { Grid } from './features/grid/Grid';
+import { toBattleshipCoord } from './utils';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -52,7 +53,7 @@ function App() {
       JSON.stringify({
         event: GameMessageType.CreateGame,
         data: {
-          fleet,
+          fleet: fleet.map((ship) => toBattleshipCoord(ship)),
         },
       })
     );

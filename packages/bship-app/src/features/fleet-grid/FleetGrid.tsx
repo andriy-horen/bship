@@ -26,7 +26,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
       store.dispatch(
         setShipPosition({
           currentPosition: item.coordinates,
-          newPosition: { y: item.coordinates.y + y / 25, x: item.coordinates.x + x / 25 },
+          newPosition: { x: item.coordinates.x + x / 25, y: item.coordinates.y + y / 25 },
         })
       );
     },
