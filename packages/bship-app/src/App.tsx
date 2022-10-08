@@ -25,6 +25,8 @@ function App() {
   const websocket = useRef<WebSocket | null>(null);
 
   useEffect(() => {
+    if (websocket.current) return;
+
     const ws = new WebSocket(`ws://localhost:3001/game`);
 
     ws.onopen = () => {
@@ -49,10 +51,12 @@ function App() {
 
     websocket.current = ws;
 
-    return () => {
-      ws.close();
-    };
-  }, [dispatch]);
+    // TODO: in general clean-up is needed but not in case of root-level component
+    // return () => {
+    //   ws.close();
+    // };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSquareClick = (coordinates: Coordinates) => {
     websocket.current?.send(
