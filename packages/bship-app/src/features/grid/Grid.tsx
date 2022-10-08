@@ -1,6 +1,11 @@
 import { Coordinates } from 'bship-contracts';
-import { GridSquare } from '../game/gameSlice';
 import './Grid.css';
+
+export enum GridSquare {
+  Empty,
+  Miss,
+  Hit,
+}
 
 export interface GridProps {
   grid: GridSquare[][];

@@ -7,14 +7,13 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
-  GridSquare,
   selectFleet,
   selectOpponentGrid,
   selectPlayerGrid,
   setOpponentSquare,
   setPlayerSquare,
 } from './features/game/gameSlice';
-import { Grid } from './features/grid/Grid';
+import { Grid, GridSquare } from './features/grid/Grid';
 import { toBattleshipCoord } from './utils';
 
 function App() {
@@ -27,7 +26,7 @@ function App() {
   useEffect(() => {
     if (websocket.current) return;
 
-    const ws = new WebSocket(`ws://localhost:3001/game`);
+    const ws = new WebSocket(`ws://192.168.0.100:3001/game`);
 
     ws.onopen = () => {
       ws.send(

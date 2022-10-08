@@ -18,7 +18,7 @@ export enum GameMessageType {
   Connect = 'connect',
   CreateGame = 'create_game',
   Move = 'move',
-  Acknowledge = 'acknowledge',
+  Acknowledge = 'ack',
 }
 
 export enum MoveStatus {
