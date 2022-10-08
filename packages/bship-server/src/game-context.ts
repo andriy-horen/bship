@@ -70,6 +70,7 @@ export class GameContext {
         data: {
           coordinates: data.coordinates,
           value: updateResult.moveStatus,
+          target: updateResult.target,
           next: updateResult.nextPlayer === Player.Player0,
           self: player === Player.Player1,
         },
@@ -80,6 +81,7 @@ export class GameContext {
         data: {
           coordinates: data.coordinates,
           value: updateResult.moveStatus,
+          target: updateResult.target,
           next: updateResult.nextPlayer === Player.Player1,
           self: player === Player.Player0,
         },

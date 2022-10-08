@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BattleshipCoord, Coordinates, MoveStatus, Player } from 'bship-contracts';
+import { isEqual } from 'lodash';
 import { IdGeneratorService } from './id-generator.service';
 import { mapLastEntry } from './utils';
 
@@ -21,7 +22,7 @@ export class GameStoreService {
     return gameId;
   }
 
-  updateGame(gameId: string, event: GameStateEvent): GameStateUpdateResult {
+  updateGame(gameId: string, event: GameStateEvent): GameStateUpdate {
     const gameState = this._games.get(gameId);
 
     if (!gameState) {
@@ -37,13 +38,17 @@ export interface GameStateEvent {
   coordinates: Coordinates;
 }
 
-export interface GameStateUpdateResult {
+export interface GameStateUpdate {
   nextPlayer: number;
   moveStatus: MoveStatus;
+  /**
+   * target is only present when after a move battleship was sunk, otherwise undefined
+   */
+  target?: BattleshipCoord;
   invalidMove?: boolean;
 }
 
-export const INVALID_MOVE: GameStateUpdateResult = {
+export const INVALID_MOVE: GameStateUpdate = {
   nextPlayer: Player.Player0,
   moveStatus: MoveStatus.Miss,
   invalidMove: true,
@@ -55,7 +60,7 @@ export class GameState {
   private readonly _fleet1: readonly BattleshipCoord[] = [];
   private readonly _fleet2: readonly BattleshipCoord[] = [];
 
-  private readonly _state = new Map<StringGameEvent, GameStateUpdateResult>([
+  private readonly _state = new Map<StringGameEvent, GameStateUpdate>([
     [
       'init',
       {
@@ -70,7 +75,7 @@ export class GameState {
     this._fleet2 = Object.freeze(fleet2);
   }
 
-  update(event: GameStateEvent): GameStateUpdateResult {
+  update(event: GameStateEvent): GameStateUpdate {
     const key = gameStateKey(event.player, event.coordinates);
     /**
      * When move is repeated (duplicate) return invalid state
@@ -104,7 +109,7 @@ export class GameState {
     return update;
   }
 
-  get lastUpdate(): GameStateUpdateResult | undefined {
+  get lastUpdate(): GameStateUpdate | undefined {
     const lastEntry = mapLastEntry(this._state);
 
     return lastEntry?.[1];
@@ -114,9 +119,8 @@ export class GameState {
     return this._state.size === 1;
   }
 
-  getUpdateResult({ player, coordinates }: GameStateEvent): GameStateUpdateResult {
+  getUpdateResult({ player, coordinates }: GameStateEvent): GameStateUpdate {
     const targetFleet = player === 0 ? this._fleet2 : this._fleet1;
-
     const target = targetFleet.find((ship) => isShipHit(ship, coordinates));
     if (!target) {
       return {
@@ -126,12 +130,13 @@ export class GameState {
     }
 
     const isSunk = expandShip(target)
-      .filter(({ x, y }) => x !== coordinates.x && y !== coordinates.y)
-      .every((coord) => this._state.get(gameStateKey(player, coord)));
+      .filter((sectionCoord) => !isEqual(sectionCoord, coordinates))
+      .every((sectionCoord) => this._state.get(gameStateKey(player, sectionCoord)));
 
     return {
       nextPlayer: player,
       moveStatus: isSunk ? MoveStatus.Sunk : MoveStatus.Hit,
+      target: isSunk ? target : undefined,
     };
   }
 }
