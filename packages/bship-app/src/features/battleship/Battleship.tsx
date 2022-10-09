@@ -30,7 +30,9 @@ export function Battleship({
             tail: index === size - 1,
             hit: hitSections.includes(index),
           })}
-        ></div>
+        >
+          <div className="peg"></div>
+        </div>
       ))}
     </div>
   );

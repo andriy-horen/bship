@@ -1,4 +1,5 @@
 import { Coordinates, GameMessageType, GameResponseType, MoveStatus } from 'bship-contracts';
+import { range } from 'lodash-es';
 import { useEffect, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -7,15 +8,17 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
-  selectFleet,
+  addOpponentShip,
+  selectOpponentFleet,
   selectOpponentGrid,
+  selectPlayerFleet,
   selectPlayerGrid,
   setOpponentSquare,
   setPlayerSquare,
 } from './features/game/gameSlice';
 import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
-import { expandShip, toBattleshipCoord } from './utils';
+import { expandShip, toBattleshipCoord, toBattleshipModel } from './utils';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -57,6 +60,11 @@ function App() {
             allCoord.forEach((sectionCoord) => {
               dispatch(action({ value: GridSquare.Sunk, coordinates: sectionCoord }));
             });
+            if (!message.data.self) {
+              const model = toBattleshipModel(message.data.target);
+              model.hitSections = range(0, model.size);
+              dispatch(addOpponentShip({ battleship: model }));
+            }
             break;
         }
       };
@@ -82,14 +90,15 @@ function App() {
     );
   };
 
-  const fleet = useAppSelector(selectFleet);
+  const playerFleet = useAppSelector(selectPlayerFleet);
+  const opponentFleet = useAppSelector(selectOpponentFleet);
 
   const startGame = () => {
     websocket?.current?.send(
       JSON.stringify({
         event: GameMessageType.CreateGame,
         data: {
-          fleet: fleet.map((ship) => toBattleshipCoord(ship)),
+          fleet: playerFleet.map((ship) => toBattleshipCoord(ship)),
         },
       })
     );
@@ -101,7 +110,7 @@ function App() {
         <h3>Player's Grid</h3>
         <div className="player-grid">
           <DndProvider backend={HTML5Backend}>
-            <FleetGrid fleet={fleet} />
+            <FleetGrid fleet={playerFleet} />
             <CustomDragLayer />
           </DndProvider>
           <GridLayer grid={playerGrid} />
@@ -110,13 +119,7 @@ function App() {
 
       <div>
         <h3>Opponent's Grid</h3>
-        <Grid
-          fleet={[
-            { size: 5, coordinates: { x: 3, y: 2 }, orientation: 'v', hitSections: [0, 3, 4] },
-          ]}
-          grid={opponentGrid}
-          onSquareClick={handleSquareClick}
-        />
+        <Grid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
       </div>
       <button onClick={startGame}>Play!</button>
     </div>

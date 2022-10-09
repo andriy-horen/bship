@@ -6,7 +6,8 @@ import { GridSquare } from '../grid-layer/GridLayer';
 export interface GameState {
   playerGrid: GridSquare[][];
   opponentGrid: GridSquare[][];
-  fleet: Battleship[];
+  playerFleet: Battleship[];
+  opponentFleet: Battleship[];
 }
 
 const initialState: GameState = {
@@ -16,7 +17,7 @@ const initialState: GameState = {
   opponentGrid: Array(10)
     .fill(0)
     .map(() => Array(10).fill(GridSquare.Empty)),
-  fleet: [
+  playerFleet: [
     { size: 1, orientation: 'h', coordinates: { x: 0, y: 0 } },
     { size: 1, orientation: 'h', coordinates: { x: 2, y: 0 } },
     { size: 1, orientation: 'h', coordinates: { x: 4, y: 0 } },
@@ -28,6 +29,7 @@ const initialState: GameState = {
     { size: 3, orientation: 'v', coordinates: { x: 4, y: 4 } },
     { size: 4, orientation: 'v', coordinates: { x: 0, y: 6 } },
   ],
+  opponentFleet: [],
 };
 
 export interface SetSquarePayload {
@@ -62,7 +64,7 @@ export const gameSlice = createSlice({
       state.opponentGrid[y][x] = payload.value;
     },
     setPlayerFleet: (state, action: PayloadAction<Battleship[]>) => {
-      state.fleet = action.payload;
+      state.playerFleet = action.payload;
     },
     setShipPosition(
       state,
@@ -71,7 +73,7 @@ export const gameSlice = createSlice({
         newPosition: Coordinates;
       }>
     ) {
-      const ship = state.fleet.find(
+      const ship = state.playerFleet.find(
         ({ coordinates }) =>
           coordinates.y === action.payload.currentPosition.y &&
           coordinates.x === action.payload.currentPosition.x
@@ -86,13 +88,21 @@ export const gameSlice = createSlice({
         orientation: Orientation;
       }>
     ) {
-      const ship = state.fleet.find(
+      const ship = state.playerFleet.find(
         ({ coordinates }) =>
           coordinates.y === action.payload.coordinates.y &&
           coordinates.x === action.payload.coordinates.x
       )!;
 
       ship.orientation = action.payload.orientation;
+    },
+    addOpponentShip(
+      state,
+      action: PayloadAction<{
+        battleship: Battleship;
+      }>
+    ) {
+      state.opponentFleet.push(action.payload.battleship);
     },
   },
 });
@@ -103,10 +113,12 @@ export const {
   setPlayerFleet,
   setShipPosition,
   setShipOrientation,
+  addOpponentShip,
 } = gameSlice.actions;
 
 export const selectPlayerGrid = (state: RootState) => state.game.playerGrid;
 export const selectOpponentGrid = (state: RootState) => state.game.opponentGrid;
-export const selectFleet = (state: RootState) => state.game.fleet;
+export const selectPlayerFleet = (state: RootState) => state.game.playerFleet;
+export const selectOpponentFleet = (state: RootState) => state.game.opponentFleet;
 
 export default gameSlice.reducer;
