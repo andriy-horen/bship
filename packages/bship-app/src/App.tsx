@@ -20,8 +20,8 @@ import {
   selectOpponentGrid,
   selectPlayerFleet,
   selectPlayerGrid,
-  setOpponentSquare,
-  setPlayerSquare,
+  setOpponentSquares,
+  setPlayerSquares,
   SetSquarePayload,
 } from './features/game/gameSlice';
 import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
@@ -53,20 +53,20 @@ function App() {
         const message = JSON.parse(data);
         if (message.event !== GameResponseType.Mark) return;
 
-        const action = message.data.self ? setPlayerSquare : setOpponentSquare;
+        const action = message.data.self ? setPlayerSquares : setOpponentSquares;
         const coordinates = message.data.coordinates;
 
         switch (message.data.value) {
           case MoveStatus.Miss:
-            dispatch(action({ value: GridSquare.Miss, coordinates }));
+            dispatch(action({ squares: [{ value: GridSquare.Miss, coordinates }] }));
             break;
           case MoveStatus.Hit:
-            dispatch(action({ value: GridSquare.Hit, coordinates }));
+            dispatch(action({ squares: [{ value: GridSquare.Hit, coordinates }] }));
             markCorners(coordinates, action);
             break;
           case MoveStatus.Sunk:
             markAround(message.data.target, action);
-            dispatch(action({ value: GridSquare.Hit, coordinates }));
+            dispatch(action({ squares: [{ value: GridSquare.Hit, coordinates }] }));
             if (!message.data.self) {
               const model = toBattleshipModel(message.data.target);
               model.hitSections = range(0, model.size);
@@ -90,18 +90,22 @@ function App() {
     coord: Coordinates,
     action: ActionCreatorWithPayload<SetSquarePayload, string>
   ) => {
-    getCorners(coord).forEach((coord) => {
-      dispatch(action({ coordinates: coord, value: GridSquare.Miss }));
-    });
+    const squares = getCorners(coord).map((coord) => ({
+      coordinates: coord,
+      value: GridSquare.Miss,
+    }));
+    dispatch(action({ squares }));
   };
 
   const markAround = (
     ship: BattleshipCoord,
     action: ActionCreatorWithPayload<SetSquarePayload, string>
   ) => {
-    getAround(ship).forEach((coord) => {
-      dispatch(action({ coordinates: coord, value: GridSquare.Miss }));
-    });
+    const squares = getAround(ship).map((coord) => ({
+      coordinates: coord,
+      value: GridSquare.Miss,
+    }));
+    dispatch(action({ squares }));
   };
 
   const handleSquareClick = (coordinates: Coordinates) => {

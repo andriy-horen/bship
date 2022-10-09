@@ -43,8 +43,7 @@ const initialState: GameState = {
 };
 
 export interface SetSquarePayload {
-  value: GridSquare;
-  coordinates: Coordinates;
+  squares: { value: GridSquare; coordinates: Coordinates }[];
 }
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -65,13 +64,15 @@ export const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    setPlayerSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
-      const { x, y } = payload.coordinates;
-      state.playerGrid[y][x] = payload.value;
+    setPlayerSquares: (state, { payload }: PayloadAction<SetSquarePayload>) => {
+      payload.squares.forEach(({ value, coordinates: { x, y } }) => {
+        state.playerGrid[y][x] = value;
+      });
     },
-    setOpponentSquare: (state, { payload }: PayloadAction<SetSquarePayload>) => {
-      const { x, y } = payload.coordinates;
-      state.opponentGrid[y][x] = payload.value;
+    setOpponentSquares: (state, { payload }: PayloadAction<SetSquarePayload>) => {
+      payload.squares.forEach(({ value, coordinates: { x, y } }) => {
+        state.opponentGrid[y][x] = value;
+      });
     },
     setPlayerFleet: (state, action: PayloadAction<Battleship[]>) => {
       state.playerFleet = action.payload;
@@ -118,8 +119,8 @@ export const gameSlice = createSlice({
 });
 
 export const {
-  setPlayerSquare,
-  setOpponentSquare,
+  setPlayerSquares,
+  setOpponentSquares,
   setPlayerFleet,
   setShipPosition,
   setShipOrientation,
