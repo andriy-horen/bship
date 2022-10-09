@@ -5,7 +5,6 @@ export enum GridSquare {
   Empty,
   Miss,
   Hit,
-  Sunk,
 }
 
 export interface GridProps {
@@ -19,7 +18,6 @@ export function GridLayer({ grid, onSquareClick }: GridProps) {
   const classes = new Map<GridSquare, string>([
     [GridSquare.Hit, 'square-hit'],
     [GridSquare.Miss, 'square-miss'],
-    [GridSquare.Sunk, 'square-sunk'],
   ]);
 
   const getClassName = ({ x, y }: Coordinates): string => {

@@ -3,6 +3,27 @@ import { Battleship, Coordinates, Orientation } from 'bship-contracts';
 import { RootState } from '../../app/store';
 import { GridSquare } from '../grid-layer/GridLayer';
 
+const NORMAL_FLEET: Battleship[] = [
+  { size: 1, orientation: 'h', coordinates: { x: 5, y: 8 } },
+  { size: 1, orientation: 'h', coordinates: { x: 8, y: 5 } },
+  { size: 1, orientation: 'h', coordinates: { x: 5, y: 5 } },
+  { size: 1, orientation: 'h', coordinates: { x: 8, y: 8 } },
+  { size: 2, orientation: 'h', coordinates: { x: 0, y: 0 } },
+  { size: 2, orientation: 'h', coordinates: { x: 3, y: 0 } },
+  { size: 2, orientation: 'h', coordinates: { x: 6, y: 0 } },
+  { size: 3, orientation: 'h', coordinates: { x: 0, y: 2 } },
+  { size: 3, orientation: 'h', coordinates: { x: 4, y: 2 } },
+  { size: 4, orientation: 'v', coordinates: { x: 1, y: 5 } },
+];
+
+const TEST_FLEET: Battleship[] = [
+  { size: 4, orientation: 'v', coordinates: { x: 1, y: 1 } },
+  { size: 4, orientation: 'h', coordinates: { x: 3, y: 1 } },
+
+  { size: 1, orientation: 'h', coordinates: { x: 5, y: 8 } },
+  { size: 1, orientation: 'h', coordinates: { x: 8, y: 8 } },
+];
+
 export interface GameState {
   playerGrid: GridSquare[][];
   opponentGrid: GridSquare[][];
@@ -17,18 +38,7 @@ const initialState: GameState = {
   opponentGrid: Array(10)
     .fill(0)
     .map(() => Array(10).fill(GridSquare.Empty)),
-  playerFleet: [
-    { size: 1, orientation: 'h', coordinates: { x: 0, y: 0 } },
-    { size: 1, orientation: 'h', coordinates: { x: 2, y: 0 } },
-    { size: 1, orientation: 'h', coordinates: { x: 4, y: 0 } },
-    { size: 1, orientation: 'h', coordinates: { x: 6, y: 0 } },
-    { size: 2, orientation: 'h', coordinates: { x: 0, y: 2 } },
-    { size: 2, orientation: 'h', coordinates: { x: 3, y: 2 } },
-    { size: 2, orientation: 'h', coordinates: { x: 6, y: 2 } },
-    { size: 3, orientation: 'h', coordinates: { x: 0, y: 4 } },
-    { size: 3, orientation: 'v', coordinates: { x: 4, y: 4 } },
-    { size: 4, orientation: 'v', coordinates: { x: 0, y: 6 } },
-  ],
+  playerFleet: TEST_FLEET,
   opponentFleet: [],
 };
 

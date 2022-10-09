@@ -1,4 +1,11 @@
-import { Coordinates, GameMessageType, GameResponseType, MoveStatus } from 'bship-contracts';
+import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import {
+  BattleshipCoord,
+  Coordinates,
+  GameMessageType,
+  GameResponseType,
+  MoveStatus,
+} from 'bship-contracts';
 import { range } from 'lodash-es';
 import { useEffect, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
@@ -15,10 +22,11 @@ import {
   selectPlayerGrid,
   setOpponentSquare,
   setPlayerSquare,
+  SetSquarePayload,
 } from './features/game/gameSlice';
 import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
-import { expandShip, toBattleshipCoord, toBattleshipModel } from './utils';
+import { getAround, getCorners, toBattleshipCoord, toBattleshipModel } from './utils';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -54,12 +62,11 @@ function App() {
             break;
           case MoveStatus.Hit:
             dispatch(action({ value: GridSquare.Hit, coordinates }));
+            markCorners(coordinates, action);
             break;
           case MoveStatus.Sunk:
-            const allCoord = expandShip(message.data.target);
-            allCoord.forEach((sectionCoord) => {
-              dispatch(action({ value: GridSquare.Sunk, coordinates: sectionCoord }));
-            });
+            markAround(message.data.target, action);
+            dispatch(action({ value: GridSquare.Hit, coordinates }));
             if (!message.data.self) {
               const model = toBattleshipModel(message.data.target);
               model.hitSections = range(0, model.size);
@@ -78,6 +85,24 @@ function App() {
     // };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const markCorners = (
+    coord: Coordinates,
+    action: ActionCreatorWithPayload<SetSquarePayload, string>
+  ) => {
+    getCorners(coord).forEach((coord) => {
+      dispatch(action({ coordinates: coord, value: GridSquare.Miss }));
+    });
+  };
+
+  const markAround = (
+    ship: BattleshipCoord,
+    action: ActionCreatorWithPayload<SetSquarePayload, string>
+  ) => {
+    getAround(ship).forEach((coord) => {
+      dispatch(action({ coordinates: coord, value: GridSquare.Miss }));
+    });
+  };
 
   const handleSquareClick = (coordinates: Coordinates) => {
     websocket.current?.send(

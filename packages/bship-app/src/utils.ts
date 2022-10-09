@@ -1,4 +1,11 @@
-import { Battleship, BattleshipCoord, Coordinates, Orientation } from 'bship-contracts';
+import {
+  Battleship,
+  BattleshipCoord,
+  Coordinates,
+  GRID_LOWER_BOUND,
+  GRID_UPPER_BOUND,
+  Orientation,
+} from 'bship-contracts';
 
 export function toBattleshipCoord(ship: Battleship): BattleshipCoord {
   const x = ship.coordinates.x + (ship.orientation === 'h' ? ship.size - 1 : 0);
@@ -29,4 +36,55 @@ export function expandShip([head, tail]: BattleshipCoord): Coordinates[] {
   }
 
   return result;
+}
+
+export function isValidCoordinate({ x, y }: Coordinates): boolean {
+  return (
+    x >= GRID_LOWER_BOUND && x <= GRID_UPPER_BOUND && y >= GRID_LOWER_BOUND && y <= GRID_UPPER_BOUND
+  );
+}
+
+// TODO: better naming
+export function getCorners({ x, y }: Coordinates): Coordinates[] {
+  return [
+    { x: x - 1, y: y - 1 },
+    { x: x + 1, y: y - 1 },
+    { x: x + 1, y: y + 1 },
+    { x: x - 1, y: y + 1 },
+  ].filter((coord) => isValidCoordinate(coord));
+}
+
+// TODO: better naming
+export function getAround([head, tail]: BattleshipCoord): Coordinates[] {
+  const coords: Coordinates[] = [];
+
+  /**
+   * Generates top & bottom "border" incl. corners
+   */
+  for (let x = head.x - 1; x <= tail.x + 1; x++) {
+    const top = { x, y: head.y - 1 };
+    const bottom = { x, y: tail.y + 1 };
+    if (isValidCoordinate(top)) {
+      coords.push(top);
+    }
+    if (isValidCoordinate(bottom)) {
+      coords.push(bottom);
+    }
+  }
+
+  /**
+   * Generates left & right "border" excl. corners (the first loop already added them)
+   */
+  for (let y = head.y; y <= tail.y; y++) {
+    const left = { x: head.x - 1, y };
+    const right = { x: tail.x + 1, y };
+    if (isValidCoordinate(left)) {
+      coords.push(left);
+    }
+    if (isValidCoordinate(right)) {
+      coords.push(right);
+    }
+  }
+
+  return coords;
 }
