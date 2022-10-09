@@ -1,4 +1,5 @@
 import { Coordinates, GameMessageType, GameResponseType, MoveStatus } from 'bship-contracts';
+import { range } from 'lodash-es';
 import { useEffect, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -119,6 +120,7 @@ function App() {
             size: 7,
             coordinates: { x: 0, y: 0 },
             orientation: 'v',
+            hitSections: range(0, 7),
           },
           {
             size: 7,
@@ -134,6 +136,7 @@ function App() {
             size: 3,
             coordinates: { x: 4, y: 4 },
             orientation: 'h',
+            hitSections: [1],
           },
           {
             size: 3,

@@ -9,7 +9,7 @@ export interface BattleshipProps {
 }
 
 export function Battleship({
-  model: { size, orientation, coordinates },
+  model: { size, orientation, coordinates, hitSections = [] },
   onClick,
 }: BattleshipProps) {
   return (
@@ -28,6 +28,7 @@ export function Battleship({
             'battleship-section': true,
             head: index === 0,
             tail: index === size - 1,
+            hit: hitSections.includes(index),
           })}
         ></div>
       ))}

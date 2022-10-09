@@ -51,6 +51,7 @@ export interface Battleship {
   size: number;
   orientation: Orientation;
   coordinates: Coordinates;
+  hitSections?: number[];
 }
 
 export const GRID_LOWER_BOUND = 0;

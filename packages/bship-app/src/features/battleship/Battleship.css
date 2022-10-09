@@ -29,6 +29,14 @@
   border-radius: 50%;
 }
 
+.battleship-section.hit {
+  background-color: #ffaeae;
+}
+
+.battleship-section.hit::before {
+  background-color: #ff2b2b;
+}
+
 .battleship.horizontal .battleship-section.head {
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
