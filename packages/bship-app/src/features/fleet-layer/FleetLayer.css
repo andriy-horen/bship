@@ -1,0 +1,7 @@
+.fleet-layer {
+  position: relative;
+}
+
+.ship-location {
+  position: absolute;
+}

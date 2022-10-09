@@ -35,12 +35,24 @@
   border-style: dashed;
 }
 
-.grid > .square-hit {
-  /* background-color: #ffaeae; */
+.grid > .square-sunk {
+  background-color: #ffaeae;
 }
 
+.grid > .square-sunk::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-color: #ff2b2b;
+  border-radius: 50%;
+  margin-left: -4px;
+}
+
+/* TODO: refactor this */
 .grid > .square-miss,
-.grid > .square-hit {
+.grid > .square-hit,
+.grid > .square-sunk {
   justify-content: center;
   align-items: center;
 }

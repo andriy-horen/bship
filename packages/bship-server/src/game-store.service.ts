@@ -38,6 +38,7 @@ export interface GameStateEvent {
   coordinates: Coordinates;
 }
 
+// TODO: there's possibly to much different concepts expressed here in the single model (refactor?)
 export interface GameStateUpdate {
   nextPlayer: number;
   moveStatus: MoveStatus;

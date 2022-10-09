@@ -6,6 +6,7 @@ import './App.css';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
+import { FleetLayer } from './features/fleet-layer/FleetLayer';
 import {
   selectFleet,
   selectOpponentGrid,
@@ -14,7 +15,7 @@ import {
   setPlayerSquare,
 } from './features/game/gameSlice';
 import { Grid, GridSquare } from './features/grid/Grid';
-import { toBattleshipCoord } from './utils';
+import { expandShip, toBattleshipCoord } from './utils';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -36,15 +37,28 @@ function App() {
       );
 
       ws.onmessage = ({ data }) => {
+        // TODO: optimize everything here
         if (!data) return;
         const message = JSON.parse(data);
         if (message.event !== GameResponseType.Mark) return;
 
         const action = message.data.self ? setPlayerSquare : setOpponentSquare;
-        const isMiss = message.data.value === MoveStatus.Miss;
         const coordinates = message.data.coordinates;
 
-        dispatch(action({ value: isMiss ? GridSquare.Miss : GridSquare.Hit, coordinates }));
+        switch (message.data.value) {
+          case MoveStatus.Miss:
+            dispatch(action({ value: GridSquare.Miss, coordinates }));
+            break;
+          case MoveStatus.Hit:
+            dispatch(action({ value: GridSquare.Hit, coordinates }));
+            break;
+          case MoveStatus.Sunk:
+            const allCoord = expandShip(message.data.target);
+            allCoord.forEach((sectionCoord) => {
+              dispatch(action({ value: GridSquare.Sunk, coordinates: sectionCoord }));
+            });
+            break;
+        }
       };
     };
 
@@ -99,6 +113,35 @@ function App() {
         <Grid grid={opponentGrid} onSquareClick={handleSquareClick} />
       </div>
       <button onClick={startGame}>Play!</button>
+      <FleetLayer
+        fleet={[
+          {
+            size: 7,
+            coordinates: { x: 0, y: 0 },
+            orientation: 'v',
+          },
+          {
+            size: 7,
+            coordinates: { x: 2, y: 0 },
+            orientation: 'v',
+          },
+          {
+            size: 3,
+            coordinates: { x: 4, y: 2 },
+            orientation: 'h',
+          },
+          {
+            size: 3,
+            coordinates: { x: 4, y: 4 },
+            orientation: 'h',
+          },
+          {
+            size: 3,
+            coordinates: { x: 4, y: 6 },
+            orientation: 'h',
+          },
+        ]}
+      ></FleetLayer>
     </div>
   );
 }

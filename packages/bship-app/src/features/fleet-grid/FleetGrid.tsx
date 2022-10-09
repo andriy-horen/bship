@@ -1,7 +1,7 @@
 import { Battleship as BattleshipModel, Coordinates, Orientation } from 'bship-contracts';
 import { useDrop } from 'react-dnd';
 import { store } from '../../app/store';
-import { Battleship } from '../battleship/Battleship';
+import { DraggableBattleship } from '../battleship/DraggableBattleship';
 import { BattleshipDrag } from '../dnd/battleshipDrag';
 import { ItemTypes } from '../dnd/itemTypes';
 import { snapToGrid } from '../dnd/snap';
@@ -52,7 +52,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
             left: `${ship.coordinates.x * 24 + ship.coordinates.x}px`,
           }}
         >
-          <Battleship model={ship} onClick={changeOrientation}></Battleship>
+          <DraggableBattleship model={ship} onClick={changeOrientation}></DraggableBattleship>
         </div>
       ))}
     </div>
