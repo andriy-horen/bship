@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Battleship, Coordinates, Orientation } from 'bship-contracts';
 import { RootState } from '../../app/store';
-import { GridSquare } from '../grid/Grid';
+import { GridSquare } from '../grid-layer/GridLayer';
 
 export interface GameState {
   playerGrid: GridSquare[][];
