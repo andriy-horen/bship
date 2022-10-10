@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Battleship, Coordinates, Orientation } from 'bship-contracts';
 import { RootState } from '../../app/store';
+import { expandShip, toBattleshipCoord } from '../../utils';
 import { GridSquare } from '../grid-layer/GridLayer';
 
 const NORMAL_FLEET: Battleship[] = [
@@ -24,11 +25,17 @@ const TEST_FLEET: Battleship[] = [
   { size: 1, orientation: 'h', coordinates: { x: 8, y: 8 } },
 ];
 
+export interface CurrentGame {
+  gameId: string;
+  hasStarted: boolean;
+}
+
 export interface GameState {
   playerGrid: GridSquare[][];
   opponentGrid: GridSquare[][];
   playerFleet: Battleship[];
   opponentFleet: Battleship[];
+  currentGame: CurrentGame;
 }
 
 const initialState: GameState = {
@@ -40,6 +47,10 @@ const initialState: GameState = {
     .map(() => Array(10).fill(GridSquare.Empty)),
   playerFleet: TEST_FLEET,
   opponentFleet: [],
+  currentGame: {
+    gameId: '',
+    hasStarted: false,
+  },
 };
 
 export interface SetSquarePayload {
@@ -107,6 +118,25 @@ export const gameSlice = createSlice({
 
       ship.orientation = action.payload.orientation;
     },
+    setShipHitStatus(
+      state,
+      action: PayloadAction<{
+        coordinates: Coordinates;
+      }>
+    ) {
+      const { x: moveX, y: moveY } = action.payload.coordinates;
+
+      const fleetCoord = state.playerFleet.map((ship) => expandShip(toBattleshipCoord(ship)));
+      const shipIndex = fleetCoord.findIndex((sectionCoords) =>
+        sectionCoords.some(({ x, y }) => x === moveX && y === moveY)
+      );
+      const sectionIndex = fleetCoord[shipIndex].findIndex(
+        ({ x, y }) => x === moveX && y === moveY
+      );
+
+      const sections = state.playerFleet[shipIndex].hitSections ?? [];
+      state.playerFleet[shipIndex].hitSections = [...sections, sectionIndex];
+    },
     addOpponentShip(
       state,
       action: PayloadAction<{
@@ -114,6 +144,16 @@ export const gameSlice = createSlice({
       }>
     ) {
       state.opponentFleet.push(action.payload.battleship);
+    },
+    updateCurrentGame(
+      state,
+      action: PayloadAction<{
+        gameId: string;
+        started: boolean;
+      }>
+    ) {
+      state.currentGame.gameId = action.payload.gameId;
+      state.currentGame.hasStarted = action.payload.started;
     },
   },
 });
@@ -125,11 +165,14 @@ export const {
   setShipPosition,
   setShipOrientation,
   addOpponentShip,
+  updateCurrentGame,
+  setShipHitStatus,
 } = gameSlice.actions;
 
 export const selectPlayerGrid = (state: RootState) => state.game.playerGrid;
 export const selectOpponentGrid = (state: RootState) => state.game.opponentGrid;
 export const selectPlayerFleet = (state: RootState) => state.game.playerFleet;
 export const selectOpponentFleet = (state: RootState) => state.game.opponentFleet;
+export const selectCurrentGame = (state: RootState) => state.game.currentGame;
 
 export default gameSlice.reducer;

@@ -1,4 +1,4 @@
-import { GameMessageType, GameResponseType, Player } from 'bship-contracts';
+import { GameMessageType, GameResponseType, MarkPayload, Player } from 'bship-contracts';
 import { RawData, WebSocket } from 'ws';
 import { ClientPairingRequest } from './client-pairing.service';
 import { GameStoreService } from './game-store.service';
@@ -73,7 +73,7 @@ export class GameContext {
           target: updateResult.target,
           next: updateResult.nextPlayer === Player.Player0,
           self: player === Player.Player1,
-        },
+        } as MarkPayload,
       });
 
       this.notifyClient(this._client2, {
@@ -84,7 +84,7 @@ export class GameContext {
           target: updateResult.target,
           next: updateResult.nextPlayer === Player.Player1,
           self: player === Player.Player0,
-        },
+        } as MarkPayload,
       });
     };
   };

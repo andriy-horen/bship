@@ -4,4 +4,5 @@
 
 .ship-location {
   position: absolute;
+  z-index: 1;
 }

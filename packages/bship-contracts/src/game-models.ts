@@ -41,10 +41,11 @@ export enum Player {
 }
 
 export interface MarkPayload {
-  position: { y: number; x: number };
-  grid: Player;
-  status: MoveStatus;
-  next: Player;
+  coordinates: Coordinates;
+  value: MoveStatus;
+  target?: BattleshipCoord;
+  next: boolean;
+  self: boolean;
 }
 
 export interface Battleship {

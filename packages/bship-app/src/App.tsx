@@ -4,9 +4,10 @@ import {
   Coordinates,
   GameMessageType,
   GameResponseType,
+  MarkPayload,
   MoveStatus,
 } from 'bship-contracts';
-import { range } from 'lodash-es';
+import { noop, range } from 'lodash-es';
 import { useEffect, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -16,13 +17,16 @@ import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
   addOpponentShip,
+  selectCurrentGame,
   selectOpponentFleet,
   selectOpponentGrid,
   selectPlayerFleet,
   selectPlayerGrid,
   setOpponentSquares,
   setPlayerSquares,
+  setShipHitStatus,
   SetSquarePayload,
+  updateCurrentGame,
 } from './features/game/gameSlice';
 import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
@@ -32,6 +36,7 @@ function App() {
   const dispatch = useAppDispatch();
   const playerGrid = useAppSelector(selectPlayerGrid);
   const opponentGrid = useAppSelector(selectOpponentGrid);
+  const currentGame = useAppSelector(selectCurrentGame);
 
   const websocket = useRef<WebSocket | null>(null);
 
@@ -51,28 +56,13 @@ function App() {
         // TODO: optimize everything here
         if (!data) return;
         const message = JSON.parse(data);
-        if (message.event !== GameResponseType.Mark) return;
 
-        const action = message.data.self ? setPlayerSquares : setOpponentSquares;
-        const coordinates = message.data.coordinates;
-
-        switch (message.data.value) {
-          case MoveStatus.Miss:
-            dispatch(action({ squares: [{ value: GridSquare.Miss, coordinates }] }));
-            break;
-          case MoveStatus.Hit:
-            dispatch(action({ squares: [{ value: GridSquare.Hit, coordinates }] }));
-            markCorners(coordinates, action);
-            break;
-          case MoveStatus.Sunk:
-            markAround(message.data.target, action);
-            dispatch(action({ squares: [{ value: GridSquare.Hit, coordinates }] }));
-            if (!message.data.self) {
-              const model = toBattleshipModel(message.data.target);
-              model.hitSections = range(0, model.size);
-              dispatch(addOpponentShip({ battleship: model }));
-            }
-            break;
+        switch (message.event) {
+          case GameResponseType.Mark:
+            return handleMarkMessage(message.data);
+          case GameResponseType.GameStarted:
+            dispatch(updateCurrentGame({ gameId: message.data.gameId, started: true }));
+            return;
         }
       };
     };
@@ -85,6 +75,30 @@ function App() {
     // };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleMarkMessage = (data: MarkPayload) => {
+    const action = data.self ? setPlayerSquares : setOpponentSquares;
+    const coordinates = data.coordinates;
+
+    switch (data.value) {
+      case MoveStatus.Miss:
+        dispatch(action({ squares: [{ value: GridSquare.Miss, coordinates }] }));
+        break;
+      case MoveStatus.Hit:
+        hit(coordinates, data.self, action);
+        markCorners(coordinates, action);
+        break;
+      case MoveStatus.Sunk:
+        hit(coordinates, data.self, action);
+        markAround(data.target!, action);
+        if (!data.self) {
+          const model = toBattleshipModel(data.target!);
+          model.hitSections = range(0, model.size);
+          dispatch(addOpponentShip({ battleship: model }));
+        }
+        break;
+    }
+  };
 
   const markCorners = (
     coord: Coordinates,
@@ -106,6 +120,17 @@ function App() {
       value: GridSquare.Miss,
     }));
     dispatch(action({ squares }));
+  };
+
+  const hit = (
+    coordinates: Coordinates,
+    isSelf: boolean,
+    action: ActionCreatorWithPayload<SetSquarePayload, string>
+  ) => {
+    dispatch(action({ squares: [{ value: GridSquare.Hit, coordinates }] }));
+    if (isSelf) {
+      dispatch(setShipHitStatus({ coordinates }));
+    }
   };
 
   const handleSquareClick = (coordinates: Coordinates) => {
@@ -133,10 +158,9 @@ function App() {
     );
   };
 
-  return (
-    <div className="App">
-      <div>
-        <h3>Player's Grid</h3>
+  function getPlayerGrid() {
+    if (!currentGame.hasStarted) {
+      return (
         <div className="player-grid">
           <DndProvider backend={HTML5Backend}>
             <FleetGrid fleet={playerFleet} />
@@ -144,6 +168,17 @@ function App() {
           </DndProvider>
           <GridLayer grid={playerGrid} />
         </div>
+      );
+    }
+
+    return <Grid fleet={playerFleet} grid={playerGrid} onSquareClick={noop} />;
+  }
+
+  return (
+    <div className="App">
+      <div>
+        <h3>Player's Grid</h3>
+        {getPlayerGrid()}
       </div>
 
       <div>
