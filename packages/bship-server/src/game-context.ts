@@ -41,8 +41,8 @@ export class GameContext {
   }
 
   subscribe(): void {
-    this._client1.on('message', this.messageHandlerFactory(Player.Player0));
-    this._client2.on('message', this.messageHandlerFactory(Player.Player1));
+    this._client1.on('message', this.messageHandlerFactory(Player.P1));
+    this._client2.on('message', this.messageHandlerFactory(Player.P2));
   }
 
   private messageHandlerFactory = (player: Player) => {
@@ -59,20 +59,20 @@ export class GameContext {
         coordinates: data.coordinates,
       });
 
-      console.log(updateResult);
-
-      if (updateResult.invalidMove) {
+      if (!updateResult) {
         return;
       }
+
+      console.log(updateResult);
 
       this.notifyClient(this._client1, {
         event: GameResponseType.Mark,
         data: {
           coordinates: data.coordinates,
           value: updateResult.moveStatus,
-          target: updateResult.target,
-          next: updateResult.nextPlayer === Player.Player0,
-          self: player === Player.Player1,
+          target: updateResult.sunkShip,
+          next: updateResult.nextTurn === Player.P1,
+          self: player === Player.P2,
         } as MarkPayload,
       });
 
@@ -81,11 +81,27 @@ export class GameContext {
         data: {
           coordinates: data.coordinates,
           value: updateResult.moveStatus,
-          target: updateResult.target,
-          next: updateResult.nextPlayer === Player.Player1,
-          self: player === Player.Player0,
+          target: updateResult.sunkShip,
+          next: updateResult.nextTurn === Player.P2,
+          self: player === Player.P1,
         } as MarkPayload,
       });
+
+      if (updateResult.gameCompleted) {
+        this.notifyClient(this._client1, {
+          event: GameResponseType.GameCompleted,
+          data: {
+            won: this._gameStore.getGameResult(this._gameId).winner === Player.P1,
+          },
+        });
+
+        this.notifyClient(this._client2, {
+          event: GameResponseType.GameCompleted,
+          data: {
+            won: this._gameStore.getGameResult(this._gameId).winner === Player.P2,
+          },
+        });
+      }
     };
   };
 }

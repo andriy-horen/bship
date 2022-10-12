@@ -24,7 +24,6 @@ export enum GameMessageType {
 export enum MoveStatus {
   Hit = 'hit',
   Miss = 'miss',
-  Sunk = 'sunk',
 }
 
 export enum GameResponseType {
@@ -32,12 +31,13 @@ export enum GameResponseType {
   GameStarted = 'game_started',
   WaitForOpponent = 'wait_for_opponent',
   Mark = 'mark',
+  GameCompleted = 'game_completed',
   GameAborted = 'game_aborted',
 }
 
 export enum Player {
-  Player0 = 0,
-  Player1 = 1,
+  P1 = 0,
+  P2 = 1,
 }
 
 export interface MarkPayload {

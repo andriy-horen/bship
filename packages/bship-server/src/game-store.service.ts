@@ -22,7 +22,7 @@ export class GameStoreService {
     return gameId;
   }
 
-  updateGame(gameId: string, event: GameStateEvent): GameStateUpdate {
+  updateGame(gameId: string, event: GameStateEvent): GameStateUpdate | null {
     const gameState = this._games.get(gameId);
 
     if (!gameState) {
@@ -30,6 +30,16 @@ export class GameStoreService {
     }
 
     return gameState.update(event);
+  }
+
+  getGameResult(gameId: string): GameResult {
+    const gameState = this._games.get(gameId);
+
+    if (!gameState) {
+      throw new Error('game not found');
+    }
+
+    return gameState.gameResult;
   }
 }
 
@@ -40,49 +50,44 @@ export interface GameStateEvent {
 
 // TODO: there's possibly to much different concepts expressed here in the single model (refactor?)
 export interface GameStateUpdate {
-  nextPlayer: number;
+  event?: GameStateEvent;
+  nextTurn: Player;
   moveStatus: MoveStatus;
-  /**
-   * target is only present when after a move battleship was sunk, otherwise undefined
-   */
-  target?: BattleshipCoord;
-  invalidMove?: boolean;
+  gameCompleted: boolean;
+  sunkShip?: BattleshipCoord;
 }
 
-export const INVALID_MOVE: GameStateUpdate = {
-  nextPlayer: Player.Player0,
-  moveStatus: MoveStatus.Miss,
-  invalidMove: true,
-};
+type StringGameEvent = `p${number}:${number},${number}`;
 
-type StringGameEvent = `p${number}:${number},${number}` | 'init';
+export interface GameResult {
+  completed: boolean;
+  winner?: Player;
+}
 
 export class GameState {
-  private readonly _fleet1: readonly BattleshipCoord[] = [];
-  private readonly _fleet2: readonly BattleshipCoord[] = [];
+  private readonly _fleetStatus1: Map<BattleshipCoord, boolean>;
+  private readonly _fleetStatus2: Map<BattleshipCoord, boolean>;
 
-  private readonly _state = new Map<StringGameEvent, GameStateUpdate>([
-    [
-      'init',
-      {
-        nextPlayer: Player.Player0,
-        moveStatus: MoveStatus.Miss,
-      },
-    ],
-  ]);
+  private readonly _state = new Map<StringGameEvent, GameStateUpdate>();
+
+  private _gameResult: GameResult = { completed: false };
 
   constructor(fleet1: BattleshipCoord[], fleet2: BattleshipCoord[]) {
-    this._fleet1 = Object.freeze(fleet1);
-    this._fleet2 = Object.freeze(fleet2);
+    this._fleetStatus1 = new Map(fleet1.map((ship) => [ship, true]));
+    this._fleetStatus2 = new Map(fleet2.map((ship) => [ship, true]));
   }
 
-  update(event: GameStateEvent): GameStateUpdate {
+  update(event: GameStateEvent): GameStateUpdate | null {
+    if (this._gameResult.completed) {
+      return null;
+    }
+
     const key = gameStateKey(event.player, event.coordinates);
     /**
      * When move is repeated (duplicate) return invalid state
      */
     if (this._state.has(key)) {
-      return INVALID_MOVE;
+      return null;
     }
 
     /**
@@ -94,14 +99,14 @@ export class GameState {
       event.coordinates.x > 9 ||
       event.coordinates.y > 9
     ) {
-      return INVALID_MOVE;
+      return null;
     }
 
     /**
      * When update comes from player out of turn
      */
-    if (event.player !== this.lastUpdate!.nextPlayer) {
-      return INVALID_MOVE;
+    if (event.player !== (this.lastUpdate?.nextTurn ?? Player.P1)) {
+      return null;
     }
 
     const update = this.getUpdateResult(event);
@@ -116,28 +121,50 @@ export class GameState {
     return lastEntry?.[1];
   }
 
-  get isNewGame(): boolean {
-    return this._state.size === 1;
+  get gameResult(): GameResult {
+    return this._gameResult;
   }
 
-  getUpdateResult({ player, coordinates }: GameStateEvent): GameStateUpdate {
-    const targetFleet = player === 0 ? this._fleet2 : this._fleet1;
-    const target = targetFleet.find((ship) => isShipHit(ship, coordinates));
-    if (!target) {
+  private checkGameCompletion(): void {
+    const fleet1Destroyed = [...this._fleetStatus1.values()].every((alive) => !alive);
+    const fleet2Destroyed = [...this._fleetStatus2.values()].every((alive) => !alive);
+
+    if (!fleet1Destroyed && !fleet2Destroyed) {
+      return;
+    }
+
+    const winner = fleet1Destroyed ? Player.P2 : Player.P1;
+    this._gameResult = { completed: true, winner };
+  }
+
+  getUpdateResult(event: GameStateEvent): GameStateUpdate {
+    const { player, coordinates } = event;
+    const targetFleet = player === 0 ? this._fleetStatus2 : this._fleetStatus1;
+    const targetShip = Array.from(targetFleet.keys()).find((ship) => isShipHit(ship, coordinates));
+    if (!targetShip) {
       return {
-        nextPlayer: takeTurn(player),
+        event,
+        nextTurn: takeTurn(player),
         moveStatus: MoveStatus.Miss,
+        gameCompleted: this._gameResult.completed,
       };
     }
 
-    const isSunk = expandShip(target)
+    const isSunk = expandShip(targetShip)
       .filter((sectionCoord) => !isEqual(sectionCoord, coordinates))
       .every((sectionCoord) => this._state.get(gameStateKey(player, sectionCoord)));
 
+    if (isSunk) {
+      targetFleet.set(targetShip, false);
+      this.checkGameCompletion();
+    }
+
     return {
-      nextPlayer: player,
-      moveStatus: isSunk ? MoveStatus.Sunk : MoveStatus.Hit,
-      target: isSunk ? target : undefined,
+      event,
+      nextTurn: player,
+      moveStatus: MoveStatus.Hit,
+      gameCompleted: this._gameResult.completed,
+      sunkShip: isSunk ? targetShip : undefined,
     };
   }
 }
@@ -151,7 +178,7 @@ function isShipHit([head, tail]: BattleshipCoord, { x, y }: Coordinates): boolea
 }
 
 function takeTurn(current: Player): Player {
-  return current === Player.Player0 ? Player.Player1 : Player.Player0;
+  return current === Player.P1 ? Player.P2 : Player.P1;
 }
 
 function expandShip([head, tail]: BattleshipCoord): Coordinates[] {

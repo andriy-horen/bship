@@ -87,14 +87,11 @@ function App() {
       case MoveStatus.Hit:
         hit(coordinates, data.self, action);
         markCorners(coordinates, action);
-        break;
-      case MoveStatus.Sunk:
-        hit(coordinates, data.self, action);
-        markAround(data.target!, action);
-        if (!data.self) {
-          const model = toBattleshipModel(data.target!);
+        if (!data.self && data.target) {
+          const model = toBattleshipModel(data.target);
           model.hitSections = range(0, model.size);
           dispatch(addOpponentShip({ battleship: model }));
+          markAround(data.target, action);
         }
         break;
     }
