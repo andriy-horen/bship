@@ -1,7 +1,7 @@
 import { GameMessageType, GameResponseType, MarkPayload, Player } from 'bship-contracts';
 import { RawData, WebSocket } from 'ws';
 import { ClientPairingRequest } from './client-pairing.service';
-import { GameStoreService } from './game-store.service';
+import { flipPlayer, GameStoreService } from './game-store.service';
 
 export class GameContext {
   private readonly _client1: WebSocket;
@@ -23,21 +23,19 @@ export class GameContext {
     });
 
     // TODO: next player is hardcoded here and instead should be provided by game state obj
-    this.notifyClient(this._client1, {
+    this.notifyClients((recipient) => ({
       event: GameResponseType.GameStarted,
-      data: { gameId: this._gameId, next: true },
-    });
-
-    this.notifyClient(this._client2, {
-      event: GameResponseType.GameStarted,
-      data: { gameId: this._gameId, next: false },
-    });
+      data: { gameId: this._gameId, next: recipient === Player.P1 },
+    }));
 
     this.subscribe();
   }
 
-  notifyClient(client: WebSocket, message: { event: GameResponseType; data?: any }): void {
-    client.send(JSON.stringify(message));
+  notifyClients(
+    messageProvider: (player: Player) => { event: GameResponseType; data?: any }
+  ): void {
+    this._client1.send(JSON.stringify(messageProvider(Player.P1)));
+    this._client2.send(JSON.stringify(messageProvider(Player.P2)));
   }
 
   subscribe(): void {
@@ -65,42 +63,24 @@ export class GameContext {
 
       console.log(updateResult);
 
-      this.notifyClient(this._client1, {
+      this.notifyClients((recipient) => ({
         event: GameResponseType.Mark,
         data: {
           coordinates: data.coordinates,
           value: updateResult.moveStatus,
           target: updateResult.sunkShip,
-          next: updateResult.nextTurn === Player.P1,
-          self: player === Player.P2,
+          next: updateResult.nextTurn === recipient,
+          self: flipPlayer(updateResult.event.player) === recipient,
         } as MarkPayload,
-      });
-
-      this.notifyClient(this._client2, {
-        event: GameResponseType.Mark,
-        data: {
-          coordinates: data.coordinates,
-          value: updateResult.moveStatus,
-          target: updateResult.sunkShip,
-          next: updateResult.nextTurn === Player.P2,
-          self: player === Player.P1,
-        } as MarkPayload,
-      });
+      }));
 
       if (updateResult.gameCompleted) {
-        this.notifyClient(this._client1, {
+        this.notifyClients((recipient) => ({
           event: GameResponseType.GameCompleted,
           data: {
-            won: this._gameStore.getGameResult(this._gameId).winner === Player.P1,
+            won: this._gameStore.getGameResult(this._gameId).winner === recipient,
           },
-        });
-
-        this.notifyClient(this._client2, {
-          event: GameResponseType.GameCompleted,
-          data: {
-            won: this._gameStore.getGameResult(this._gameId).winner === Player.P2,
-          },
-        });
+        }));
       }
     };
   };

@@ -50,7 +50,7 @@ export interface GameStateEvent {
 
 // TODO: there's possibly to much different concepts expressed here in the single model (refactor?)
 export interface GameStateUpdate {
-  event?: GameStateEvent;
+  event: GameStateEvent;
   nextTurn: Player;
   moveStatus: MoveStatus;
   gameCompleted: boolean;
@@ -144,7 +144,7 @@ export class GameState {
     if (!targetShip) {
       return {
         event,
-        nextTurn: takeTurn(player),
+        nextTurn: flipPlayer(player),
         moveStatus: MoveStatus.Miss,
         gameCompleted: this._gameResult.completed,
       };
@@ -177,7 +177,7 @@ function isShipHit([head, tail]: BattleshipCoord, { x, y }: Coordinates): boolea
   return x >= head.x && x <= tail.x && y >= head.y && y <= tail.y;
 }
 
-function takeTurn(current: Player): Player {
+export function flipPlayer(current: Player): Player {
   return current === Player.P1 ? Player.P2 : Player.P1;
 }
 
