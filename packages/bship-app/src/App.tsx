@@ -1,3 +1,4 @@
+import { Button, Container, Header } from '@mantine/core';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import {
   BattleshipCoord,
@@ -172,18 +173,23 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <Container>
+      <Header height={60}>
+        <h3>bship.org</h3>
+      </Header>
+
       <div>
         <h3>Player's Grid</h3>
         {getPlayerGrid()}
       </div>
-
       <div>
         <h3>Opponent's Grid</h3>
         <Grid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
       </div>
-      <button onClick={startGame}>Play!</button>
-    </div>
+      <Button disabled={currentGame.hasStarted} onClick={startGame}>
+        Play!
+      </Button>
+    </Container>
   );
 }
 
