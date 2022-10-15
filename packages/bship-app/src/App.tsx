@@ -1,6 +1,5 @@
-import { Button, Container, Header } from '@mantine/core';
+import { Container, Header } from '@mantine/core';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { IconDeviceDesktop, IconShip } from '@tabler/icons';
 import {
   BattleshipCoord,
   Coordinates,
@@ -32,6 +31,7 @@ import {
 } from './features/game/gameSlice';
 import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
+import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
 import { getAround, getCorners, toBattleshipCoord, toBattleshipModel } from './utils';
 
 function App() {
@@ -190,16 +190,7 @@ function App() {
         </div>
 
         <div className="buttons-container">
-          <Button color="green" disabled={currentGame.hasStarted} onClick={startGame}>
-            <IconShip size={18}></IconShip>
-            {/* Waiting for opponent <Loader color="white" size="xs" /> */}
-            Play online
-          </Button>
-          <Button color="dark">
-            {/* Waiting for opponent <Loader color="white" size="xs" /> */}
-            <IconDeviceDesktop size={18}></IconDeviceDesktop>
-            Play computer
-          </Button>
+          <PlayButtonsContainer></PlayButtonsContainer>
         </div>
       </div>
     </Container>

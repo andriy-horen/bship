@@ -1,4 +1,5 @@
 import { MantineProvider } from '@mantine/core';
+import { NotificationsProvider } from '@mantine/notifications';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -14,7 +15,9 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <MantineProvider withGlobalStyles withNormalizeCSS>
-        <App />
+        <NotificationsProvider position="top-center">
+          <App />
+        </NotificationsProvider>
       </MantineProvider>
     </Provider>
   </React.StrictMode>
