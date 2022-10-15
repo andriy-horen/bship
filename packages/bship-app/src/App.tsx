@@ -1,5 +1,6 @@
 import { Button, Container, Header } from '@mantine/core';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import { IconDeviceDesktop, IconShip } from '@tabler/icons';
 import {
   BattleshipCoord,
   Coordinates,
@@ -178,17 +179,29 @@ function App() {
         <h3>bship.org</h3>
       </Header>
 
-      <div>
-        <h3>Player's Grid</h3>
-        {getPlayerGrid()}
+      <div className="grids-container">
+        <div className="grid-player">
+          <div>You</div>
+          {getPlayerGrid()}
+        </div>
+        <div className="grid-opponent">
+          <div>Opponent</div>
+          <Grid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
+        </div>
+
+        <div className="buttons-container">
+          <Button color="green" disabled={currentGame.hasStarted} onClick={startGame}>
+            <IconShip size={18}></IconShip>
+            {/* Waiting for opponent <Loader color="white" size="xs" /> */}
+            Play online
+          </Button>
+          <Button color="dark">
+            {/* Waiting for opponent <Loader color="white" size="xs" /> */}
+            <IconDeviceDesktop size={18}></IconDeviceDesktop>
+            Play computer
+          </Button>
+        </div>
       </div>
-      <div>
-        <h3>Opponent's Grid</h3>
-        <Grid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
-      </div>
-      <Button disabled={currentGame.hasStarted} onClick={startGame}>
-        Play!
-      </Button>
     </Container>
   );
 }
