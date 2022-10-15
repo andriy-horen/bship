@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { CommonModule } from './common.module';
@@ -12,6 +12,6 @@ import { GameModule } from './game.module';
     GameModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [Logger],
 })
 export class AppModule {}
