@@ -25,9 +25,15 @@ const TEST_FLEET: Battleship[] = [
   { size: 1, orientation: 'h', coordinates: { x: 8, y: 8 } },
 ];
 
+export enum CurrentGameStatus {
+  None = 'none',
+  WaitingForOpponent = 'waiting',
+  GameStarted = 'started',
+}
+
 export interface CurrentGame {
   gameId: string;
-  hasStarted: boolean;
+  status: CurrentGameStatus;
 }
 
 export interface GameState {
@@ -49,7 +55,7 @@ const initialState: GameState = {
   opponentFleet: [],
   currentGame: {
     gameId: '',
-    hasStarted: false,
+    status: CurrentGameStatus.None,
   },
 };
 
@@ -149,11 +155,11 @@ export const gameSlice = createSlice({
       state,
       action: PayloadAction<{
         gameId: string;
-        started: boolean;
+        status: CurrentGameStatus;
       }>
     ) {
       state.currentGame.gameId = action.payload.gameId;
-      state.currentGame.hasStarted = action.payload.started;
+      state.currentGame.status = action.payload.status;
     },
   },
 });

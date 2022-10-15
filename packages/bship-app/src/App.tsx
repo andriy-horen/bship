@@ -1,4 +1,5 @@
 import { Container, Header } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import {
   BattleshipCoord,
@@ -18,6 +19,7 @@ import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
   addOpponentShip,
+  CurrentGameStatus,
   selectCurrentGame,
   selectOpponentFleet,
   selectOpponentGrid,
@@ -62,8 +64,55 @@ function App() {
         switch (message.event) {
           case GameResponseType.Mark:
             return handleMarkMessage(message.data);
+          case GameResponseType.WaitForOpponent:
+            dispatch(
+              updateCurrentGame({ gameId: '', status: CurrentGameStatus.WaitingForOpponent })
+            );
+            return;
           case GameResponseType.GameStarted:
-            dispatch(updateCurrentGame({ gameId: message.data.gameId, started: true }));
+            dispatch(
+              updateCurrentGame({
+                gameId: message.data.gameId,
+                status: CurrentGameStatus.GameStarted,
+              })
+            );
+            showNotification(
+              message.data.next
+                ? {
+                    title: 'Game started',
+                    message: 'You go first. Good luck!',
+                    color: 'green',
+                  }
+                : {
+                    title: 'Game started',
+                    message: 'Opponent goes first. Good luck!',
+                    color: 'green',
+                  }
+            );
+            return;
+
+          case GameResponseType.GameCompleted:
+            dispatch(
+              updateCurrentGame({
+                gameId: '',
+                status: CurrentGameStatus.None,
+              })
+            );
+            showNotification(
+              message.data.won
+                ? {
+                    title: 'Game Over',
+                    message: 'You won! Congrats GG EZ.',
+                    color: 'green',
+                    autoClose: false,
+                  }
+                : {
+                    title: 'Game Over',
+                    message: 'You lost! Gonna cry?',
+                    color: 'orange',
+                    autoClose: false,
+                  }
+            );
             return;
         }
       };
@@ -158,7 +207,7 @@ function App() {
   };
 
   function getPlayerGrid() {
-    if (!currentGame.hasStarted) {
+    if (currentGame.status === CurrentGameStatus.None) {
       return (
         <div className="player-grid">
           <DndProvider backend={HTML5Backend}>
@@ -175,7 +224,7 @@ function App() {
 
   return (
     <Container>
-      <Header height={60}>
+      <Header height={40}>
         <h3>bship.org</h3>
       </Header>
 
@@ -190,7 +239,11 @@ function App() {
         </div>
 
         <div className="buttons-container">
-          <PlayButtonsContainer></PlayButtonsContainer>
+          <PlayButtonsContainer
+            gameStatus={currentGame.status}
+            onPlayOnlineClick={startGame}
+            onPlayComputerClick={noop}
+          ></PlayButtonsContainer>
         </div>
       </div>
     </Container>

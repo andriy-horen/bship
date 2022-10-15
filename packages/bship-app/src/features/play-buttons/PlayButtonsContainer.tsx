@@ -1,46 +1,32 @@
-import { showNotification } from '@mantine/notifications';
-import { IconDeviceDesktop, IconShip } from '@tabler/icons';
-import { useAppSelector } from '../../app/hooks';
-import { CurrentGame, selectCurrentGame } from '../game/gameSlice';
-import { PlayButton, PlayButtonState } from './PlayButton';
+import { IconShip } from '@tabler/icons';
+import { CurrentGameStatus } from '../game/gameSlice';
+import { PlayButton } from './PlayButton';
 
-export function PlayButtonsContainer() {
-  const currentGame = useAppSelector(selectCurrentGame);
+export interface PlayButtonsContainerProps {
+  gameStatus: CurrentGameStatus;
+  onPlayOnlineClick: () => void;
+  onPlayComputerClick: () => void;
+}
 
-  const playButtonClick = () => {
-    showNotification({
-      title: 'Game started',
-      message: 'You go first. Good luck!',
-      color: 'green',
-    });
-  };
-
-  const getButtonState = (game: CurrentGame): PlayButtonState => {
-    return 'none';
-  };
-
+export function PlayButtonsContainer({
+  gameStatus,
+  onPlayOnlineClick,
+  onPlayComputerClick,
+}: PlayButtonsContainerProps) {
   const iconStyle: React.CSSProperties = {
     marginRight: '8px',
   };
 
   return (
     <>
-      <PlayButton
-        color="green"
-        onPlayButtonClick={playButtonClick}
-        state={getButtonState(currentGame)}
-      >
+      <PlayButton color="green" onPlayButtonClick={onPlayOnlineClick} gameStatus={gameStatus}>
         <IconShip style={{ ...iconStyle, transform: 'scaleX(-1)' }} size={18}></IconShip>
         Play online
       </PlayButton>
-      <PlayButton
-        color="dark"
-        onPlayButtonClick={playButtonClick}
-        state={getButtonState(currentGame)}
-      >
+      {/* <PlayButton color="dark" onPlayButtonClick={onPlayComputerClick} gameStatus={gameStatus}>
         <IconDeviceDesktop style={iconStyle} size={18}></IconDeviceDesktop>
         Play computer
-      </PlayButton>
+      </PlayButton> */}
     </>
   );
 }

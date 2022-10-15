@@ -1,25 +1,28 @@
 import { Button, Loader, MantineColor } from '@mantine/core';
-
-export type PlayButtonState = 'none' | 'waiting' | 'started';
+import { CurrentGameStatus } from '../game/gameSlice';
 
 export interface PlayButtonProps {
-  state: PlayButtonState;
+  gameStatus: CurrentGameStatus;
   color: MantineColor;
   onPlayButtonClick: () => void;
   children: React.ReactNode;
 }
 
-export function PlayButton({ onPlayButtonClick, state, color, children }: PlayButtonProps) {
+export function PlayButton({ onPlayButtonClick, gameStatus, color, children }: PlayButtonProps) {
   const waiting = (
     <>
-      Waiting for opponent <Loader color="white" size="xs" />
+      <Loader color="white" size="xs" style={{ marginRight: '8px' }} /> Waiting for opponent
     </>
   );
 
-  const buttonContent = state === 'waiting' ? waiting : children;
+  const buttonContent = gameStatus === CurrentGameStatus.WaitingForOpponent ? waiting : children;
 
   return (
-    <Button color={color} hidden={state === 'started'} onClick={onPlayButtonClick}>
+    <Button
+      color={color}
+      hidden={gameStatus === CurrentGameStatus.GameStarted}
+      onClick={onPlayButtonClick}
+    >
       {buttonContent}
     </Button>
   );
