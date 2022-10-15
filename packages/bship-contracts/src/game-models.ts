@@ -15,7 +15,6 @@ export interface GameMessage {
 }
 
 export enum GameMessageType {
-  Connect = 'connect',
   CreateGame = 'create_game',
   Move = 'move',
   Acknowledge = 'ack',
@@ -27,7 +26,6 @@ export enum MoveStatus {
 }
 
 export enum GameResponseType {
-  Connected = 'connected',
   GameStarted = 'game_started',
   WaitForOpponent = 'wait_for_opponent',
   Mark = 'mark',

@@ -1,3 +1,4 @@
+import { Inject, Logger, LoggerService } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -8,11 +9,12 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { GameMessageType, GameResponseType } from 'bship-contracts';
+import { urlAlphabet } from 'nanoid';
 import { IncomingMessage } from 'node:http';
+import url from 'node:url';
 import { Server, WebSocket } from 'ws';
 import { ClientPairingService } from './client-pairing.service';
 import { GameContext } from './game-context';
-import { IdGeneratorService } from './id-generator.service';
 
 interface GameWebSocket extends WebSocket {
   connectionId: string | undefined;
@@ -30,17 +32,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private clientPairingService: ClientPairingService,
-    private idGenerator: IdGeneratorService
+    @Inject(Logger) private readonly logger: LoggerService
   ) {}
-
-  @SubscribeMessage(GameMessageType.Connect)
-  handleConnect(@ConnectedSocket() client: GameWebSocket) {
-    const connectionId = this.idGenerator.generate();
-    client.connectionId = connectionId;
-    this.clients.set(connectionId, client);
-
-    return { event: GameResponseType.Connected };
-  }
 
   @SubscribeMessage(GameMessageType.CreateGame)
   handleCreateGame(@MessageBody() data: any, @ConnectedSocket() client: GameWebSocket): any {
@@ -68,14 +61,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return data;
   }
 
-  handleConnection(client: GameWebSocket, req: IncomingMessage): any {
-    // TODO: implement re-connect logic when connection was lost
-    // const { query } = url.parse(req.url ?? '', true);
+  handleConnection(client: GameWebSocket, req: IncomingMessage): void {
+    const { query } = url.parse(req.url ?? '', true);
+    if (!query?.id) {
+      this.logger.error('Client opened connection with missing ID', GameGateway.name);
+      return client?.close();
+    }
+    if (!this.validWebsocketId(query.id)) {
+      this.logger.error('Client opened connection with incorrectly formated ID', GameGateway.name);
+      return client?.close();
+    }
+    if (this.clients.has(query.id)) {
+      this.logger.error(
+        'Client opened connection with already existing ID (duplicate)',
+        GameGateway.name
+      );
+      return client?.close();
+    }
+
+    client.connectionId = query.id;
+    this.clients.set(query.id, client);
+    this.logger.log(`New client connected: ${query.id}`, GameGateway.name);
   }
 
   handleDisconnect(client: GameWebSocket): void {
     if (client.connectionId) {
       this.clients.delete(client.connectionId);
     }
+  }
+
+  private validWebsocketId(websocketId: string | string[]): websocketId is string {
+    if (typeof websocketId !== 'string') {
+      return false;
+    }
+
+    return websocketId.length >= 21 && [...websocketId].every((ch) => urlAlphabet.includes(ch));
   }
 }

@@ -1,4 +1,5 @@
 import { Button, Loader, MantineColor } from '@mantine/core';
+import { noop } from 'lodash-es';
 import { CurrentGameStatus } from '../game/gameSlice';
 
 export interface PlayButtonProps {
@@ -16,12 +17,14 @@ export function PlayButton({ onPlayButtonClick, gameStatus, color, children }: P
   );
 
   const buttonContent = gameStatus === CurrentGameStatus.WaitingForOpponent ? waiting : children;
+  const clickHandler =
+    gameStatus === CurrentGameStatus.WaitingForOpponent ? noop : onPlayButtonClick;
 
   return (
     <Button
       color={color}
       hidden={gameStatus === CurrentGameStatus.GameStarted}
-      onClick={onPlayButtonClick}
+      onClick={clickHandler}
     >
       {buttonContent}
     </Button>

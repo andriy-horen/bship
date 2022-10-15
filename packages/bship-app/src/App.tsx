@@ -1,18 +1,18 @@
 import { Container, Header } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import {
   BattleshipCoord,
   Coordinates,
   GameMessageType,
-  GameResponseType,
   MarkPayload,
   MoveStatus,
 } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
-import { useEffect, useRef } from 'react';
+import { nanoid } from 'nanoid';
+import { useCallback, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import useWebSocket from 'react-use-websocket';
 import './App.css';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { CustomDragLayer } from './features/dnd/CustomDragLayer';
@@ -29,7 +29,6 @@ import {
   setPlayerSquares,
   setShipHitStatus,
   SetSquarePayload,
-  updateCurrentGame,
 } from './features/game/gameSlice';
 import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
@@ -42,90 +41,109 @@ function App() {
   const opponentGrid = useAppSelector(selectOpponentGrid);
   const currentGame = useAppSelector(selectCurrentGame);
 
-  const websocket = useRef<WebSocket | null>(null);
+  const websocketUrl = 'ws://192.168.0.100:3001/game';
+  const [websocketId] = useState(nanoid(21));
+  const [connect, setConnect] = useState(false);
 
-  useEffect(() => {
-    if (websocket.current) return;
-
-    const ws = new WebSocket(`ws://192.168.0.100:3001/game`);
-
-    ws.onopen = () => {
-      ws.send(
-        JSON.stringify({
-          event: GameMessageType.Connect,
-        })
-      );
-
-      ws.onmessage = ({ data }) => {
-        // TODO: optimize everything here
+  const { sendJsonMessage } = useWebSocket(
+    websocketUrl,
+    {
+      queryParams: { id: websocketId },
+      share: true,
+      onMessage({ data }) {
         if (!data) return;
+
         const message = JSON.parse(data);
+        console.log(message);
+      },
+    },
+    connect
+  );
 
-        switch (message.event) {
-          case GameResponseType.Mark:
-            return handleMarkMessage(message.data);
-          case GameResponseType.WaitForOpponent:
-            dispatch(
-              updateCurrentGame({ gameId: '', status: CurrentGameStatus.WaitingForOpponent })
-            );
-            return;
-          case GameResponseType.GameStarted:
-            dispatch(
-              updateCurrentGame({
-                gameId: message.data.gameId,
-                status: CurrentGameStatus.GameStarted,
-              })
-            );
-            showNotification(
-              message.data.next
-                ? {
-                    title: 'Game started',
-                    message: 'You go first. Good luck!',
-                    color: 'green',
-                  }
-                : {
-                    title: 'Game started',
-                    message: 'Opponent goes first. Good luck!',
-                    color: 'green',
-                  }
-            );
-            return;
+  // const websocket = useRef<WebSocket | null>(null);
 
-          case GameResponseType.GameCompleted:
-            dispatch(
-              updateCurrentGame({
-                gameId: '',
-                status: CurrentGameStatus.None,
-              })
-            );
-            showNotification(
-              message.data.won
-                ? {
-                    title: 'Game Over',
-                    message: 'You won! Congrats GG EZ.',
-                    color: 'green',
-                    autoClose: false,
-                  }
-                : {
-                    title: 'Game Over',
-                    message: 'You lost! Gonna cry?',
-                    color: 'orange',
-                    autoClose: false,
-                  }
-            );
-            return;
-        }
-      };
-    };
+  // useEffect(() => {
+  //   if (websocket.current) return;
 
-    websocket.current = ws;
+  //   const ws = new WebSocket('ws://192.168.0.100:3001/game');
 
-    // TODO: in general clean-up is needed but not in case of root-level component
-    // return () => {
-    //   ws.close();
-    // };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   ws.onopen = () => {
+  //     ws.send(
+  //       JSON.stringify({
+  //         event: GameMessageType.Connect,
+  //       })
+  //     );
+
+  //     ws.onmessage = ({ data }) => {
+  //       // TODO: optimize everything here
+  //       if (!data) return;
+  //       const message = JSON.parse(data);
+
+  //       switch (message.event) {
+  //         case GameResponseType.Mark:
+  //           return handleMarkMessage(message.data);
+  //         case GameResponseType.WaitForOpponent:
+  //           dispatch(
+  //             updateCurrentGame({ gameId: '', status: CurrentGameStatus.WaitingForOpponent })
+  //           );
+  //           return;
+  //         case GameResponseType.GameStarted:
+  //           dispatch(
+  //             updateCurrentGame({
+  //               gameId: message.data.gameId,
+  //               status: CurrentGameStatus.GameStarted,
+  //             })
+  //           );
+  //           showNotification(
+  //             message.data.next
+  //               ? {
+  //                   title: 'Game started',
+  //                   message: 'You go first. Good luck!',
+  //                   color: 'green',
+  //                 }
+  //               : {
+  //                   title: 'Game started',
+  //                   message: 'Opponent goes first. Good luck!',
+  //                   color: 'green',
+  //                 }
+  //           );
+  //           return;
+
+  //         case GameResponseType.GameCompleted:
+  //           dispatch(
+  //             updateCurrentGame({
+  //               gameId: '',
+  //               status: CurrentGameStatus.None,
+  //             })
+  //           );
+  //           showNotification(
+  //             message.data.won
+  //               ? {
+  //                   title: 'Game Over',
+  //                   message: 'You won! Congrats GG EZ.',
+  //                   color: 'green',
+  //                   autoClose: false,
+  //                 }
+  //               : {
+  //                   title: 'Game Over',
+  //                   message: 'You lost! Gonna cry?',
+  //                   color: 'orange',
+  //                   autoClose: false,
+  //                 }
+  //           );
+  //           return;
+  //       }
+  //     };
+  //   };
+
+  //   websocket.current = ws;
+
+  //   // TODO: in general clean-up is needed but not in case of root-level component
+  //   // return () => {
+  //   //   ws.close();
+  //   // };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const handleMarkMessage = (data: MarkPayload) => {
     const action = data.self ? setPlayerSquares : setOpponentSquares;
@@ -182,29 +200,28 @@ function App() {
   };
 
   const handleSquareClick = (coordinates: Coordinates) => {
-    websocket.current?.send(
-      JSON.stringify({
-        event: GameMessageType.Move,
-        data: {
-          coordinates,
-        },
-      })
-    );
+    // websocket.current?.send(
+    //   JSON.stringify({
+    //     event: GameMessageType.Move,
+    //     data: {
+    //       coordinates,
+    //     },
+    //   })
+    // );
   };
 
   const playerFleet = useAppSelector(selectPlayerFleet);
   const opponentFleet = useAppSelector(selectOpponentFleet);
 
-  const startGame = () => {
-    websocket?.current?.send(
-      JSON.stringify({
-        event: GameMessageType.CreateGame,
-        data: {
-          fleet: playerFleet.map((ship) => toBattleshipCoord(ship)),
-        },
-      })
-    );
-  };
+  const startGame = useCallback(() => {
+    setConnect(true);
+    sendJsonMessage({
+      event: GameMessageType.CreateGame,
+      data: {
+        fleet: playerFleet.map((ship) => toBattleshipCoord(ship)),
+      },
+    } as any);
+  }, []);
 
   function getPlayerGrid() {
     if (currentGame.status === CurrentGameStatus.None) {
