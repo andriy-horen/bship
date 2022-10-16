@@ -1,34 +1,31 @@
-import { Battleship as BattleshipModel, Coordinates, Orientation } from 'bship-contracts';
+import { Battleship as BattleshipModel } from 'bship-contracts';
 import classNames from 'classnames';
 import { range } from 'lodash-es';
 import './Battleship.css';
 
 export interface BattleshipProps {
   model: BattleshipModel;
-  onClick?: (coordinates: Coordinates, orientation: Orientation) => void;
+  onClick?: (model: BattleshipModel) => void;
 }
 
-export function Battleship({
-  model: { size, orientation, coordinates, hitSections = [] },
-  onClick,
-}: BattleshipProps) {
+export function Battleship({ model, onClick }: BattleshipProps) {
   return (
     <div
       className={classNames({
         battleship: true,
-        vertical: orientation === 'v',
-        horizontal: orientation === 'h',
+        vertical: model.orientation === 'v',
+        horizontal: model.orientation === 'h',
       })}
-      onClick={() => onClick?.(coordinates, orientation)}
+      onClick={() => onClick?.(model)}
     >
-      {range(size).map((index) => (
+      {range(model.size).map((index) => (
         <div
           key={index}
           className={classNames({
             'battleship-section': true,
             head: index === 0,
-            tail: index === size - 1,
-            hit: hitSections.includes(index),
+            tail: index === model.size - 1,
+            hit: model.hitSections?.includes(index),
           })}
         >
           <div className="peg"></div>

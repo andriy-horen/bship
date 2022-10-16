@@ -102,3 +102,20 @@ export function getBoxCoordinates([head, tail]: BattleshipCoord): Coordinates[] 
 
   return coords;
 }
+
+export function shipsIntersect(
+  [head1, tail1]: BattleshipCoord,
+  [head2, tail2]: BattleshipCoord
+): boolean {
+  const intersectX = head2.x <= tail1.x && tail2.x >= head1.x;
+  const intersectY = head2.y <= tail1.y && tail2.y >= head1.y;
+
+  return intersectX && intersectY;
+}
+
+export function getShipBox([head, tail]: BattleshipCoord): BattleshipCoord {
+  return [
+    { x: head.x - 1, y: head.y - 1 },
+    { x: tail.x + 1, y: tail.y + 1 },
+  ];
+}

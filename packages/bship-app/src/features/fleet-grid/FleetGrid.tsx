@@ -1,10 +1,17 @@
-import { Battleship as BattleshipModel, Coordinates } from 'bship-contracts';
+import { Battleship as BattleshipModel, BattleshipCoord, Coordinates } from 'bship-contracts';
 import { useDrop } from 'react-dnd';
+import { useAppSelector } from '../../app/hooks';
 import { store } from '../../app/store';
+import { isEqual } from '../../coordinates';
+import { getShipBox, isValidCoordinate, shipsIntersect, toBattleshipCoord } from '../../utils';
 import { DraggableBattleship } from '../battleship/DraggableBattleship';
 import { ItemTypes } from '../dnd/itemTypes';
 import { snapToGrid } from '../dnd/snap';
-import { toggleShipOrientation, updateShipPosition } from '../game/gameEventSlice';
+import {
+  selectPlayerFleet,
+  toggleShipOrientation,
+  updateShipPosition,
+} from '../game/gameEventSlice';
 import './FleetGrid.css';
 
 export interface FleetGridProps {
@@ -12,27 +19,61 @@ export interface FleetGridProps {
 }
 
 export function FleetGrid({ fleet }: FleetGridProps) {
-  const [, drop] = useDrop(() => ({
-    accept: ItemTypes.Battleship,
-    drop(item: BattleshipModel, monitor) {
-      const delta = monitor.getDifferenceFromInitialOffset() as {
-        x: number;
-        y: number;
-      };
+  const getDropCoordinates = (current: Coordinates, delta: Coordinates): Coordinates => {
+    const [x, y] = snapToGrid([delta.x, delta.y], 25);
+    return { x: current.x + x / 25, y: current.y + y / 25 };
+  };
 
-      const [x, y] = snapToGrid([delta.x, delta.y], 25);
+  const validateNewPosition = (newShip: BattleshipCoord, current: Coordinates) => {
+    if (!newShip.every((coord) => isValidCoordinate(coord))) {
+      return false;
+    }
+    if (
+      playerFleet.some(
+        (ship) =>
+          !isEqual(ship.coordinates, current) &&
+          shipsIntersect(getShipBox(toBattleshipCoord(ship)), newShip)
+      )
+    ) {
+      return false;
+    }
+    return true;
+  };
 
-      store.dispatch(
-        updateShipPosition({
-          currentCoord: item.coordinates,
-          newCoord: { x: item.coordinates.x + x / 25, y: item.coordinates.y + y / 25 },
-        })
-      );
-    },
-  }));
+  const playerFleet = useAppSelector(selectPlayerFleet);
 
-  const toggleOrientation = (coordinates: Coordinates) => {
-    store.dispatch(toggleShipOrientation(coordinates));
+  const [, drop] = useDrop(
+    () => ({
+      accept: ItemTypes.Battleship,
+      drop(item: BattleshipModel, monitor) {
+        const delta = monitor.getDifferenceFromInitialOffset() as { x: number; y: number };
+
+        store.dispatch(
+          updateShipPosition({
+            currentCoord: item.coordinates,
+            newCoord: getDropCoordinates(item.coordinates, delta),
+          })
+        );
+      },
+      canDrop(item, monitor) {
+        const delta = monitor.getDifferenceFromInitialOffset() as { x: number; y: number };
+        const newCoord = getDropCoordinates(item.coordinates, delta);
+        const dropShip = toBattleshipCoord({ ...item, coordinates: newCoord });
+
+        return validateNewPosition(dropShip, item.coordinates);
+      },
+    }),
+    [playerFleet]
+  );
+
+  const toggleOrientation = (model: BattleshipModel) => {
+    const updated = {
+      ...model,
+      orientation: model.orientation === 'h' ? 'v' : 'h',
+    } as BattleshipModel;
+    if (validateNewPosition(toBattleshipCoord(updated), model.coordinates)) {
+      store.dispatch(toggleShipOrientation(model.coordinates));
+    }
   };
 
   return (
