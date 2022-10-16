@@ -61,6 +61,9 @@ export const gameEventSlice = createSlice({
       state.gameId = '';
       state.moves = [];
       state.status = GameStatus.None;
+      state.playerFleet.forEach((ship) => {
+        ship.hitSections = [];
+      });
     },
     // TODO: drop this hacky implementation
     hitShip: (state, { payload }: PayloadAction<Coordinates>) => {
