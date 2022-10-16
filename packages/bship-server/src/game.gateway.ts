@@ -87,6 +87,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: GameWebSocket): void {
     if (client.connectionId) {
       this.clients.delete(client.connectionId);
+      const game = this.games.find((g) => g.clients.includes(client));
+      game?.abortGame();
     }
   }
 

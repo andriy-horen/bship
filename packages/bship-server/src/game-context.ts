@@ -84,4 +84,14 @@ export class GameContext {
       }
     };
   };
+
+  get clients(): [WebSocket, WebSocket] {
+    return [this._client1, this._client2];
+  }
+
+  abortGame(): void {
+    this.notifyClients(() => ({
+      event: GameResponseType.GameAborted,
+    }));
+  }
 }
