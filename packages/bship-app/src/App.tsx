@@ -1,9 +1,11 @@
 import { Container, Header } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import {
   BattleshipCoord,
   Coordinates,
   GameMessageType,
+  GameResponseType,
   MarkPayload,
   MoveStatus,
 } from 'bship-contracts';
@@ -29,6 +31,7 @@ import {
   setPlayerSquares,
   setShipHitStatus,
   SetSquarePayload,
+  updateCurrentGame,
 } from './features/game/gameSlice';
 import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
@@ -54,96 +57,66 @@ function App() {
         if (!data) return;
 
         const message = JSON.parse(data);
-        console.log(message);
+        switch (message.event) {
+          case GameResponseType.Mark:
+            return handleMarkMessage(message.data);
+          case GameResponseType.WaitForOpponent:
+            dispatch(
+              updateCurrentGame({ gameId: '', status: CurrentGameStatus.WaitingForOpponent })
+            );
+            return;
+          case GameResponseType.GameStarted:
+            dispatch(
+              updateCurrentGame({
+                gameId: message.data.gameId,
+                status: CurrentGameStatus.GameStarted,
+              })
+            );
+            showNotification(
+              message.data.next
+                ? {
+                    title: 'Game started',
+                    message: 'You go first. Good luck!',
+                    color: 'green',
+                  }
+                : {
+                    title: 'Game started',
+                    message: 'Opponent goes first. Good luck!',
+                    color: 'green',
+                  }
+            );
+            return;
+
+          case GameResponseType.GameCompleted:
+            dispatch(
+              updateCurrentGame({
+                gameId: '',
+                status: CurrentGameStatus.None,
+              })
+            );
+            showNotification(
+              message.data.won
+                ? {
+                    title: 'Game Over',
+                    message: 'You won! Congrats GG EZ.',
+                    color: 'green',
+                    autoClose: false,
+                  }
+                : {
+                    title: 'Game Over',
+                    message: 'You lost! Gonna cry?',
+                    color: 'orange',
+                    autoClose: false,
+                  }
+            );
+            return;
+        }
       },
+      onOpen() {},
+      onClose() {},
     },
     connect
   );
-
-  // const websocket = useRef<WebSocket | null>(null);
-
-  // useEffect(() => {
-  //   if (websocket.current) return;
-
-  //   const ws = new WebSocket('ws://192.168.0.100:3001/game');
-
-  //   ws.onopen = () => {
-  //     ws.send(
-  //       JSON.stringify({
-  //         event: GameMessageType.Connect,
-  //       })
-  //     );
-
-  //     ws.onmessage = ({ data }) => {
-  //       // TODO: optimize everything here
-  //       if (!data) return;
-  //       const message = JSON.parse(data);
-
-  //       switch (message.event) {
-  //         case GameResponseType.Mark:
-  //           return handleMarkMessage(message.data);
-  //         case GameResponseType.WaitForOpponent:
-  //           dispatch(
-  //             updateCurrentGame({ gameId: '', status: CurrentGameStatus.WaitingForOpponent })
-  //           );
-  //           return;
-  //         case GameResponseType.GameStarted:
-  //           dispatch(
-  //             updateCurrentGame({
-  //               gameId: message.data.gameId,
-  //               status: CurrentGameStatus.GameStarted,
-  //             })
-  //           );
-  //           showNotification(
-  //             message.data.next
-  //               ? {
-  //                   title: 'Game started',
-  //                   message: 'You go first. Good luck!',
-  //                   color: 'green',
-  //                 }
-  //               : {
-  //                   title: 'Game started',
-  //                   message: 'Opponent goes first. Good luck!',
-  //                   color: 'green',
-  //                 }
-  //           );
-  //           return;
-
-  //         case GameResponseType.GameCompleted:
-  //           dispatch(
-  //             updateCurrentGame({
-  //               gameId: '',
-  //               status: CurrentGameStatus.None,
-  //             })
-  //           );
-  //           showNotification(
-  //             message.data.won
-  //               ? {
-  //                   title: 'Game Over',
-  //                   message: 'You won! Congrats GG EZ.',
-  //                   color: 'green',
-  //                   autoClose: false,
-  //                 }
-  //               : {
-  //                   title: 'Game Over',
-  //                   message: 'You lost! Gonna cry?',
-  //                   color: 'orange',
-  //                   autoClose: false,
-  //                 }
-  //           );
-  //           return;
-  //       }
-  //     };
-  //   };
-
-  //   websocket.current = ws;
-
-  //   // TODO: in general clean-up is needed but not in case of root-level component
-  //   // return () => {
-  //   //   ws.close();
-  //   // };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   const handleMarkMessage = (data: MarkPayload) => {
     const action = data.self ? setPlayerSquares : setOpponentSquares;
@@ -199,16 +172,14 @@ function App() {
     }
   };
 
-  const handleSquareClick = (coordinates: Coordinates) => {
-    // websocket.current?.send(
-    //   JSON.stringify({
-    //     event: GameMessageType.Move,
-    //     data: {
-    //       coordinates,
-    //     },
-    //   })
-    // );
-  };
+  const handleSquareClick = useCallback((coordinates: Coordinates) => {
+    sendJsonMessage({
+      event: GameMessageType.Move,
+      data: {
+        coordinates,
+      },
+    } as any);
+  }, []);
 
   const playerFleet = useAppSelector(selectPlayerFleet);
   const opponentFleet = useAppSelector(selectOpponentFleet);
