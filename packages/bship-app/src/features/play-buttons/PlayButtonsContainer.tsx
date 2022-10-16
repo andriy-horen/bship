@@ -1,9 +1,9 @@
 import { IconShip } from '@tabler/icons';
-import { CurrentGameStatus } from '../game/gameSlice';
+import { GameStatus } from '../game/gameEventSlice';
 import { PlayButton } from './PlayButton';
 
 export interface PlayButtonsContainerProps {
-  gameStatus: CurrentGameStatus;
+  gameStatus: GameStatus;
   onPlayOnlineClick: () => void;
   onPlayComputerClick: () => void;
 }

@@ -1,15 +1,7 @@
 import { Container, Header } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import {
-  BattleshipCoord,
-  Coordinates,
-  GameMessageType,
-  GameResponseType,
-  MarkPayload,
-  MoveStatus,
-} from 'bship-contracts';
-import { noop, range } from 'lodash-es';
+import { Coordinates, GameMessageType, GameResponseType } from 'bship-contracts';
+import { noop } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useCallback, useState } from 'react';
 import { DndProvider } from 'react-dnd';
@@ -20,29 +12,29 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
-  addOpponentShip,
-  CurrentGameStatus,
-  selectCurrentGame,
+  addMoveUpdateFleet,
+  gameReset,
+  gameStarted,
+  GameStatus,
+  selectGameStatus,
   selectOpponentFleet,
   selectOpponentGrid,
   selectPlayerFleet,
   selectPlayerGrid,
-  setOpponentSquares,
-  setPlayerSquares,
-  setShipHitStatus,
-  SetSquarePayload,
-  updateCurrentGame,
-} from './features/game/gameSlice';
-import { GridLayer, GridSquare } from './features/grid-layer/GridLayer';
+  waitingForOpponent,
+} from './features/game/gameEventSlice';
+import { GridLayer } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
 import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
-import { getAround, getCorners, toBattleshipCoord, toBattleshipModel } from './utils';
+import { toBattleshipCoord } from './utils';
 
 function App() {
   const dispatch = useAppDispatch();
   const playerGrid = useAppSelector(selectPlayerGrid);
   const opponentGrid = useAppSelector(selectOpponentGrid);
-  const currentGame = useAppSelector(selectCurrentGame);
+  const playerFleet = useAppSelector(selectPlayerFleet);
+  const opponentFleet = useAppSelector(selectOpponentFleet);
+  const gameStatus = useAppSelector(selectGameStatus);
 
   const websocketUrl = 'ws://192.168.0.100:3001/game';
   const [websocketId] = useState(nanoid(21));
@@ -59,19 +51,13 @@ function App() {
         const message = JSON.parse(data);
         switch (message.event) {
           case GameResponseType.Mark:
-            return handleMarkMessage(message.data);
+            dispatch(addMoveUpdateFleet(message.data));
+            return;
           case GameResponseType.WaitForOpponent:
-            dispatch(
-              updateCurrentGame({ gameId: '', status: CurrentGameStatus.WaitingForOpponent })
-            );
+            dispatch(waitingForOpponent());
             return;
           case GameResponseType.GameStarted:
-            dispatch(
-              updateCurrentGame({
-                gameId: message.data.gameId,
-                status: CurrentGameStatus.GameStarted,
-              })
-            );
+            dispatch(gameStarted(message.data.gameId));
             showNotification(
               message.data.next
                 ? {
@@ -88,12 +74,7 @@ function App() {
             return;
 
           case GameResponseType.GameCompleted:
-            dispatch(
-              updateCurrentGame({
-                gameId: '',
-                status: CurrentGameStatus.None,
-              })
-            );
+            dispatch(gameReset());
             showNotification(
               message.data.won
                 ? {
@@ -110,6 +91,14 @@ function App() {
                   }
             );
             return;
+          case GameResponseType.GameAborted:
+            dispatch(gameReset());
+            showNotification({
+              title: 'Game Aborted',
+              message: 'Just start a new one, duh',
+              color: 'red',
+            });
+            return;
         }
       },
       onOpen() {},
@@ -117,60 +106,6 @@ function App() {
     },
     connect
   );
-
-  const handleMarkMessage = (data: MarkPayload) => {
-    const action = data.self ? setPlayerSquares : setOpponentSquares;
-    const coordinates = data.coordinates;
-
-    switch (data.value) {
-      case MoveStatus.Miss:
-        dispatch(action({ squares: [{ value: GridSquare.Miss, coordinates }] }));
-        break;
-      case MoveStatus.Hit:
-        hit(coordinates, data.self, action);
-        markCorners(coordinates, action);
-        if (!data.self && data.target) {
-          const model = toBattleshipModel(data.target);
-          model.hitSections = range(0, model.size);
-          dispatch(addOpponentShip({ battleship: model }));
-          markAround(data.target, action);
-        }
-        break;
-    }
-  };
-
-  const markCorners = (
-    coord: Coordinates,
-    action: ActionCreatorWithPayload<SetSquarePayload, string>
-  ) => {
-    const squares = getCorners(coord).map((coord) => ({
-      coordinates: coord,
-      value: GridSquare.Miss,
-    }));
-    dispatch(action({ squares }));
-  };
-
-  const markAround = (
-    ship: BattleshipCoord,
-    action: ActionCreatorWithPayload<SetSquarePayload, string>
-  ) => {
-    const squares = getAround(ship).map((coord) => ({
-      coordinates: coord,
-      value: GridSquare.Miss,
-    }));
-    dispatch(action({ squares }));
-  };
-
-  const hit = (
-    coordinates: Coordinates,
-    isSelf: boolean,
-    action: ActionCreatorWithPayload<SetSquarePayload, string>
-  ) => {
-    dispatch(action({ squares: [{ value: GridSquare.Hit, coordinates }] }));
-    if (isSelf) {
-      dispatch(setShipHitStatus({ coordinates }));
-    }
-  };
 
   const handleSquareClick = useCallback((coordinates: Coordinates) => {
     sendJsonMessage({
@@ -180,9 +115,6 @@ function App() {
       },
     } as any);
   }, []);
-
-  const playerFleet = useAppSelector(selectPlayerFleet);
-  const opponentFleet = useAppSelector(selectOpponentFleet);
 
   const startGame = useCallback(() => {
     setConnect(true);
@@ -195,7 +127,7 @@ function App() {
   }, []);
 
   function getPlayerGrid() {
-    if (currentGame.status === CurrentGameStatus.None) {
+    if (gameStatus === GameStatus.None) {
       return (
         <div className="player-grid">
           <DndProvider backend={HTML5Backend}>
@@ -228,7 +160,7 @@ function App() {
 
         <div className="buttons-container">
           <PlayButtonsContainer
-            gameStatus={currentGame.status}
+            gameStatus={gameStatus}
             onPlayOnlineClick={startGame}
             onPlayComputerClick={noop}
           ></PlayButtonsContainer>

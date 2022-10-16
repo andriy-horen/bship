@@ -6,6 +6,7 @@ import {
   GRID_UPPER_BOUND,
   Orientation,
 } from 'bship-contracts';
+import { range } from 'lodash-es';
 
 export function toBattleshipCoord(ship: Battleship): BattleshipCoord {
   const x = ship.coordinates.x + (ship.orientation === 'h' ? ship.size - 1 : 0);
@@ -14,15 +15,26 @@ export function toBattleshipCoord(ship: Battleship): BattleshipCoord {
   return [ship.coordinates, { x, y }];
 }
 
-export function toBattleshipModel(battleshipCoord: BattleshipCoord): Battleship {
+/**
+ * Converts coordinates-based model to point-size-orientation model
+ * @param battleshipCoord coordinates-based ship model
+ * @param hit either array of hit sections or boolean indicating ship sunk
+ * @returns Battleship Model
+ */
+export function toBattleshipModel(
+  battleshipCoord: BattleshipCoord,
+  hit?: number[] | boolean
+): Battleship {
   const [head, tail] = battleshipCoord;
   const orientation: Orientation = head.y === tail.y ? 'h' : 'v';
   const size = orientation === 'h' ? tail.x - head.x + 1 : tail.y - head.y + 1;
+  const hitSections = typeof hit === 'boolean' ? range(size) : hit;
 
   return {
     coordinates: battleshipCoord[0],
     orientation,
     size,
+    hitSections,
   };
 }
 
@@ -44,8 +56,11 @@ export function isValidCoordinate({ x, y }: Coordinates): boolean {
   );
 }
 
-// TODO: better naming
-export function getCorners({ x, y }: Coordinates): Coordinates[] {
+export function isShipHit([head, tail]: BattleshipCoord, { x, y }: Coordinates): boolean {
+  return x >= head.x && x <= tail.x && y >= head.y && y <= tail.y;
+}
+
+export function getCornerCoordinates({ x, y }: Coordinates): Coordinates[] {
   return [
     { x: x - 1, y: y - 1 },
     { x: x + 1, y: y - 1 },
@@ -54,8 +69,7 @@ export function getCorners({ x, y }: Coordinates): Coordinates[] {
   ].filter((coord) => isValidCoordinate(coord));
 }
 
-// TODO: better naming
-export function getAround([head, tail]: BattleshipCoord): Coordinates[] {
+export function getBoxCoordinates([head, tail]: BattleshipCoord): Coordinates[] {
   const coords: Coordinates[] = [];
 
   /**
