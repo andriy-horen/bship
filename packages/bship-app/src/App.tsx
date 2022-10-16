@@ -3,7 +3,7 @@ import { showNotification } from '@mantine/notifications';
 import { Coordinates, GameMessageType, GameResponseType } from 'bship-contracts';
 import { noop } from 'lodash-es';
 import { nanoid } from 'nanoid';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import useWebSocket from 'react-use-websocket';
@@ -107,16 +107,16 @@ function App() {
     connect
   );
 
-  const handleSquareClick = useCallback((coordinates: Coordinates) => {
+  const handleSquareClick = (coordinates: Coordinates) => {
     sendJsonMessage({
       event: GameMessageType.Move,
       data: {
         coordinates,
       },
     } as any);
-  }, []);
+  };
 
-  const startGame = useCallback(() => {
+  const startGame = () => {
     setConnect(true);
     sendJsonMessage({
       event: GameMessageType.CreateGame,
@@ -124,7 +124,7 @@ function App() {
         fleet: playerFleet.map((ship) => toBattleshipCoord(ship)),
       },
     } as any);
-  }, []);
+  };
 
   function getPlayerGrid() {
     if (gameStatus === GameStatus.None) {

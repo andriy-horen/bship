@@ -80,6 +80,27 @@ export const gameEventSlice = createSlice({
       const sections = state.playerFleet[shipIndex].hitSections ?? [];
       state.playerFleet[shipIndex].hitSections = [...sections, sectionIndex];
     },
+    updateShipPosition: (
+      state,
+      {
+        payload: { currentCoord, newCoord },
+      }: PayloadAction<{ currentCoord: Coordinates; newCoord: Coordinates }>
+    ) => {
+      const ship = state.playerFleet.find(
+        ({ coordinates: { x, y } }) => x === currentCoord.x && y === currentCoord.y
+      );
+
+      if (!ship) return;
+      ship.coordinates = newCoord;
+    },
+    toggleShipOrientation: (state, { payload }: PayloadAction<Coordinates>) => {
+      const ship = state.playerFleet.find(
+        ({ coordinates: { x, y } }) => x === payload.x && y === payload.y
+      );
+
+      if (!ship) return;
+      ship.orientation = ship.orientation === 'v' ? 'h' : 'v';
+    },
   },
 });
 
@@ -107,7 +128,13 @@ function convertMoveStatus(status: MoveStatus): GridSquare {
   }
 }
 
-export const { waitingForOpponent, gameStarted, gameReset } = gameEventSlice.actions;
+export const {
+  waitingForOpponent,
+  gameStarted,
+  gameReset,
+  updateShipPosition,
+  toggleShipOrientation,
+} = gameEventSlice.actions;
 
 export const gridSelector = (moves: MarkPayload[]) => {
   return moves.reduce((grid, { coordinates, value, target }) => {

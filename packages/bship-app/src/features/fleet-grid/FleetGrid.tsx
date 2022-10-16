@@ -1,11 +1,10 @@
-import { Battleship as BattleshipModel, Coordinates, Orientation } from 'bship-contracts';
+import { Battleship as BattleshipModel, Coordinates } from 'bship-contracts';
 import { useDrop } from 'react-dnd';
 import { store } from '../../app/store';
 import { DraggableBattleship } from '../battleship/DraggableBattleship';
-import { BattleshipDrag } from '../dnd/battleshipDrag';
 import { ItemTypes } from '../dnd/itemTypes';
 import { snapToGrid } from '../dnd/snap';
-import { setShipOrientation, setShipPosition } from '../game/gameSlice';
+import { toggleShipOrientation, updateShipPosition } from '../game/gameEventSlice';
 import './FleetGrid.css';
 
 export interface FleetGridProps {
@@ -15,7 +14,7 @@ export interface FleetGridProps {
 export function FleetGrid({ fleet }: FleetGridProps) {
   const [, drop] = useDrop(() => ({
     accept: ItemTypes.Battleship,
-    drop(item: BattleshipDrag, monitor) {
+    drop(item: BattleshipModel, monitor) {
       const delta = monitor.getDifferenceFromInitialOffset() as {
         x: number;
         y: number;
@@ -24,21 +23,16 @@ export function FleetGrid({ fleet }: FleetGridProps) {
       const [x, y] = snapToGrid([delta.x, delta.y], 25);
 
       store.dispatch(
-        setShipPosition({
-          currentPosition: item.coordinates,
-          newPosition: { x: item.coordinates.x + x / 25, y: item.coordinates.y + y / 25 },
+        updateShipPosition({
+          currentCoord: item.coordinates,
+          newCoord: { x: item.coordinates.x + x / 25, y: item.coordinates.y + y / 25 },
         })
       );
     },
   }));
 
-  const changeOrientation = (coordinates: Coordinates, orientation: Orientation) => {
-    store.dispatch(
-      setShipOrientation({
-        coordinates,
-        orientation: orientation === 'v' ? 'h' : 'v',
-      })
-    );
+  const toggleOrientation = (coordinates: Coordinates) => {
+    store.dispatch(toggleShipOrientation(coordinates));
   };
 
   return (
@@ -52,7 +46,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
             left: `${ship.coordinates.x * 24 + ship.coordinates.x}px`,
           }}
         >
-          <DraggableBattleship model={ship} onClick={changeOrientation}></DraggableBattleship>
+          <DraggableBattleship model={ship} onClick={toggleOrientation}></DraggableBattleship>
         </div>
       ))}
     </div>

@@ -3,8 +3,8 @@ import type { XYCoord } from 'react-dnd';
 import { useDragLayer } from 'react-dnd';
 import { ItemTypes } from './itemTypes';
 
+import { Battleship as BattleshipModel } from 'bship-contracts';
 import { Battleship } from '../battleship/Battleship';
-import { BattleshipDrag } from './battleshipDrag';
 import { snapToGrid } from './snap';
 
 const layerStyles: CSSProperties = {
@@ -42,7 +42,7 @@ function getItemStyles(initialOffset: XYCoord | null, currentOffset: XYCoord | n
 
 export const CustomDragLayer: FC = () => {
   const { itemType, isDragging, item, initialOffset, currentOffset } = useDragLayer((monitor) => ({
-    item: monitor.getItem<BattleshipDrag>(),
+    item: monitor.getItem<BattleshipModel>(),
     itemType: monitor.getItemType(),
     initialOffset: monitor.getInitialSourceClientOffset(),
     currentOffset: monitor.getSourceClientOffset(),
