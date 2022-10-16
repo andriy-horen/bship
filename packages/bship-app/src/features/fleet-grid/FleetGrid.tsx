@@ -24,20 +24,15 @@ export function FleetGrid({ fleet }: FleetGridProps) {
     return { x: current.x + x / 25, y: current.y + y / 25 };
   };
 
-  const validateNewPosition = (newShip: BattleshipCoord, current: Coordinates) => {
-    if (!newShip.every((coord) => isValidCoordinate(coord))) {
-      return false;
-    }
-    if (
-      playerFleet.some(
-        (ship) =>
-          !isEqual(ship.coordinates, current) &&
-          shipsIntersect(getShipBox(toBattleshipCoord(ship)), newShip)
-      )
-    ) {
-      return false;
-    }
-    return true;
+  const isValidNewPosition = (newShip: BattleshipCoord, current: Coordinates) => {
+    const validCoordinates = newShip.every((coord) => isValidCoordinate(coord));
+    const intersectsOthers = playerFleet.some(
+      (ship) =>
+        !isEqual(ship.coordinates, current) &&
+        shipsIntersect(getShipBox(toBattleshipCoord(ship)), newShip)
+    );
+
+    return validCoordinates && !intersectsOthers;
   };
 
   const playerFleet = useAppSelector(selectPlayerFleet);
@@ -60,18 +55,19 @@ export function FleetGrid({ fleet }: FleetGridProps) {
         const newCoord = getDropCoordinates(item.coordinates, delta);
         const dropShip = toBattleshipCoord({ ...item, coordinates: newCoord });
 
-        return validateNewPosition(dropShip, item.coordinates);
+        return isValidNewPosition(dropShip, item.coordinates);
       },
     }),
     [playerFleet]
   );
 
   const toggleOrientation = (model: BattleshipModel) => {
-    const updated = {
+    const updated: BattleshipModel = {
       ...model,
       orientation: model.orientation === 'h' ? 'v' : 'h',
-    } as BattleshipModel;
-    if (validateNewPosition(toBattleshipCoord(updated), model.coordinates)) {
+    };
+
+    if (isValidNewPosition(toBattleshipCoord(updated), model.coordinates)) {
       store.dispatch(toggleShipOrientation(model.coordinates));
     }
   };
