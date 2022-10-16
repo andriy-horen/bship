@@ -1,4 +1,6 @@
 import { Battleship as BattleshipModel, BattleshipCoord, Coordinates } from 'bship-contracts';
+import classNames from 'classnames';
+import { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { useAppSelector } from '../../app/hooks';
 import { store } from '../../app/store';
@@ -61,15 +63,19 @@ export function FleetGrid({ fleet }: FleetGridProps) {
     [playerFleet]
   );
 
-  const toggleOrientation = (model: BattleshipModel) => {
+  const [shipErrorAnimation, setShipErrorAnimation] = useState<number>();
+
+  const toggleOrientation = (model: BattleshipModel, index: number) => {
     const updated: BattleshipModel = {
       ...model,
       orientation: model.orientation === 'h' ? 'v' : 'h',
     };
 
-    if (isValidNewPosition(toBattleshipCoord(updated), model.coordinates)) {
-      store.dispatch(toggleShipOrientation(model.coordinates));
+    if (!isValidNewPosition(toBattleshipCoord(updated), model.coordinates)) {
+      return setShipErrorAnimation(index);
     }
+
+    store.dispatch(toggleShipOrientation(model.coordinates));
   };
 
   return (
@@ -77,13 +83,19 @@ export function FleetGrid({ fleet }: FleetGridProps) {
       {fleet.map((ship, index) => (
         <div
           key={index}
-          className="ship-location"
+          className={classNames('ship-location', {
+            'ship-error-animate': shipErrorAnimation === index,
+          })}
+          onAnimationEnd={() => setShipErrorAnimation(undefined)}
           style={{
             top: `${ship.coordinates.y * 24 + ship.coordinates.y}px`,
             left: `${ship.coordinates.x * 24 + ship.coordinates.x}px`,
           }}
         >
-          <DraggableBattleship model={ship} onClick={toggleOrientation}></DraggableBattleship>
+          <DraggableBattleship
+            model={ship}
+            onClick={(model) => toggleOrientation(model, index)}
+          ></DraggableBattleship>
         </div>
       ))}
     </div>
