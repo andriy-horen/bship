@@ -16,6 +16,6 @@
   position: absolute;
   justify-content: space-around;
   height: 250px;
-  align-items: end;
+  align-items: flex-end;
   margin-left: -12px;
 }
