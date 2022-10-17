@@ -8,7 +8,7 @@ import {
 } from 'bship-contracts';
 import { range } from 'lodash-es';
 
-export function toBattleshipCoord(ship: Battleship): Rect {
+export function toRect(ship: Battleship): Rect {
   const x = ship.coordinates.x + (ship.orientation === 'h' ? ship.size - 1 : 0);
   const y = ship.coordinates.y + (ship.orientation === 'v' ? ship.size - 1 : 0);
 

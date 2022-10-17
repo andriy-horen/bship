@@ -26,7 +26,7 @@ import {
 import { GridLayer } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
 import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
-import { toBattleshipCoord } from './utils';
+import { toRect } from './utils';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -121,7 +121,7 @@ function App() {
     sendJsonMessage({
       event: GameMessageType.CreateGame,
       data: {
-        fleet: playerFleet.map((ship) => toBattleshipCoord(ship)),
+        fleet: playerFleet.map((ship) => toRect(ship)),
       },
     } as any);
   };

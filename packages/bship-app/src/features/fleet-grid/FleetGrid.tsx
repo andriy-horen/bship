@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { useAppSelector } from '../../app/hooks';
 import { store } from '../../app/store';
-import { isValidCoordinate, toBattleshipCoord } from '../../utils';
+import { isValidCoordinate, toRect } from '../../utils';
 import { DraggableBattleship } from '../battleship/DraggableBattleship';
 import { ItemTypes } from '../dnd/itemTypes';
 import { snapToGrid } from '../dnd/snap';
@@ -35,9 +35,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
   const isValidNewPosition = (newShip: Rect, current: Point) => {
     const validCoordinates = newShip.every((coord) => isValidCoordinate(coord));
     const intersectsOthers = playerFleet.some(
-      (ship) =>
-        !isEqual(ship.coordinates, current) &&
-        intersects(expandRect(toBattleshipCoord(ship)), newShip)
+      (ship) => !isEqual(ship.coordinates, current) && intersects(expandRect(toRect(ship)), newShip)
     );
 
     return validCoordinates && !intersectsOthers;
@@ -61,7 +59,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
       canDrop(item, monitor) {
         const delta = monitor.getDifferenceFromInitialOffset() as { x: number; y: number };
         const newCoord = getDropCoordinates(item.coordinates, delta);
-        const dropShip = toBattleshipCoord({ ...item, coordinates: newCoord });
+        const dropShip = toRect({ ...item, coordinates: newCoord });
 
         return isValidNewPosition(dropShip, item.coordinates);
       },
@@ -77,7 +75,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
       orientation: model.orientation === 'h' ? 'v' : 'h',
     };
 
-    if (!isValidNewPosition(toBattleshipCoord(updated), model.coordinates)) {
+    if (!isValidNewPosition(toRect(updated), model.coordinates)) {
       return setShipErrorAnimation(index);
     }
 
