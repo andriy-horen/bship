@@ -1,4 +1,4 @@
-import { insideBoundsSize, Player } from 'bship-contracts';
+import { Player, upperBound } from 'bship-contracts';
 import { GameEvent, GameUpdate } from './game-state.service';
 
 export interface GameStrategy {
@@ -22,7 +22,7 @@ export class DefaultGameStrategy implements GameStrategy {
       return event.player === this.goesFirst;
     }
 
-    const insideBounds = insideBoundsSize(event.coord, this.gridSize);
+    const insideBounds = upperBound(event.coord, this.gridSize);
 
     return insideBounds;
   }

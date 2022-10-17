@@ -1,6 +1,6 @@
 import {
   Battleship as BattleshipModel,
-  expandRect,
+  expandBy,
   intersects,
   isEqual,
   Point,
@@ -35,7 +35,8 @@ export function FleetGrid({ fleet }: FleetGridProps) {
   const isValidNewPosition = (newShip: Rect, current: Point) => {
     const validCoordinates = newShip.every((coord) => isValidCoordinate(coord));
     const intersectsOthers = playerFleet.some(
-      (ship) => !isEqual(ship.coordinates, current) && intersects(expandRect(toRect(ship)), newShip)
+      (ship) =>
+        !isEqual(ship.coordinates, current) && intersects(expandBy(toRect(ship), 1), newShip)
     );
 
     return validCoordinates && !intersectsOthers;

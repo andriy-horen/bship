@@ -13,14 +13,20 @@ export function add(p1: Point, p2: Point): Point {
   return { x: p1.x + p2.x, y: p1.y + p2.y };
 }
 
-export function insideBounds({ x, y }: Point, [lower, upper]: Rect): boolean {
+export function contains({ x, y }: Point, [lower, upper]: Rect): boolean {
   return x >= lower.x && x <= upper.x && y >= lower.y && y <= upper.y;
 }
 
-export function insideBoundsSize(point: Point, size: number): boolean {
-  return insideBounds(point, [
+/**
+ * Checks point upper bound
+ * @param point point to check
+ * @param upperBound exclusive upper-bound
+ * @returns true if point is inside bound, otherwise - false
+ */
+export function upperBound(point: Point, upperBound: number): boolean {
+  return contains(point, [
     { x: 0, y: 0 },
-    { x: size - 1, y: size - 1 },
+    { x: upperBound - 1, y: upperBound - 1 },
   ]);
 }
 
@@ -31,9 +37,9 @@ export function intersects([head1, tail1]: Rect, [head2, tail2]: Rect): boolean 
   return intersectX && intersectY;
 }
 
-export function expandRect([head, tail]: Rect): Rect {
+export function expandBy([head, tail]: Rect, value: number): Rect {
   return [
-    { x: head.x - 1, y: head.y - 1 },
-    { x: tail.x + 1, y: tail.y + 1 },
+    { x: head.x - value, y: head.y - value },
+    { x: tail.x + value, y: tail.y + value },
   ];
 }

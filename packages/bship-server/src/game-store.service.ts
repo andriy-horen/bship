@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { insideBounds, MoveStatus, Player, Point, Rect } from 'bship-contracts';
+import { contains, MoveStatus, Player, Point, Rect } from 'bship-contracts';
 import { isEqual } from 'lodash';
 import { IdGeneratorService } from './id-generator.service';
 import { mapLastEntry } from './utils';
@@ -140,9 +140,7 @@ export class GameState {
   getUpdateResult(event: GameStateEvent): GameStateUpdate {
     const { player, coordinates } = event;
     const targetFleet = player === 0 ? this._fleetStatus2 : this._fleetStatus1;
-    const targetShip = Array.from(targetFleet.keys()).find((ship) =>
-      insideBounds(coordinates, ship)
-    );
+    const targetShip = Array.from(targetFleet.keys()).find((ship) => contains(coordinates, ship));
     if (!targetShip) {
       return {
         event,

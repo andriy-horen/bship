@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Battleship, insideBounds, MarkPayload, MoveStatus, Point } from 'bship-contracts';
+import { Battleship, contains, MarkPayload, MoveStatus, Point } from 'bship-contracts';
 import { AppThunk, RootState } from '../../app/store';
 import { getBoxCoordinates, getCornerCoordinates, toBattleshipModel, toRect } from '../../utils';
 
@@ -63,7 +63,7 @@ export const gameEventSlice = createSlice({
     hitShip: (state, { payload: coord }: PayloadAction<Point>) => {
       const shipIndex = state.playerFleet
         .map((ship) => toRect(ship))
-        .findIndex((ship) => insideBounds(coord, ship));
+        .findIndex((ship) => contains(coord, ship));
 
       const ship = state.playerFleet[shipIndex];
       const sectionIndex = Math.max.apply(null, [
