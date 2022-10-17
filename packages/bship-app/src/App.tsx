@@ -1,7 +1,7 @@
 import { Container, Header } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { Coordinates, GameMessageType, GameResponseType } from 'bship-contracts';
-import { noop } from 'lodash-es';
+import { noop, range } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useState } from 'react';
 import { DndProvider } from 'react-dnd';
@@ -130,11 +130,21 @@ function App() {
     if (gameStatus === GameStatus.None) {
       return (
         <div className="player-grid">
+          <div className="vertical-labels">
+            {Array.from('ABCDEFGHIJ').map((label) => (
+              <div>{label}</div>
+            ))}
+          </div>
           <DndProvider backend={HTML5Backend}>
             <FleetGrid fleet={playerFleet} />
             <CustomDragLayer />
           </DndProvider>
           <GridLayer grid={playerGrid} />
+          <div className="horizontal-labels">
+            {range(1, 11).map((label) => (
+              <div>{label}</div>
+            ))}
+          </div>
         </div>
       );
     }
