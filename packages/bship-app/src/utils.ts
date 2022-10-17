@@ -35,18 +35,6 @@ export function toBattleshipModel(battleshipCoord: Rect, hit?: number[] | boolea
   };
 }
 
-// TODO: this function is duplicated, extract to common
-export function expandShip([head, tail]: Rect): Point[] {
-  const result: Point[] = [];
-  for (let x = head.x; x <= tail.x; x++) {
-    for (let y = head.y; y <= tail.y; y++) {
-      result.push({ x, y });
-    }
-  }
-
-  return result;
-}
-
 export function isValidCoordinate({ x, y }: Point): boolean {
   return (
     x >= GRID_LOWER_BOUND && x <= GRID_UPPER_BOUND && y >= GRID_LOWER_BOUND && y <= GRID_UPPER_BOUND

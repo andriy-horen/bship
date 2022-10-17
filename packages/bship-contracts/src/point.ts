@@ -30,16 +30,27 @@ export function upperBound(point: Point, upperBound: number): boolean {
   ]);
 }
 
-export function intersects([head1, tail1]: Rect, [head2, tail2]: Rect): boolean {
-  const intersectX = head2.x <= tail1.x && tail2.x >= head1.x;
-  const intersectY = head2.y <= tail1.y && tail2.y >= head1.y;
+export function intersects([tl1, br1]: Rect, [tl2, br2]: Rect): boolean {
+  const intersectX = tl2.x <= br1.x && br2.x >= tl1.x;
+  const intersectY = tl2.y <= br1.y && br2.y >= tl1.y;
 
   return intersectX && intersectY;
 }
 
-export function expandBy([head, tail]: Rect, value: number): Rect {
+export function expandBy([tl, br]: Rect, value: number): Rect {
   return [
-    { x: head.x - value, y: head.y - value },
-    { x: tail.x + value, y: tail.y + value },
+    { x: tl.x - value, y: tl.y - value },
+    { x: br.x + value, y: br.y + value },
   ];
+}
+
+export function toPoints([tl, br]: Rect): Point[] {
+  const result: Point[] = [];
+  for (let x = tl.x; x <= br.x; x++) {
+    for (let y = tl.y; y <= br.y; y++) {
+      result.push({ x, y });
+    }
+  }
+
+  return result;
 }

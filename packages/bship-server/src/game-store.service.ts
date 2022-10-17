@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { contains, MoveStatus, Player, Point, Rect } from 'bship-contracts';
+import { contains, MoveStatus, Player, Point, Rect, toPoints } from 'bship-contracts';
 import { isEqual } from 'lodash';
 import { IdGeneratorService } from './id-generator.service';
 import { mapLastEntry } from './utils';
@@ -150,7 +150,7 @@ export class GameState {
       };
     }
 
-    const isSunk = expandShip(targetShip)
+    const isSunk = toPoints(targetShip)
       .filter((sectionCoord) => !isEqual(sectionCoord, coordinates))
       .every((sectionCoord) => this._state.get(gameStateKey(player, sectionCoord)));
 
@@ -175,15 +175,4 @@ function gameStateKey(player: Player, coord: Point): StringGameEvent {
 
 export function flipPlayer(current: Player): Player {
   return current === Player.P1 ? Player.P2 : Player.P1;
-}
-
-function expandShip([head, tail]: Rect): Point[] {
-  const result: Point[] = [];
-  for (let x = head.x; x <= tail.x; x++) {
-    for (let y = head.y; y <= tail.y; y++) {
-      result.push({ x, y });
-    }
-  }
-
-  return result;
 }
