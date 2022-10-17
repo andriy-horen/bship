@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
-import { BattleshipCoord } from 'bship-contracts';
+import { Rect } from 'bship-contracts';
 import { WebSocket } from 'ws';
 import { GameContext } from './game-context';
 import { GameStoreService } from './game-store.service';
@@ -7,7 +7,7 @@ import { GameStoreService } from './game-store.service';
 export interface ClientPairingRequest {
   connectionId: string;
   socket: WebSocket;
-  fleet: BattleshipCoord[];
+  fleet: Rect[];
 }
 
 export interface MatchGameResult {

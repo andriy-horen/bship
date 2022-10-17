@@ -1,4 +1,4 @@
-import { Coordinates } from 'bship-contracts';
+import { Point } from 'bship-contracts';
 import './GridLayer.css';
 
 export enum GridSquare {
@@ -9,7 +9,7 @@ export enum GridSquare {
 
 export interface GridProps {
   grid: GridSquare[][];
-  onSquareClick?: (coordinates: Coordinates) => void;
+  onSquareClick?: (coordinates: Point) => void;
 }
 
 export function GridLayer({ grid, onSquareClick }: GridProps) {
@@ -20,12 +20,12 @@ export function GridLayer({ grid, onSquareClick }: GridProps) {
     [GridSquare.Miss, 'square-miss'],
   ]);
 
-  const getClassName = ({ x, y }: Coordinates): string => {
+  const getClassName = ({ x, y }: Point): string => {
     const square = grid[y][x];
     return classes.get(square) ?? '';
   };
 
-  const get2DIndicies = (index: number): Coordinates => {
+  const get2DIndicies = (index: number): Point => {
     return { x: index % 10, y: Math.floor(index / 10) };
   };
 

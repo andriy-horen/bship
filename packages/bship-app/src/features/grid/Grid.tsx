@@ -1,4 +1,4 @@
-import { Battleship, Coordinates } from 'bship-contracts';
+import { Battleship, Point } from 'bship-contracts';
 import { range } from 'lodash-es';
 import { FleetLayer } from '../fleet-layer/FleetLayer';
 import { GridLayer, GridSquare } from '../grid-layer/GridLayer';
@@ -7,7 +7,7 @@ import './Grid.css';
 export interface GridProps {
   fleet: Battleship[];
   grid: GridSquare[][];
-  onSquareClick: (coordinates: Coordinates) => void;
+  onSquareClick: (coordinates: Point) => void;
 }
 
 export function Grid({ fleet, grid, onSquareClick }: GridProps) {

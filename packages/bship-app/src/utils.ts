@@ -1,14 +1,14 @@
 import {
   Battleship,
-  BattleshipCoord,
-  Coordinates,
   GRID_LOWER_BOUND,
   GRID_UPPER_BOUND,
   Orientation,
+  Point,
+  Rect,
 } from 'bship-contracts';
 import { range } from 'lodash-es';
 
-export function toBattleshipCoord(ship: Battleship): BattleshipCoord {
+export function toBattleshipCoord(ship: Battleship): Rect {
   const x = ship.coordinates.x + (ship.orientation === 'h' ? ship.size - 1 : 0);
   const y = ship.coordinates.y + (ship.orientation === 'v' ? ship.size - 1 : 0);
 
@@ -21,10 +21,7 @@ export function toBattleshipCoord(ship: Battleship): BattleshipCoord {
  * @param hit either array of hit sections or boolean indicating ship sunk
  * @returns Battleship Model
  */
-export function toBattleshipModel(
-  battleshipCoord: BattleshipCoord,
-  hit?: number[] | boolean
-): Battleship {
+export function toBattleshipModel(battleshipCoord: Rect, hit?: number[] | boolean): Battleship {
   const [head, tail] = battleshipCoord;
   const orientation: Orientation = head.y === tail.y ? 'h' : 'v';
   const size = orientation === 'h' ? tail.x - head.x + 1 : tail.y - head.y + 1;
@@ -39,8 +36,8 @@ export function toBattleshipModel(
 }
 
 // TODO: this function is duplicated, extract to common
-export function expandShip([head, tail]: BattleshipCoord): Coordinates[] {
-  const result: Coordinates[] = [];
+export function expandShip([head, tail]: Rect): Point[] {
+  const result: Point[] = [];
   for (let x = head.x; x <= tail.x; x++) {
     for (let y = head.y; y <= tail.y; y++) {
       result.push({ x, y });
@@ -50,17 +47,13 @@ export function expandShip([head, tail]: BattleshipCoord): Coordinates[] {
   return result;
 }
 
-export function isValidCoordinate({ x, y }: Coordinates): boolean {
+export function isValidCoordinate({ x, y }: Point): boolean {
   return (
     x >= GRID_LOWER_BOUND && x <= GRID_UPPER_BOUND && y >= GRID_LOWER_BOUND && y <= GRID_UPPER_BOUND
   );
 }
 
-export function isShipHit([head, tail]: BattleshipCoord, { x, y }: Coordinates): boolean {
-  return x >= head.x && x <= tail.x && y >= head.y && y <= tail.y;
-}
-
-export function getCornerCoordinates({ x, y }: Coordinates): Coordinates[] {
+export function getCornerCoordinates({ x, y }: Point): Point[] {
   return [
     { x: x - 1, y: y - 1 },
     { x: x + 1, y: y - 1 },
@@ -69,8 +62,8 @@ export function getCornerCoordinates({ x, y }: Coordinates): Coordinates[] {
   ].filter((coord) => isValidCoordinate(coord));
 }
 
-export function getBoxCoordinates([head, tail]: BattleshipCoord): Coordinates[] {
-  const coords: Coordinates[] = [];
+export function getBoxCoordinates([head, tail]: Rect): Point[] {
+  const coords: Point[] = [];
 
   /**
    * Generates top & bottom "border" incl. corners
@@ -101,21 +94,4 @@ export function getBoxCoordinates([head, tail]: BattleshipCoord): Coordinates[] 
   }
 
   return coords;
-}
-
-export function shipsIntersect(
-  [head1, tail1]: BattleshipCoord,
-  [head2, tail2]: BattleshipCoord
-): boolean {
-  const intersectX = head2.x <= tail1.x && tail2.x >= head1.x;
-  const intersectY = head2.y <= tail1.y && tail2.y >= head1.y;
-
-  return intersectX && intersectY;
-}
-
-export function getShipBox([head, tail]: BattleshipCoord): BattleshipCoord {
-  return [
-    { x: head.x - 1, y: head.y - 1 },
-    { x: tail.x + 1, y: tail.y + 1 },
-  ];
 }

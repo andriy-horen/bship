@@ -1,11 +1,6 @@
-export interface Coordinates {
-  x: number;
-  y: number;
-}
+import { Point, Rect } from './point';
 
 export type StringCoordinates = `${number},${number}`;
-
-export type BattleshipCoord = [Coordinates, Coordinates];
 
 export type Orientation = 'v' | 'h';
 
@@ -39,9 +34,9 @@ export enum Player {
 }
 
 export interface MarkPayload {
-  coordinates: Coordinates;
+  coordinates: Point;
   value: MoveStatus;
-  target?: BattleshipCoord;
+  target?: Rect;
   next: boolean;
   self: boolean;
 }
@@ -49,7 +44,7 @@ export interface MarkPayload {
 export interface Battleship {
   size: number;
   orientation: Orientation;
-  coordinates: Coordinates;
+  coordinates: Point;
   hitSections?: number[];
 }
 

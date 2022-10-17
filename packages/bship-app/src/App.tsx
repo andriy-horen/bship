@@ -1,6 +1,6 @@
 import { Container, Header } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { Coordinates, GameMessageType, GameResponseType } from 'bship-contracts';
+import { GameMessageType, GameResponseType, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useState } from 'react';
@@ -107,7 +107,7 @@ function App() {
     connect
   );
 
-  const handleSquareClick = (coordinates: Coordinates) => {
+  const handleSquareClick = (coordinates: Point) => {
     sendJsonMessage({
       event: GameMessageType.Move,
       data: {

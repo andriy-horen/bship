@@ -1,11 +1,17 @@
-import { Battleship as BattleshipModel, BattleshipCoord, Coordinates } from 'bship-contracts';
+import {
+  Battleship as BattleshipModel,
+  expandRect,
+  intersects,
+  isEqual,
+  Point,
+  Rect,
+} from 'bship-contracts';
 import classNames from 'classnames';
 import { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { useAppSelector } from '../../app/hooks';
 import { store } from '../../app/store';
-import { isEqual } from '../../coordinates';
-import { getShipBox, isValidCoordinate, shipsIntersect, toBattleshipCoord } from '../../utils';
+import { isValidCoordinate, toBattleshipCoord } from '../../utils';
 import { DraggableBattleship } from '../battleship/DraggableBattleship';
 import { ItemTypes } from '../dnd/itemTypes';
 import { snapToGrid } from '../dnd/snap';
@@ -21,17 +27,17 @@ export interface FleetGridProps {
 }
 
 export function FleetGrid({ fleet }: FleetGridProps) {
-  const getDropCoordinates = (current: Coordinates, delta: Coordinates): Coordinates => {
+  const getDropCoordinates = (current: Point, delta: Point): Point => {
     const [x, y] = snapToGrid([delta.x, delta.y], 25);
     return { x: current.x + x / 25, y: current.y + y / 25 };
   };
 
-  const isValidNewPosition = (newShip: BattleshipCoord, current: Coordinates) => {
+  const isValidNewPosition = (newShip: Rect, current: Point) => {
     const validCoordinates = newShip.every((coord) => isValidCoordinate(coord));
     const intersectsOthers = playerFleet.some(
       (ship) =>
         !isEqual(ship.coordinates, current) &&
-        shipsIntersect(getShipBox(toBattleshipCoord(ship)), newShip)
+        intersects(expandRect(toBattleshipCoord(ship)), newShip)
     );
 
     return validCoordinates && !intersectsOthers;

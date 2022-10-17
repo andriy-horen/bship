@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { BattleshipCoord, Coordinates, MoveStatus, Player } from 'bship-contracts';
+import { insideBounds, MoveStatus, Player, Point, Rect } from 'bship-contracts';
 import { isEqual } from 'lodash';
 import { IdGeneratorService } from './id-generator.service';
 import { mapLastEntry } from './utils';
 
 export interface AddGameRequest {
-  fleet1: BattleshipCoord[];
-  fleet2: BattleshipCoord[];
+  fleet1: Rect[];
+  fleet2: Rect[];
 }
 
 @Injectable()
@@ -45,7 +45,7 @@ export class GameStoreService {
 
 export interface GameStateEvent {
   player: Player;
-  coordinates: Coordinates;
+  coordinates: Point;
 }
 
 // TODO: there's possibly to much different concepts expressed here in the single model (refactor?)
@@ -54,7 +54,7 @@ export interface GameStateUpdate {
   nextTurn: Player;
   moveStatus: MoveStatus;
   gameCompleted: boolean;
-  sunkShip?: BattleshipCoord;
+  sunkShip?: Rect;
 }
 
 type StringGameEvent = `p${number}:${number},${number}`;
@@ -65,14 +65,14 @@ export interface GameResult {
 }
 
 export class GameState {
-  private readonly _fleetStatus1: Map<BattleshipCoord, boolean>;
-  private readonly _fleetStatus2: Map<BattleshipCoord, boolean>;
+  private readonly _fleetStatus1: Map<Rect, boolean>;
+  private readonly _fleetStatus2: Map<Rect, boolean>;
 
   private readonly _state = new Map<StringGameEvent, GameStateUpdate>();
 
   private _gameResult: GameResult = { completed: false };
 
-  constructor(fleet1: BattleshipCoord[], fleet2: BattleshipCoord[]) {
+  constructor(fleet1: Rect[], fleet2: Rect[]) {
     this._fleetStatus1 = new Map(fleet1.map((ship) => [ship, true]));
     this._fleetStatus2 = new Map(fleet2.map((ship) => [ship, true]));
   }
@@ -140,7 +140,9 @@ export class GameState {
   getUpdateResult(event: GameStateEvent): GameStateUpdate {
     const { player, coordinates } = event;
     const targetFleet = player === 0 ? this._fleetStatus2 : this._fleetStatus1;
-    const targetShip = Array.from(targetFleet.keys()).find((ship) => isShipHit(ship, coordinates));
+    const targetShip = Array.from(targetFleet.keys()).find((ship) =>
+      insideBounds(coordinates, ship)
+    );
     if (!targetShip) {
       return {
         event,
@@ -169,20 +171,16 @@ export class GameState {
   }
 }
 
-function gameStateKey(player: Player, coord: Coordinates): StringGameEvent {
+function gameStateKey(player: Player, coord: Point): StringGameEvent {
   return `p${player}:${coord.y},${coord.x}`;
-}
-
-function isShipHit([head, tail]: BattleshipCoord, { x, y }: Coordinates): boolean {
-  return x >= head.x && x <= tail.x && y >= head.y && y <= tail.y;
 }
 
 export function flipPlayer(current: Player): Player {
   return current === Player.P1 ? Player.P2 : Player.P1;
 }
 
-function expandShip([head, tail]: BattleshipCoord): Coordinates[] {
-  const result: Coordinates[] = [];
+function expandShip([head, tail]: Rect): Point[] {
+  const result: Point[] = [];
   for (let x = head.x; x <= tail.x; x++) {
     for (let y = head.y; y <= tail.y; y++) {
       result.push({ x, y });

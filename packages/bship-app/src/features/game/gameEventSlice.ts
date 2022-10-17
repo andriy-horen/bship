@@ -1,10 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Battleship, Coordinates, MarkPayload, MoveStatus } from 'bship-contracts';
+import { Battleship, insideBounds, MarkPayload, MoveStatus, Point } from 'bship-contracts';
 import { AppThunk, RootState } from '../../app/store';
 import {
   getBoxCoordinates,
   getCornerCoordinates,
-  isShipHit,
   toBattleshipCoord,
   toBattleshipModel,
 } from '../../utils';
@@ -66,15 +65,15 @@ export const gameEventSlice = createSlice({
       });
     },
     // TODO: drop this hacky implementation
-    hitShip: (state, { payload }: PayloadAction<Coordinates>) => {
+    hitShip: (state, { payload: coord }: PayloadAction<Point>) => {
       const shipIndex = state.playerFleet
         .map((ship) => toBattleshipCoord(ship))
-        .findIndex((ship) => isShipHit(ship, payload));
+        .findIndex((ship) => insideBounds(coord, ship));
 
       const ship = state.playerFleet[shipIndex];
       const sectionIndex = Math.max.apply(null, [
-        payload.x - ship.coordinates.x,
-        payload.y - ship.coordinates.y,
+        coord.x - ship.coordinates.x,
+        coord.y - ship.coordinates.y,
       ]);
 
       const sections = state.playerFleet[shipIndex].hitSections ?? [];
@@ -84,7 +83,7 @@ export const gameEventSlice = createSlice({
       state,
       {
         payload: { currentCoord, newCoord },
-      }: PayloadAction<{ currentCoord: Coordinates; newCoord: Coordinates }>
+      }: PayloadAction<{ currentCoord: Point; newCoord: Point }>
     ) => {
       const ship = state.playerFleet.find(
         ({ coordinates: { x, y } }) => x === currentCoord.x && y === currentCoord.y
@@ -93,7 +92,7 @@ export const gameEventSlice = createSlice({
       if (!ship) return;
       ship.coordinates = newCoord;
     },
-    toggleShipOrientation: (state, { payload }: PayloadAction<Coordinates>) => {
+    toggleShipOrientation: (state, { payload }: PayloadAction<Point>) => {
       const ship = state.playerFleet.find(
         ({ coordinates: { x, y } }) => x === payload.x && y === payload.y
       );
