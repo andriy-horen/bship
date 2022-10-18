@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { contains, MoveStatus, Player, Point, Rect, toPoints } from 'bship-contracts';
 import { isEqual } from 'lodash';
 import { IdGeneratorService } from './id-generator.service';
-import { mapLastEntry } from './utils';
+import { mapLastEntry, nextPlayer } from './utils';
 
 export interface AddGameRequest {
   fleet1: Rect[];
@@ -144,7 +144,7 @@ export class GameState {
     if (!targetShip) {
       return {
         event,
-        nextTurn: flipPlayer(player),
+        nextTurn: nextPlayer(player),
         moveStatus: MoveStatus.Miss,
         gameCompleted: this._gameResult.completed,
       };
@@ -171,8 +171,4 @@ export class GameState {
 
 function gameStateKey(player: Player, coord: Point): StringGameEvent {
   return `p${player}:${coord.y},${coord.x}`;
-}
-
-export function flipPlayer(current: Player): Player {
-  return current === Player.P1 ? Player.P2 : Player.P1;
 }

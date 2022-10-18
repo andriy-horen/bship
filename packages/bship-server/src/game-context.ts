@@ -1,7 +1,8 @@
 import { GameMessageType, GameResponseType, MarkPayload, Player } from 'bship-contracts';
 import { RawData, WebSocket } from 'ws';
 import { ClientPairingRequest } from './client-pairing.service';
-import { flipPlayer, GameStoreService } from './game-store.service';
+import { GameStoreService } from './game-store.service';
+import { nextPlayer } from './utils';
 
 export class GameContext {
   private readonly _client1: WebSocket;
@@ -70,7 +71,7 @@ export class GameContext {
           value: updateResult.moveStatus,
           target: updateResult.sunkShip,
           next: updateResult.nextTurn === recipient,
-          self: flipPlayer(updateResult.event.player) === recipient,
+          self: nextPlayer(updateResult.event.player) === recipient,
         } as MarkPayload,
       }));
 
