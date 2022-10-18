@@ -8,7 +8,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { GameMessageType, GameResponseType } from 'bship-contracts';
+import { GameMessageType } from 'bship-contracts';
 import { urlAlphabet } from 'nanoid';
 import { IncomingMessage } from 'node:http';
 import url from 'node:url';
@@ -48,7 +48,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
 
     if (!gameContext) {
-      return { event: GameResponseType.WaitForOpponent };
+      return { event: GameMessageType.WaitForOpponent };
     }
 
     this.games.push(gameContext);

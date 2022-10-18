@@ -10,22 +10,18 @@ export interface GameMessage {
 }
 
 export enum GameMessageType {
-  CreateGame = 'create_game',
-  Move = 'move',
-  Acknowledge = 'ack',
+  CreateGame = 'create',
+  GameStarted = 'started',
+  WaitForOpponent = 'wait_opp',
+  GameEvent = 'event',
+  GameUpdate = 'update',
+  GameCompleted = 'completed',
+  GameAborted = 'aborted',
 }
 
-export enum MoveStatus {
+export enum UpdateStatus {
   Hit = 'hit',
   Miss = 'miss',
-}
-
-export enum GameResponseType {
-  GameStarted = 'game_started',
-  WaitForOpponent = 'wait_for_opponent',
-  Mark = 'mark',
-  GameCompleted = 'game_completed',
-  GameAborted = 'game_aborted',
 }
 
 export enum Player {
@@ -33,10 +29,10 @@ export enum Player {
   P2 = 1,
 }
 
-export interface MarkPayload {
-  coordinates: Point;
-  value: MoveStatus;
-  target?: Rect;
+export interface GameUpdatePayload {
+  coord: Point;
+  status: UpdateStatus;
+  sunk?: Rect;
   next: boolean;
   self: boolean;
 }

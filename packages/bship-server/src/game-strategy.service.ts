@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { contains, isEqual, MoveStatus, Player, Rect, toPoints, upperBound } from 'bship-contracts';
+import {
+  contains,
+  isEqual,
+  Player,
+  Rect,
+  toPoints,
+  UpdateStatus,
+  upperBound,
+} from 'bship-contracts';
 import { GameEvent, GameEventString, GameResult, gameStateKey, GameUpdate } from './game-state';
 import { nextPlayer } from './utils';
 
@@ -39,7 +47,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
       return {
         sourceEvent: event,
         nextTurn: nextPlayer(player),
-        status: MoveStatus.Miss,
+        status: UpdateStatus.Miss,
       };
     }
 
@@ -52,7 +60,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
       return {
         sourceEvent: event,
         nextTurn: player,
-        status: MoveStatus.Hit,
+        status: UpdateStatus.Hit,
       };
     }
 
@@ -68,7 +76,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
     return {
       sourceEvent: event,
       nextTurn: player,
-      status: MoveStatus.Hit,
+      status: UpdateStatus.Hit,
       sunkShip: targetShip,
       gameResult,
     };

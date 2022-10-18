@@ -1,6 +1,6 @@
 import { Container, Header } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { GameMessageType, GameResponseType, Point } from 'bship-contracts';
+import { GameMessageType, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { CustomDragLayer } from './features/dnd/CustomDragLayer';
 import { FleetGrid } from './features/fleet-grid/FleetGrid';
 import {
-  addMoveUpdateFleet,
+  addUpdateThunk as addUpdate,
   gameReset,
   gameStarted,
   GameStatus,
@@ -50,13 +50,13 @@ function App() {
 
         const message = JSON.parse(data);
         switch (message.event) {
-          case GameResponseType.Mark:
-            dispatch(addMoveUpdateFleet(message.data));
+          case GameMessageType.GameUpdate:
+            dispatch(addUpdate(message.data));
             return;
-          case GameResponseType.WaitForOpponent:
+          case GameMessageType.WaitForOpponent:
             dispatch(waitingForOpponent());
             return;
-          case GameResponseType.GameStarted:
+          case GameMessageType.GameStarted:
             dispatch(gameStarted(message.data.gameId));
             showNotification(
               message.data.next
@@ -73,7 +73,7 @@ function App() {
             );
             return;
 
-          case GameResponseType.GameCompleted:
+          case GameMessageType.GameCompleted:
             dispatch(gameReset());
             showNotification(
               message.data.won
@@ -91,7 +91,7 @@ function App() {
                   }
             );
             return;
-          case GameResponseType.GameAborted:
+          case GameMessageType.GameAborted:
             dispatch(gameReset());
             showNotification({
               title: 'Game Aborted',
@@ -109,7 +109,7 @@ function App() {
 
   const handleSquareClick = (coordinates: Point) => {
     sendJsonMessage({
-      event: GameMessageType.Move,
+      event: GameMessageType.GameEvent,
       data: {
         coordinates,
       },

@@ -1,4 +1,4 @@
-import { MoveStatus, Player, Point, Rect } from 'bship-contracts';
+import { Player, Point, Rect, UpdateStatus } from 'bship-contracts';
 import { ReplaySubject, takeWhile } from 'rxjs';
 import { GameUpdateStrategy } from './game-strategy.service';
 
@@ -14,7 +14,7 @@ export interface GameEvent {
 export interface GameUpdate {
   sourceEvent: GameEvent;
   nextTurn: Player;
-  status: MoveStatus;
+  status: UpdateStatus;
   gameResult?: GameResult;
   sunkShip?: Rect;
 }

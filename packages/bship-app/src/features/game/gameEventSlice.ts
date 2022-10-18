@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Battleship, contains, MarkPayload, MoveStatus, Point } from 'bship-contracts';
+import { Battleship, contains, GameUpdatePayload, Point, UpdateStatus } from 'bship-contracts';
 import { AppThunk, RootState } from '../../app/store';
 import { getBoxCoordinates, getCornerCoordinates, toBattleshipModel, toRect } from '../../utils';
 
@@ -11,7 +11,7 @@ export enum GameStatus {
 
 export interface GameEventState {
   gameId: string;
-  moves: MarkPayload[];
+  gameUpdates: GameUpdatePayload[];
   status: GameStatus;
   playerFleet: Battleship[];
 }
@@ -31,7 +31,7 @@ const NORMAL_FLEET: Battleship[] = [
 
 const initialState: GameEventState = {
   gameId: '',
-  moves: [],
+  gameUpdates: [],
   status: GameStatus.None,
   playerFleet: NORMAL_FLEET,
 };
@@ -41,8 +41,8 @@ export const gameEventSlice = createSlice({
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    addMove: (state, { payload }: PayloadAction<MarkPayload>) => {
-      state.moves.push(payload);
+    addUpdate: (state, { payload }: PayloadAction<GameUpdatePayload>) => {
+      state.gameUpdates.push(payload);
     },
     waitingForOpponent: (state) => {
       state.status = GameStatus.WaitingForOpponent;
@@ -53,7 +53,7 @@ export const gameEventSlice = createSlice({
     },
     gameReset: (state) => {
       state.gameId = '';
-      state.moves = [];
+      state.gameUpdates = [];
       state.status = GameStatus.None;
       state.playerFleet.forEach((ship) => {
         ship.hitSections = [];
@@ -111,11 +111,11 @@ function getEmtpyGrid(): GridSquare[][] {
     .map(() => Array(GRID_SIZE).fill(GridSquare.Empty));
 }
 
-function convertMoveStatus(status: MoveStatus): GridSquare {
+function convertUpdateStatus(status: UpdateStatus): GridSquare {
   switch (status) {
-    case MoveStatus.Miss:
+    case UpdateStatus.Miss:
       return GridSquare.Miss;
-    case MoveStatus.Hit:
+    case UpdateStatus.Hit:
       return GridSquare.Hit;
     default:
       return GridSquare.Empty;
@@ -130,17 +130,17 @@ export const {
   toggleShipOrientation,
 } = gameEventSlice.actions;
 
-export const gridSelector = (moves: MarkPayload[]) => {
-  return moves.reduce((grid, { coordinates, value, target }) => {
-    grid[coordinates.y][coordinates.x] = convertMoveStatus(value);
+export const gridSelector = (updates: GameUpdatePayload[]) => {
+  return updates.reduce((grid, { coord, status, sunk }) => {
+    grid[coord.y][coord.x] = convertUpdateStatus(status);
 
-    if (value === MoveStatus.Hit) {
-      getCornerCoordinates(coordinates).forEach(({ x, y }) => {
+    if (status === UpdateStatus.Hit) {
+      getCornerCoordinates(coord).forEach(({ x, y }) => {
         grid[y][x] = GridSquare.Miss;
       });
     }
-    if (target) {
-      getBoxCoordinates(target).forEach(({ x, y }) => {
+    if (sunk) {
+      getBoxCoordinates(sunk).forEach(({ x, y }) => {
         grid[y][x] = GridSquare.Miss;
       });
     }
@@ -149,28 +149,28 @@ export const gridSelector = (moves: MarkPayload[]) => {
   }, getEmtpyGrid());
 };
 
-export const selectPlayerGrid = ({ gameEvent: { moves } }: RootState) =>
-  gridSelector(moves.filter((move) => move.self));
-export const selectOpponentGrid = ({ gameEvent: { moves } }: RootState) =>
-  gridSelector(moves.filter((move) => !move.self));
+export const selectPlayerGrid = ({ gameEvent: { gameUpdates: updates } }: RootState) =>
+  gridSelector(updates.filter((update) => update.self));
+export const selectOpponentGrid = ({ gameEvent: { gameUpdates: updates } }: RootState) =>
+  gridSelector(updates.filter((update) => !update.self));
 
 export const selectPlayerFleet = (state: RootState) => state.gameEvent.playerFleet;
 export const selectOpponentFleet = (state: RootState) => {
-  return state.gameEvent.moves
-    .filter((move) => !move.self && !!move.target)
-    .map((move) => toBattleshipModel(move.target!, true));
+  return state.gameEvent.gameUpdates
+    .filter((update) => !update.self && !!update.sunk)
+    .map((update) => toBattleshipModel(update.sunk!, true));
 };
 
 export const selectGameStatus = (state: RootState) => state.gameEvent.status;
 
-export const addMoveUpdateFleet =
-  (move: MarkPayload): AppThunk =>
+export const addUpdateThunk =
+  (update: GameUpdatePayload): AppThunk =>
   (dispatch) => {
-    const { addMove, hitShip } = gameEventSlice.actions;
+    const { addUpdate, hitShip } = gameEventSlice.actions;
 
-    dispatch(addMove(move));
-    if (move.self && move.value === MoveStatus.Hit) {
-      dispatch(hitShip(move.coordinates));
+    dispatch(addUpdate(update));
+    if (update.self && update.status === UpdateStatus.Hit) {
+      dispatch(hitShip(update.coord));
     }
   };
 
