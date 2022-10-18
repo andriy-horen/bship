@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
 import { Rect } from 'bship-contracts';
 import { WebSocket } from 'ws';
 import { GameContext } from './game-context';
-import { GameStoreService } from './game-store.service';
+import { GameStateFactory } from './game-state-factory.service';
 
 export interface ClientPairingRequest {
   connectionId: string;
@@ -20,7 +20,7 @@ export class ClientPairingService {
   private readonly gameRequestQueue: ClientPairingRequest[] = [];
 
   constructor(
-    private gameStore: GameStoreService,
+    private _gameStateFactory: GameStateFactory,
     @Inject(Logger) private readonly logger: LoggerService
   ) {}
 
@@ -36,7 +36,7 @@ export class ClientPairingService {
 
       const waiting = this.gameRequestQueue.shift()!;
 
-      return new GameContext(waiting, request, this.gameStore);
+      return new GameContext(waiting, request, this._gameStateFactory);
     }
 
     this.gameRequestQueue.push(request);

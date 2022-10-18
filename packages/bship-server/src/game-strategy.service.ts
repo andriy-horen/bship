@@ -1,51 +1,118 @@
-import { MoveStatus, Player } from 'bship-contracts';
-import { GameEvent, GameEventString, GameUpdate } from './game-state.service';
+import { Injectable } from '@nestjs/common';
+import { contains, isEqual, MoveStatus, Player, Rect, toPoints, upperBound } from 'bship-contracts';
+import { GameEvent, GameEventString, GameResult, gameStateKey, GameUpdate } from './game-state';
 import { nextPlayer } from './utils';
 
-export interface GameStrategy {
-  getNextTurn(
-    event: GameEvent,
-    status: MoveStatus,
-    state: Map<GameEventString, GameUpdate>
-  ): Player;
+export const GAME_UPDATE_STRATEGY = 'GAME_UPDATE_STRATEGY';
 
-  get gridSize(): number;
-  get firstTurn(): Player;
+export interface GameUpdateContext {
+  event: GameEvent;
+  state: Map<GameEventString, GameUpdate>;
+  fleet1: Rect[];
+  fleet2: Rect[];
 }
 
-export class SeaBattleGameStrategy implements GameStrategy {
-  get gridSize(): number {
-    // TODO: consider extracting to the global config
-    return 10;
+export interface GameUpdateStrategy {
+  canUpdate(context: GameUpdateContext): boolean;
+  getNextUpdate(context: GameUpdateContext): GameUpdate;
+}
+
+@Injectable()
+export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
+  // TODO: should be configurable
+  private readonly GRID_SIZE = 10;
+
+  canUpdate({ event, state }: GameUpdateContext): boolean {
+    const isInsideBounds = upperBound(event.coord, this.GRID_SIZE);
+    const isDuplicate = this.checkIfDuplicate(event, state);
+    const outOfTurn = this.checkIfOutOfTurn(event, state);
+
+    return isInsideBounds && !isDuplicate && !outOfTurn;
   }
 
-  get firstTurn(): Player {
-    return Player.P1;
-  }
-
-  getNextTurn(
-    event: GameEvent,
-    status: MoveStatus,
-    state: Map<GameEventString, GameUpdate>
-  ): Player {
-    if (state.size === 0) {
-      return this.firstTurn;
+  getNextUpdate({ event, state, fleet1, fleet2 }: GameUpdateContext): GameUpdate {
+    const { player, coord } = event;
+    const targetFleet = player === Player.P1 ? fleet2 : fleet1;
+    const targetShip = targetFleet.find((ship) => contains(coord, ship));
+    // update: player missed
+    if (!targetShip) {
+      return {
+        sourceEvent: event,
+        nextTurn: nextPlayer(player),
+        status: MoveStatus.Miss,
+      };
     }
 
-    return status === MoveStatus.Hit ? event.player : nextPlayer(event.player);
+    const isSunk = toPoints(targetShip)
+      .filter((shipCoord) => !isEqual(coord, shipCoord))
+      .every((shipCoord) => state.get(gameStateKey({ player, coord: shipCoord })));
+
+    // update: player hit
+    if (!isSunk) {
+      return {
+        sourceEvent: event,
+        nextTurn: player,
+        status: MoveStatus.Hit,
+      };
+    }
+
+    // should only calculate game result when hit & sunk (potentially last ship)
+    const gameResult = this.tryGetGameResult(
+      event,
+      // filters out last sunk ship because it's already checked
+      targetFleet.filter((ship) => ship !== targetShip),
+      state
+    );
+
+    // update: player hit & sunk a ship
+    return {
+      sourceEvent: event,
+      nextTurn: player,
+      status: MoveStatus.Hit,
+      sunkShip: targetShip,
+      gameResult,
+    };
+  }
+
+  private isFleetDestroyed(
+    { player }: GameEvent,
+    fleet: Rect[],
+    state: Map<GameEventString, GameUpdate>
+  ): boolean {
+    return fleet
+      .flatMap((ship) => toPoints(ship))
+      .every((coord) => state.has(gameStateKey({ player, coord })));
+  }
+
+  private tryGetGameResult(
+    event: GameEvent,
+    fleet: Rect[],
+    state: Map<GameEventString, GameUpdate>
+  ): GameResult | undefined {
+    return this.isFleetDestroyed(event, fleet, state) ? { winner: event.player } : undefined;
+  }
+
+  private checkIfDuplicate(event: GameEvent, state: Map<GameEventString, GameUpdate>): boolean {
+    return state.has(gameStateKey(event));
+  }
+
+  private checkIfOutOfTurn(event: GameEvent, state: Map<GameEventString, GameUpdate>): boolean {
+    if (state.size === 0) {
+      // TODO: first player to move should be configurable
+      return event.player !== Player.P1;
+    }
+
+    const lastUpdate = [...state.values()][state.size - 1];
+    return event.player !== lastUpdate.nextTurn;
   }
 }
 
-export class HasbroGameStrategy implements GameStrategy {
-  getNextTurn(event: GameEvent): Player {
-    return nextPlayer(event.player);
+@Injectable()
+export class HasbroGameUpdateStrategy implements GameUpdateStrategy {
+  canUpdate(context: GameUpdateContext): boolean {
+    throw new Error('Method not implemented.');
   }
-
-  get gridSize(): number {
-    return 10;
-  }
-
-  get firstTurn(): Player {
-    return Player.P1;
+  getNextUpdate(context: GameUpdateContext): GameUpdate {
+    throw new Error('Method not implemented.');
   }
 }
