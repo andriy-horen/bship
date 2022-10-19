@@ -9,6 +9,10 @@ export interface GameMessage {
   data?: any;
 }
 
+export function isGameMessage(message: any): message is GameMessage {
+  return typeof message?.event === 'string';
+}
+
 export enum GameMessageType {
   CreateGame = 'create',
   GameStarted = 'started',
