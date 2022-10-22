@@ -1,4 +1,5 @@
 import { GameMessageType, GameUpdatePayload, Player } from 'bship-contracts';
+import { ClientConnection } from './client-connection.service';
 import { ClientMessagingService } from './client-messaging.service';
 import { ClientPairingRequest } from './client-pairing.service';
 import { GameState } from './game-state';
@@ -10,12 +11,18 @@ export class GameContext {
   private readonly _gameState: GameState;
   private readonly _messagingService: ClientMessagingService;
 
+  private readonly _connection1: ClientConnection;
+  private readonly _connection2: ClientConnection;
+
   constructor(
     player1: ClientPairingRequest,
     player2: ClientPairingRequest,
     gameStateFactory: GameStateFactory
   ) {
-    this._messagingService = new ClientMessagingService(player1.socket, player2.socket);
+    this._connection1 = new ClientConnection(player1.socket);
+    this._connection2 = new ClientConnection(player2.socket);
+
+    this._messagingService = new ClientMessagingService(this._connection1, this._connection2);
     this._messagingService.gameEvents$.subscribe(([message, player]) => {
       this._gameState.update({
         player,
@@ -25,7 +32,7 @@ export class GameContext {
 
     this._gameState = gameStateFactory.createGameState(player1.fleet, player2.fleet);
     this._gameState.state$.subscribe((update) => {
-      this._messagingService.notifyBothFactory((recipient) => ({
+      this._messagingService.notifyFactory((recipient) => ({
         event: GameMessageType.GameUpdate,
         data: {
           coord: update.sourceEvent.coord,
@@ -38,7 +45,7 @@ export class GameContext {
 
       if (update.gameResult) {
         const { winner } = update.gameResult;
-        this._messagingService.notifyBothFactory((recipient) => ({
+        this._messagingService.notifyFactory((recipient) => ({
           event: GameMessageType.GameCompleted,
           data: {
             won: winner === recipient,
@@ -48,7 +55,7 @@ export class GameContext {
     });
 
     // TODO: next player is hardcoded here and instead should be provided by game state obj
-    this._messagingService.notifyBothFactory((recipient) => ({
+    this._messagingService.notifyFactory((recipient) => ({
       event: GameMessageType.GameStarted,
       data: { gameId: this._gameId, next: recipient === Player.P1 },
     }));

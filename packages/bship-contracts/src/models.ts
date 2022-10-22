@@ -4,6 +4,9 @@ export type StringCoordinates = `${number},${number}`;
 
 export type Orientation = 'v' | 'h';
 
+export const PING = '0';
+export const PONG = '1';
+
 export interface GameMessage {
   event: GameMessageType;
   data?: any;

@@ -1,49 +1,39 @@
-import { GameMessage, GameMessageType, isGameMessage, Player } from 'bship-contracts';
-import { filter, fromEvent, map, merge, Observable } from 'rxjs';
-import { MessageEvent, WebSocket } from 'ws';
+import { GameMessage, GameMessageType, Player } from 'bship-contracts';
+import { filter, map, merge, Observable } from 'rxjs';
+import { ClientConnection } from './client-connection.service';
 
 export class ClientMessagingService {
-  private readonly _messages1$: Observable<[GameMessage, Player]>;
-  private readonly _messages2$: Observable<[GameMessage, Player]>;
-
   private _sequenceId = 0;
 
   readonly gameEvents$: Observable<[GameMessage, Player]>;
 
-  constructor(private readonly _client1: WebSocket, private readonly _client2: WebSocket) {
-    const fromMessageEvent = (client: WebSocket) => {
-      return fromEvent(client, 'message').pipe(
-        map((message) => JSON.parse((message as MessageEvent).data.toString())),
-        filter((message) => isGameMessage(message))
-      );
-    };
-
-    this._messages1$ = fromMessageEvent(_client1).pipe(map((message) => [message, Player.P1]));
-    this._messages2$ = fromMessageEvent(_client2).pipe(map((message) => [message, Player.P2]));
-
-    this.gameEvents$ = merge(this._messages1$, this._messages2$).pipe(
-      filter(([message]) => message.event === GameMessageType.GameEvent)
-    );
+  constructor(
+    private readonly _client1: ClientConnection,
+    private readonly _client2: ClientConnection
+  ) {
+    this.gameEvents$ = merge(
+      this._client1.gameMessages$.pipe(
+        map((message) => [message, Player.P1] as [GameMessage, Player])
+      ),
+      this._client2.gameMessages$.pipe(
+        map((message) => [message, Player.P2] as [GameMessage, Player])
+      )
+    ).pipe(filter(([message]) => message.event === GameMessageType.GameEvent));
   }
 
-  private notifyClient(client: WebSocket, message: GameMessage): void {
-    message.seq = this._sequenceId;
-    if (client.readyState === client.OPEN) {
-      client.send(JSON.stringify(message));
-    }
+  notify(message: GameMessage): void {
+    message.seq = this._sequenceId++;
+    this._client1.notify(message);
+    this._client2.notify(message);
   }
 
-  notifyBoth(message: GameMessage): void {
-    this._sequenceId++;
+  notifyFactory(factory: (player: Player) => GameMessage): void {
+    const message1 = factory(Player.P1);
+    const message2 = factory(Player.P2);
 
-    this.notifyClient(this._client1, message);
-    this.notifyClient(this._client2, message);
-  }
+    message1.seq = message2.seq = this._sequenceId++;
 
-  notifyBothFactory(factory: (player: Player) => GameMessage): void {
-    this._sequenceId++;
-
-    this.notifyClient(this._client1, factory(Player.P1));
-    this.notifyClient(this._client2, factory(Player.P2));
+    this._client1.notify(message1);
+    this._client2.notify(message2);
   }
 }

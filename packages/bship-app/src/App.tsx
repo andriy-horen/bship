@@ -1,9 +1,9 @@
 import { Container, Header } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { GameMessage, GameMessageType, Point } from 'bship-contracts';
+import { GameMessage, GameMessageType, PING, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
 import { nanoid } from 'nanoid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import useWebSocket from 'react-use-websocket';
@@ -40,7 +40,7 @@ function App() {
   const [websocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);
 
-  const { sendJsonMessage } = useWebSocket(
+  const { sendJsonMessage, sendMessage } = useWebSocket(
     websocketUrl,
     {
       queryParams: { id: websocketId },
@@ -113,6 +113,16 @@ function App() {
     },
     connect
   );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (gameStatus === GameStatus.None) {
+        return;
+      }
+      sendMessage(PING, false);
+    }, 5_000);
+    return () => clearInterval(interval);
+  }, [gameStatus, sendMessage]);
 
   const handleSquareClick = (coordinates: Point) => {
     sendJsonMessage({
