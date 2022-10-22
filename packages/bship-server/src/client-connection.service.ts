@@ -1,6 +1,7 @@
 import { GameMessage, isGameMessage, PING, PONG } from 'bship-contracts';
 import { filter, map, Observable, Subject, Subscription, tap } from 'rxjs';
-import { MessageEvent, WebSocket } from 'ws';
+import { MessageEvent } from 'ws';
+import { GameWebSocket } from './game.gateway';
 
 export interface Destroyable {
   destroy(): void;
@@ -28,13 +29,17 @@ export class ClientConnection implements Destroyable {
     this._messageEventSubject$.next(message.data.toString());
   };
 
-  constructor(private readonly _socket: WebSocket) {
+  constructor(private readonly _socket: GameWebSocket) {
     this._socket.addEventListener('message', this.messageEventHandler);
     this._pingPongSubscription = this._pingPong$.subscribe();
   }
 
   get lastMessageTimestamp(): Date {
     return this._lastMessageTimestamp;
+  }
+
+  get id(): string {
+    return this._socket.connectionId!;
   }
 
   notify(message: GameMessage): void {

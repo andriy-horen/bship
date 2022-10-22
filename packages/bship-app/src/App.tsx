@@ -37,7 +37,7 @@ function App() {
   const gameStatus = useAppSelector(selectGameStatus);
 
   const websocketUrl = 'ws://10.33.0.203:3001/game';
-  const [websocketId] = useState(nanoid(21));
+  const [websocketId, setWebsocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);
 
   const { sendJsonMessage, sendMessage } = useWebSocket(
@@ -109,12 +109,24 @@ function App() {
         }
       },
       onOpen() {},
-      onClose() {},
+      onClose() {
+        dispatch(gameReset());
+        showNotification({
+          title: 'Disconnect',
+          message: 'Try starting new game',
+          color: 'red',
+        });
+      },
     },
     connect
   );
 
   useEffect(() => {
+    if (gameStatus === GameStatus.None) {
+      setConnect(false);
+      setWebsocketId(nanoid(21));
+    }
+
     const interval = setInterval(() => {
       if (gameStatus === GameStatus.None) {
         return;

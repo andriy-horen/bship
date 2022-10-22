@@ -1,29 +1,33 @@
 import { GameMessageType, GameUpdatePayload, Player } from 'bship-contracts';
-import { ClientConnection } from './client-connection.service';
+import { Subscription } from 'rxjs';
+import { ClientConnection, Destroyable } from './client-connection.service';
 import { ClientMessagingService } from './client-messaging.service';
 import { ClientPairingRequest } from './client-pairing.service';
 import { GameState } from './game-state';
 import { GameStateFactory } from './game-state-factory.service';
 import { nextPlayer } from './utils';
 
-export class GameContext {
+export class GameContext implements Destroyable {
   private readonly _gameId = 'game1';
   private readonly _gameState: GameState;
   private readonly _messagingService: ClientMessagingService;
 
-  private readonly _connection1: ClientConnection;
-  private readonly _connection2: ClientConnection;
+  private readonly _gameEventsSub: Subscription | undefined;
+  private readonly _gameStateSub: Subscription | undefined;
+
+  readonly connection1: ClientConnection;
+  readonly connection2: ClientConnection;
 
   constructor(
     player1: ClientPairingRequest,
     player2: ClientPairingRequest,
     gameStateFactory: GameStateFactory
   ) {
-    this._connection1 = new ClientConnection(player1.socket);
-    this._connection2 = new ClientConnection(player2.socket);
+    this.connection1 = new ClientConnection(player1.socket);
+    this.connection2 = new ClientConnection(player2.socket);
 
-    this._messagingService = new ClientMessagingService(this._connection1, this._connection2);
-    this._messagingService.gameEvents$.subscribe(([message, player]) => {
+    this._messagingService = new ClientMessagingService(this.connection1, this.connection2);
+    this._gameEventsSub = this._messagingService.gameEvents$.subscribe(([message, player]) => {
       this._gameState.update({
         player,
         coord: message.data.coordinates,
@@ -59,5 +63,12 @@ export class GameContext {
       event: GameMessageType.GameStarted,
       data: { gameId: this._gameId, next: recipient === Player.P1 },
     }));
+  }
+
+  destroy(): void {
+    this._gameEventsSub?.unsubscribe();
+    this._gameStateSub?.unsubscribe();
+    this.connection1.destroy();
+    this.connection2.destroy();
   }
 }

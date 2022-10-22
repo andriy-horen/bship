@@ -9,6 +9,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { GameMessageType } from 'bship-contracts';
+import { remove } from 'lodash';
 import { urlAlphabet } from 'nanoid';
 import { IncomingMessage } from 'node:http';
 import url from 'node:url';
@@ -16,7 +17,7 @@ import { Server, WebSocket } from 'ws';
 import { ClientPairingService } from './client-pairing.service';
 import { GameContext } from './game-context';
 
-interface GameWebSocket extends WebSocket {
+export interface GameWebSocket extends WebSocket {
   connectionId: string | undefined;
 }
 
@@ -26,14 +27,25 @@ interface GameWebSocket extends WebSocket {
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server!: Server;
 
-  private readonly clients = new Map<string, GameWebSocket>();
-
-  private readonly games: GameContext[] = [];
+  private readonly _games: GameContext[] = [];
+  private readonly _clientGame = new Map<string, GameContext>();
 
   constructor(
     private clientPairingService: ClientPairingService,
     @Inject(Logger) private readonly logger: LoggerService
-  ) {}
+  ) {
+    setInterval(() => {
+      for (const game of this._games) {
+        const timeout = new Date(Date.now() - 1000 * 10);
+        if (
+          game.connection1.lastMessageTimestamp < timeout ||
+          game.connection2.lastMessageTimestamp < timeout
+        ) {
+          game.destroy();
+        }
+      }
+    }, 1000);
+  }
 
   @SubscribeMessage(GameMessageType.CreateGame)
   handleCreateGame(@MessageBody() data: any, @ConnectedSocket() client: GameWebSocket): any {
@@ -51,7 +63,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return { event: GameMessageType.WaitForOpponent };
     }
 
-    this.games.push(gameContext);
+    this._games.push(gameContext);
+    this._clientGame.set(gameContext.connection1.id, gameContext);
+    this._clientGame.set(gameContext.connection2.id, gameContext);
   }
 
   @SubscribeMessage('chat')
@@ -65,28 +79,29 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { query } = url.parse(req.url ?? '', true);
     if (!query?.id) {
       this.logger.error('Client opened connection with missing ID', GameGateway.name);
-      return client?.close();
+      return client?.terminate();
     }
     if (!this.validWebsocketId(query.id)) {
       this.logger.error('Client opened connection with incorrectly formated ID', GameGateway.name);
-      return client?.close();
+      return client?.terminate();
     }
-    if (this.clients.has(query.id)) {
-      this.logger.error(
-        'Client opened connection with already existing ID (duplicate)',
-        GameGateway.name
-      );
-      return client?.close();
-    }
+    // if (this.clients.has(query.id)) {
+    //   this.logger.error(
+    //     'Client opened connection with already existing ID (duplicate)',
+    //     GameGateway.name
+    //   );
+    //   return client?.close();
+    // }
 
     client.connectionId = query.id;
-    this.clients.set(query.id, client);
     this.logger.log(`New client connected: ${query.id}`, GameGateway.name);
   }
 
   handleDisconnect(client: GameWebSocket): void {
-    if (client.connectionId) {
-      this.clients.delete(client.connectionId);
+    if (client.connectionId != null && this._clientGame.has(client.connectionId)) {
+      const game = this._clientGame.get(client.connectionId);
+      remove(this._games, game);
+      game?.destroy();
     }
   }
 

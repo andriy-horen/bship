@@ -1,12 +1,12 @@
 import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
 import { Rect } from 'bship-contracts';
-import { WebSocket } from 'ws';
 import { GameContext } from './game-context';
 import { GameStateFactory } from './game-state-factory.service';
+import { GameWebSocket } from './game.gateway';
 
 export interface ClientPairingRequest {
   connectionId: string;
-  socket: WebSocket;
+  socket: GameWebSocket;
   fleet: Rect[];
 }
 
