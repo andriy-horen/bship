@@ -15,14 +15,14 @@ export function Grid({ fleet, grid, onSquareClick }: GridProps) {
     <div>
       <div className="vertical-labels">
         {Array.from('ABCDEFGHIJ').map((label) => (
-          <div>{label}</div>
+          <div key={label}>{label}</div>
         ))}
       </div>
       <FleetLayer fleet={fleet}></FleetLayer>
       <GridLayer grid={grid} onSquareClick={onSquareClick}></GridLayer>
       <div className="horizontal-labels">
         {range(1, 11).map((label) => (
-          <div>{label}</div>
+          <div key={label}>{label}</div>
         ))}
       </div>
     </div>

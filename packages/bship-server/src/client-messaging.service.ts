@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
 import { GameMessage, GameMessageType, isGameMessage, Player } from 'bship-contracts';
 import { filter, fromEvent, map, merge, Observable } from 'rxjs';
 import { MessageEvent, WebSocket } from 'ws';
 
-@Injectable()
 export class ClientMessagingService {
   private readonly _messages1$: Observable<[GameMessage, Player]>;
   private readonly _messages2$: Observable<[GameMessage, Player]>;
+
+  private _sequenceId = 0;
 
   readonly gameEvents$: Observable<[GameMessage, Player]>;
 
@@ -26,18 +26,23 @@ export class ClientMessagingService {
     );
   }
 
-  private notifyClient(client: WebSocket, message: any): void {
+  private notifyClient(client: WebSocket, message: GameMessage): void {
+    message.seq = this._sequenceId;
     if (client.readyState === client.OPEN) {
       client.send(JSON.stringify(message));
     }
   }
 
   notifyBoth(message: GameMessage): void {
+    this._sequenceId++;
+
     this.notifyClient(this._client1, message);
     this.notifyClient(this._client2, message);
   }
 
   notifyBothFactory(factory: (player: Player) => GameMessage): void {
+    this._sequenceId++;
+
     this.notifyClient(this._client1, factory(Player.P1));
     this.notifyClient(this._client2, factory(Player.P2));
   }

@@ -1,6 +1,6 @@
 import { Container, Header } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { GameMessageType, Point } from 'bship-contracts';
+import { GameMessage, GameMessageType, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useState } from 'react';
@@ -36,7 +36,7 @@ function App() {
   const opponentFleet = useAppSelector(selectOpponentFleet);
   const gameStatus = useAppSelector(selectGameStatus);
 
-  const websocketUrl = 'ws://192.168.0.100:3001/game';
+  const websocketUrl = 'ws://10.33.0.203:3001/game';
   const [websocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);
 
@@ -48,14 +48,14 @@ function App() {
       onMessage({ data }) {
         if (!data) return;
 
-        const message = JSON.parse(data);
+        const message = JSON.parse(data) as GameMessage;
         switch (message.event) {
           case GameMessageType.GameUpdate:
             dispatch(addUpdate(message.data));
-            return;
+            break;
           case GameMessageType.WaitForOpponent:
             dispatch(waitingForOpponent());
-            return;
+            break;
           case GameMessageType.GameStarted:
             dispatch(gameStarted(message.data.gameId));
             showNotification(
@@ -71,7 +71,7 @@ function App() {
                     color: 'green',
                   }
             );
-            return;
+            break;
 
           case GameMessageType.GameCompleted:
             dispatch(gameReset());
@@ -90,7 +90,7 @@ function App() {
                     autoClose: false,
                   }
             );
-            return;
+            break;
           case GameMessageType.GameAborted:
             dispatch(gameReset());
             showNotification({
@@ -98,7 +98,14 @@ function App() {
               message: 'Just start a new one, duh',
               color: 'red',
             });
-            return;
+            break;
+        }
+
+        if (typeof message.seq === 'number') {
+          sendJsonMessage({
+            event: GameMessageType.Acknowledge,
+            seq: message.seq,
+          });
         }
       },
       onOpen() {},
@@ -126,13 +133,14 @@ function App() {
     } as any);
   };
 
+  // TODO: extract editable grid
   function getPlayerGrid() {
     if (gameStatus === GameStatus.None) {
       return (
         <div className="player-grid">
           <div className="vertical-labels">
             {Array.from('ABCDEFGHIJ').map((label) => (
-              <div>{label}</div>
+              <div key={label}>{label}</div>
             ))}
           </div>
           <DndProvider backend={HTML5Backend}>
@@ -142,7 +150,7 @@ function App() {
           <GridLayer grid={playerGrid} />
           <div className="horizontal-labels">
             {range(1, 11).map((label) => (
-              <div>{label}</div>
+              <div key={label}>{label}</div>
             ))}
           </div>
         </div>

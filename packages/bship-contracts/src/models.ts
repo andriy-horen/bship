@@ -7,6 +7,7 @@ export type Orientation = 'v' | 'h';
 export interface GameMessage {
   event: GameMessageType;
   data?: any;
+  seq?: number;
 }
 
 export function isGameMessage(message: any): message is GameMessage {
@@ -16,11 +17,12 @@ export function isGameMessage(message: any): message is GameMessage {
 export enum GameMessageType {
   CreateGame = 'create',
   GameStarted = 'started',
-  WaitForOpponent = 'wait_opp',
+  WaitForOpponent = 'wait_start',
   GameEvent = 'event',
   GameUpdate = 'update',
   GameCompleted = 'completed',
   GameAborted = 'aborted',
+  Acknowledge = 'ack',
 }
 
 export enum UpdateStatus {
