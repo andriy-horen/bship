@@ -27,7 +27,7 @@ export interface GameUpdateStrategy {
 
 @Injectable()
 export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
-  // TODO: should be configurable
+  // TODO: should come from game config
   private readonly GRID_SIZE = 10;
 
   canUpdate({ event, state }: GameUpdateContext): boolean {

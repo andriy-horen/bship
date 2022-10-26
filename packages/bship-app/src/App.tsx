@@ -36,7 +36,7 @@ function App() {
   const opponentFleet = useAppSelector(selectOpponentFleet);
   const gameStatus = useAppSelector(selectGameStatus);
 
-  const websocketUrl = 'ws://10.33.0.203:3001/game';
+  const websocketUrl = 'ws://192.168.0.100:3001/game';
   const [websocketId, setWebsocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);
 
