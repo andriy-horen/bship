@@ -31,19 +31,7 @@ export class GameGateway implements OnGatewayConnection {
   constructor(
     private clientPairingService: ClientPairingService,
     @Inject(Logger) private readonly logger: LoggerService
-  ) {
-    setInterval(() => {
-      for (const game of this._games) {
-        const timeout = new Date(Date.now() - 1000 * 10);
-        if (
-          game.connection1.lastMessageTimestamp < timeout ||
-          game.connection2.lastMessageTimestamp < timeout
-        ) {
-          game.destroy();
-        }
-      }
-    }, 1000);
-  }
+  ) {}
 
   @SubscribeMessage(GameMessageType.CreateGame)
   handleCreateGame(@MessageBody() data: any, @ConnectedSocket() client: GameWebSocket): any {

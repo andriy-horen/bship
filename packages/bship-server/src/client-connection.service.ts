@@ -1,5 +1,18 @@
 import { GameMessage, isGameMessage, PING, PONG } from 'bship-contracts';
-import { filter, first, map, Observable, Subject, takeUntil, tap } from 'rxjs';
+import {
+  catchError,
+  filter,
+  first,
+  ignoreElements,
+  map,
+  merge,
+  Observable,
+  of,
+  Subject,
+  takeUntil,
+  tap,
+  timeout,
+} from 'rxjs';
 import { CloseEvent, MessageEvent } from 'ws';
 import { GameWebSocket } from './game.gateway';
 
@@ -8,44 +21,45 @@ export interface Destroyable {
 }
 
 export class ClientConnection implements Destroyable {
+  private readonly CONNECTION_TIMEOUT = 60_000;
+
   private readonly _closeEventHandler = (event: CloseEvent) => {
-    this._disconnectSubject$.next(event);
+    this._closeConnectionSubject$.next(event);
   };
 
-  private readonly _disconnectSubject$ = new Subject<CloseEvent>();
+  private readonly _closeConnectionSubject$ = new Subject<CloseEvent>();
 
-  readonly disconnect$ = this._disconnectSubject$.asObservable().pipe(first());
-
-  private _lastMessageTimestamp = new Date();
+  readonly connectionClosed$ = merge(this._closeConnectionSubject$).pipe(first());
 
   private readonly _messageEventHandler = (message: MessageEvent) => {
-    this._lastMessageTimestamp = new Date();
     this._messageEventSubject$.next(message.data.toString());
   };
-
   private readonly _messageEventSubject$ = new Subject<string>();
 
   readonly gameMessages$: Observable<GameMessage> = this._messageEventSubject$.pipe(
     filter((message) => message.trim().startsWith('{')),
     map((message) => JSON.parse(message)),
-    filter((message) => isGameMessage(message))
+    filter((message) => isGameMessage(message)),
+    takeUntil(this._closeConnectionSubject$)
+  );
+
+  readonly errorState$ = this.gameMessages$.pipe(
+    ignoreElements(),
+    timeout(this.CONNECTION_TIMEOUT),
+    catchError((error: Error) => of(error))
   );
 
   private readonly _pingPongSub = this._messageEventSubject$
     .pipe(
       filter((message) => message === PING),
       tap(() => this._socket.send(PONG)),
-      takeUntil(this._disconnectSubject$)
+      takeUntil(this._closeConnectionSubject$)
     )
     .subscribe();
 
   constructor(private readonly _socket: GameWebSocket) {
     this._socket.addEventListener('message', this._messageEventHandler);
     this._socket.addEventListener('close', this._closeEventHandler);
-  }
-
-  get lastMessageTimestamp(): Date {
-    return this._lastMessageTimestamp;
   }
 
   get id(): string {
@@ -86,6 +100,6 @@ export class ClientConnection implements Destroyable {
     this._socket.removeEventListener('close', this._closeEventHandler);
     this._pingPongSub?.unsubscribe();
     this._messageEventSubject$.complete();
-    this._disconnectSubject$.complete();
+    this._closeConnectionSubject$.complete();
   }
 }
