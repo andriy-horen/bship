@@ -51,7 +51,8 @@ export class ClientConnection implements Destroyable {
   readonly gameMessages$: Observable<GameMessage> = this._messages$.pipe(
     filter((message) => message.trim().startsWith('{')),
     map((message) => JSON.parse(message)),
-    filter((message) => isGameMessage(message))
+    filter((message) => isGameMessage(message)),
+    takeUntil(this._closeConnectionSubject$)
   );
 
   /**
@@ -84,7 +85,10 @@ export class ClientConnection implements Destroyable {
   /**
    * Indicates if client has acknowledged all messages send from the server and ready to recieve new messages
    */
-  readonly readyState$ = this._waitingAcknowledgeSubject$.pipe(map((waiting) => waiting === null));
+  readonly readyState$ = this._waitingAcknowledgeSubject$.pipe(
+    map((waiting) => waiting === null),
+    takeUntil(this._closeConnectionSubject$)
+  );
 
   /**
    * Indicates whether websocket connection is closed
