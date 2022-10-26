@@ -3,13 +3,11 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
-  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { GameMessageType } from 'bship-contracts';
-import { remove } from 'lodash';
 import { urlAlphabet } from 'nanoid';
 import { IncomingMessage } from 'node:http';
 import url from 'node:url';
@@ -24,7 +22,7 @@ export interface GameWebSocket extends WebSocket {
 @WebSocketGateway({
   path: '/game',
 })
-export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class GameGateway implements OnGatewayConnection {
   @WebSocketServer() server!: Server;
 
   private readonly _games: GameContext[] = [];
@@ -95,14 +93,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     client.connectionId = query.id;
     this.logger.log(`New client connected: ${query.id}`, GameGateway.name);
-  }
-
-  handleDisconnect(client: GameWebSocket): void {
-    if (client.connectionId != null && this._clientGame.has(client.connectionId)) {
-      const game = this._clientGame.get(client.connectionId);
-      remove(this._games, game);
-      game?.destroy();
-    }
   }
 
   private validWebsocketId(websocketId: string | string[]): websocketId is string {
