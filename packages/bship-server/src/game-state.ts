@@ -31,7 +31,9 @@ export class GameState {
     private readonly _fleet2: Rect[]
   ) {}
 
-  readonly state$ = this._gameUpdateSubject.pipe(takeWhile((update) => !update.gameResult, true));
+  readonly stateUpdate = this._gameUpdateSubject.pipe(
+    takeWhile((update) => !update.gameResult, true)
+  );
 
   update(event: GameEvent): boolean {
     if (this.isGameCompleted) {

@@ -23,14 +23,14 @@ export class GameContext implements Destroyable {
     this.connection1 = new ClientConnection(player1.socket);
     this.connection2 = new ClientConnection(player2.socket);
 
-    this.connection1.errorState$.subscribe((error) => {
+    this.connection1.errorState.subscribe((error) => {
       console.log(error);
       this.connection1.closeConnection();
       this.connection1.destroy();
       this.connection2.closeConnection();
       this.connection2.destroy();
     });
-    this.connection2.errorState$.subscribe((error) => {
+    this.connection2.errorState.subscribe((error) => {
       console.log(error);
       this.connection1.closeConnection();
       this.connection1.destroy();
@@ -38,31 +38,31 @@ export class GameContext implements Destroyable {
       this.connection2.destroy();
     });
 
-    this.connection1.gameMessages$
+    this.connection1.gameMessage
       .pipe(filter((message) => message.event === GameMessageType.GameEvent))
-      .subscribe((message) => {
+      .subscribe(({ data }) => {
         this._gameState.update({
           player: Player.P1,
-          coord: message.data.coordinates,
+          coord: data.coordinates,
         });
       });
 
-    this.connection2.gameMessages$
+    this.connection2.gameMessage
       .pipe(filter((message) => message.event === GameMessageType.GameEvent))
-      .subscribe((message) => {
+      .subscribe(({ data }) => {
         this._gameState.update({
           player: Player.P2,
-          coord: message.data.coordinates,
+          coord: data.coordinates,
         });
       });
 
-    const bothReady$ = combineLatest([
-      this.connection1.readyState$,
-      this.connection2.readyState$,
+    const bothReady = combineLatest([
+      this.connection1.readyState,
+      this.connection2.readyState,
     ]).pipe(filter(([ready1, ready2]) => ready1 && ready2));
 
     this._gameState = gameStateFactory.createGameState(player1.fleet, player2.fleet);
-    this._gameState.state$.pipe(delayWhen(() => bothReady$)).subscribe((update) => {
+    this._gameState.stateUpdate.pipe(delayWhen(() => bothReady)).subscribe((update) => {
       this.connection1.notify(gameUpdateFactory(Player.P1, update, this.sequenceId));
       this.connection2.notify(gameUpdateFactory(Player.P2, update, this.sequenceId));
       this.sequenceId++;
