@@ -1,22 +1,19 @@
-import { GameMessageType, GameUpdatePayload, Player } from 'bship-contracts';
-import { Subscription } from 'rxjs';
+import { GameMessage, GameMessageType, GameUpdatePayload, Player } from 'bship-contracts';
+import { combineLatest, delayWhen, filter } from 'rxjs';
 import { ClientConnection, Destroyable } from './client-connection.service';
-import { ClientMessagingService } from './client-messaging.service';
 import { ClientPairingRequest } from './client-pairing.service';
-import { GameState } from './game-state';
+import { GameResult, GameState, GameUpdate } from './game-state';
 import { GameStateFactory } from './game-state-factory.service';
 import { nextPlayer } from './utils';
 
 export class GameContext implements Destroyable {
   private readonly _gameId = 'game1';
   private readonly _gameState: GameState;
-  private readonly _messagingService: ClientMessagingService;
-
-  private readonly _gameEventsSub: Subscription | undefined;
-  private readonly _gameStateSub: Subscription | undefined;
 
   readonly connection1: ClientConnection;
   readonly connection2: ClientConnection;
+
+  private sequenceId = 0;
 
   constructor(
     player1: ClientPairingRequest,
@@ -26,49 +23,96 @@ export class GameContext implements Destroyable {
     this.connection1 = new ClientConnection(player1.socket);
     this.connection2 = new ClientConnection(player2.socket);
 
-    this._messagingService = new ClientMessagingService(this.connection1, this.connection2);
-    this._gameEventsSub = this._messagingService.gameEvents$.subscribe(([message, player]) => {
-      this._gameState.update({
-        player,
-        coord: message.data.coordinates,
-      });
+    this.connection1.errorState$.subscribe((error) => {
+      console.log(error);
+      this.connection1.closeConnection();
+      this.connection1.destroy();
+      this.connection2.closeConnection();
+      this.connection2.destroy();
+    });
+    this.connection2.errorState$.subscribe((error) => {
+      console.log(error);
+      this.connection1.closeConnection();
+      this.connection1.destroy();
+      this.connection2.closeConnection();
+      this.connection2.destroy();
     });
 
+    this.connection1.gameMessages$
+      .pipe(filter((message) => message.event === GameMessageType.GameEvent))
+      .subscribe((message) => {
+        this._gameState.update({
+          player: Player.P1,
+          coord: message.data.coordinates,
+        });
+      });
+
+    this.connection2.gameMessages$
+      .pipe(filter((message) => message.event === GameMessageType.GameEvent))
+      .subscribe((message) => {
+        this._gameState.update({
+          player: Player.P2,
+          coord: message.data.coordinates,
+        });
+      });
+
+    const bothReady$ = combineLatest([
+      this.connection1.readyState$,
+      this.connection2.readyState$,
+    ]).pipe(filter(([ready1, ready2]) => ready1 && ready2));
+
     this._gameState = gameStateFactory.createGameState(player1.fleet, player2.fleet);
-    this._gameState.state$.subscribe((update) => {
-      this._messagingService.notifyFactory((recipient) => ({
-        event: GameMessageType.GameUpdate,
-        data: {
-          coord: update.sourceEvent.coord,
-          status: update.status,
-          sunk: update.sunkShip,
-          next: update.nextTurn === recipient,
-          self: nextPlayer(update.sourceEvent.player) === recipient,
-        } as GameUpdatePayload,
-      }));
+    this._gameState.state$.pipe(delayWhen(() => bothReady$)).subscribe((update) => {
+      this.connection1.notify(gameUpdateFactory(Player.P1, update, this.sequenceId));
+      this.connection2.notify(gameUpdateFactory(Player.P2, update, this.sequenceId));
+      this.sequenceId++;
 
       if (update.gameResult) {
-        const { winner } = update.gameResult;
-        this._messagingService.notifyFactory((recipient) => ({
-          event: GameMessageType.GameCompleted,
-          data: {
-            won: winner === recipient,
-          },
-        }));
+        this.connection1.notify(gameCompletedFactory(Player.P1, update.gameResult));
+        this.connection2.notify(gameCompletedFactory(Player.P2, update.gameResult));
       }
     });
 
     // TODO: next player is hardcoded here and instead should be provided by game state obj
-    this._messagingService.notifyFactory((recipient) => ({
-      event: GameMessageType.GameStarted,
-      data: { gameId: this._gameId, next: recipient === Player.P1 },
-    }));
+    this.connection1.notify(gameStartedFactory(Player.P1, this.sequenceId));
+    this.connection2.notify(gameStartedFactory(Player.P2, this.sequenceId));
+    this.sequenceId++;
   }
 
   destroy(): void {
-    this._gameEventsSub?.unsubscribe();
-    this._gameStateSub?.unsubscribe();
     this.connection1.destroy();
     this.connection2.destroy();
   }
+}
+
+function gameUpdateFactory(player: Player, update: GameUpdate, seq: number): GameMessage {
+  return {
+    event: GameMessageType.GameUpdate,
+    data: {
+      coord: update.sourceEvent.coord,
+      status: update.status,
+      sunk: update.sunkShip,
+      next: update.nextTurn === player,
+      self: nextPlayer(update.sourceEvent.player) === player,
+    } as GameUpdatePayload,
+    seq,
+  };
+}
+
+function gameCompletedFactory(player: Player, gameResult: GameResult): GameMessage {
+  const { winner } = gameResult;
+  return {
+    event: GameMessageType.GameCompleted,
+    data: {
+      won: winner === player,
+    },
+  };
+}
+
+function gameStartedFactory(player: Player, seq: number): GameMessage {
+  return {
+    event: GameMessageType.GameStarted,
+    data: { gameId: 'game1', next: player === Player.P1 },
+    seq,
+  };
 }

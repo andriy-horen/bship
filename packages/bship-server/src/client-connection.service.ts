@@ -26,45 +26,41 @@ export class ClientConnection implements Destroyable {
 
   private readonly _waitingAcknowledgeSubject$ = new BehaviorSubject<GameMessage | null>(null);
   private readonly _closeConnectionSubject$ = new Subject<CloseEvent>();
-  private readonly _messageEventSubject$ = new Subject<string>();
+  private readonly _messageSubject$ = new Subject<string>();
 
   private readonly _closeEventHandler = (event: CloseEvent) => {
     this._closeConnectionSubject$.next(event);
   };
 
   private readonly _messageEventHandler = (message: MessageEvent) => {
-    this._messageEventSubject$.next(message.data.toString());
+    this._messageSubject$.next(message.data.toString());
   };
 
-  /**
-   * We don't accept any messages from the client if there's a message waiting to be acknowledged
-   */
-  private readonly _messages$ = this._messageEventSubject$.pipe(
-    withLatestFrom(this._waitingAcknowledgeSubject$),
-    filter(([, waitingAck]) => waitingAck === null),
-    map(([message]) => message)
-  );
+  private readonly _anyOrOnlyAcknowledge = (message: GameMessage) =>
+    this._waitingAcknowledgeSubject$.value === null ||
+    message.event === GameMessageType.Acknowledge;
 
   /**
    * Observable of all game messages (GameMessage type)
    */
-  readonly gameMessages$: Observable<GameMessage> = this._messages$.pipe(
-    filter((message) => message.trim().startsWith('{')),
+  readonly gameMessages$: Observable<GameMessage> = this._messageSubject$.pipe(
     map((message) => JSON.parse(message)),
     filter((message) => isGameMessage(message)),
+    // check if server waits for acknowledge
+    filter(this._anyOrOnlyAcknowledge),
     takeUntil(this._closeConnectionSubject$)
   );
 
   /**
-   * Observable of generic errors or timeout error
+   * Observable of timeout or any other error
    */
-  readonly errorState$ = this.gameMessages$.pipe(
-    ignoreElements(),
+  readonly errorState$ = this._messageSubject$.pipe(
     timeout(this.CONNECTION_TIMEOUT),
+    ignoreElements(),
     catchError((error: Error) => of(error))
   );
 
-  private readonly _pingPongSub = this._messages$
+  private readonly _pingPongSub = this._messageSubject$
     .pipe(
       filter((message) => message === PING),
       takeUntil(this._closeConnectionSubject$)
@@ -104,7 +100,7 @@ export class ClientConnection implements Destroyable {
     return this._socket.connectionId!;
   }
 
-  notify(message: GameMessage, acknowledge = false): boolean {
+  notify(message: GameMessage, acknowledge = true): boolean {
     if (this._socket.readyState !== this._socket.OPEN) {
       // TODO: implement the line below
       // this.logger.error('Sending message to a client when connection is closed', ClientConnection);
@@ -142,7 +138,7 @@ export class ClientConnection implements Destroyable {
     this._socket.removeEventListener('close', this._closeEventHandler);
     this._pingPongSub?.unsubscribe();
     this._acknowledgeSub?.unsubscribe();
-    this._messageEventSubject$.complete();
+    this._messageSubject$.complete();
     this._closeConnectionSubject$.complete();
     this._waitingAcknowledgeSubject$.complete();
   }
