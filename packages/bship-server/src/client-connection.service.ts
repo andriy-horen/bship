@@ -137,8 +137,5 @@ export class ClientConnection implements Destroyable {
     this._socket.removeEventListener('close', this._closeEventHandler);
     this._pingPongSub?.unsubscribe();
     this._acknowledgeSub?.unsubscribe();
-    this._messageSubject.complete();
-    this._closeConnectionSubject.complete();
-    this._waitingAcknowledgeSubject.complete();
   }
 }

@@ -23,18 +23,28 @@ export class GameContext implements Destroyable {
     this.connection1 = new ClientConnection(player1.socket);
     this.connection2 = new ClientConnection(player2.socket);
 
-    this.connection1.errorState.subscribe((error) => {
-      console.log(error);
+    this.connection1.errorState.subscribe(() => {
       this.connection1.closeConnection();
       this.connection1.destroy();
       this.connection2.closeConnection();
       this.connection2.destroy();
     });
-    this.connection2.errorState.subscribe((error) => {
-      console.log(error);
+    this.connection2.errorState.subscribe(() => {
       this.connection1.closeConnection();
       this.connection1.destroy();
       this.connection2.closeConnection();
+      this.connection2.destroy();
+    });
+
+    this.connection1.connectionClosed.subscribe(() => {
+      this.connection2.closeConnection();
+      this.connection2.destroy();
+      this.connection1.destroy();
+    });
+
+    this.connection2.connectionClosed.subscribe(() => {
+      this.connection1.closeConnection();
+      this.connection1.destroy();
       this.connection2.destroy();
     });
 
