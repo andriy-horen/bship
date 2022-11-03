@@ -5,7 +5,7 @@ import { noop, range } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import useWebSocket from 'react-use-websocket';
 import './App.css';
 import { useAppDispatch, useAppSelector } from './app/hooks';
@@ -165,7 +165,7 @@ function App() {
               <div key={label}>{label}</div>
             ))}
           </div>
-          <DndProvider backend={HTML5Backend}>
+          <DndProvider backend={TouchBackend} options={{ enableMouseEvents: true }}>
             <FleetGrid fleet={playerFleet} />
             <CustomDragLayer />
           </DndProvider>
