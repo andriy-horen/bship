@@ -25,6 +25,7 @@ async function bootstrap() {
     logger: createLogger(),
   });
   app.useWebSocketAdapter(new WsAdapter(app));
+  app.setGlobalPrefix('api');
   await app.listen(3001);
 }
 bootstrap();

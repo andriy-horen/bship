@@ -1,5 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'node:path';
 import { AppController } from './app.controller';
 import { CommonModule } from './common.module';
 import { defaultConfiguration } from './config/configuration';
@@ -7,6 +9,10 @@ import { GameModule } from './game.module';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../..', 'client'),
+      exclude: ['/api*'],
+    }),
     ConfigModule.forRoot({ load: [defaultConfiguration], isGlobal: true }),
     CommonModule,
     GameModule,
