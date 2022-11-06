@@ -7,7 +7,6 @@
     "@mantine/core": "^5.5.5",
     "@mantine/hooks": "^5.5.5",
     "@mantine/notifications": "^5.5.5",
-    "@nestjs/serve-static": "^3.0.0",
     "@reduxjs/toolkit": "^1.8.5",
     "@tabler/icons": "^1.103.0",
     "@testing-library/jest-dom": "^5.16.5",

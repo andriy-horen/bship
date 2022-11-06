@@ -26,6 +26,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/platform-ws": "^9.1.2",
+    "@nestjs/serve-static": "^3.0.0",
     "@nestjs/websockets": "^9.1.2",
     "bship-contracts": "^1.0.0",
     "lodash": "^4.17.21",
