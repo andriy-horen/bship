@@ -36,7 +36,9 @@ function App() {
   const opponentFleet = useAppSelector(selectOpponentFleet);
   const gameStatus = useAppSelector(selectGameStatus);
 
-  const websocketUrl = 'wss://dev.bship.works/game';
+  const [websocketUrl] = useState(
+    `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/game`
+  );
   const [websocketId, setWebsocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);
 
