@@ -76,11 +76,6 @@ export class GameContext implements Destroyable {
       this.connection1.notify(gameUpdateFactory(Player.P1, update, this.sequenceId));
       this.connection2.notify(gameUpdateFactory(Player.P2, update, this.sequenceId));
       this.sequenceId++;
-
-      if (update.gameResult) {
-        this.connection1.notify(gameCompletedFactory(Player.P1, update.gameResult));
-        this.connection2.notify(gameCompletedFactory(Player.P2, update.gameResult));
-      }
     });
 
     // TODO: next player is hardcoded here and instead should be provided by game state obj
@@ -104,18 +99,9 @@ function gameUpdateFactory(player: Player, update: GameUpdate, seq: number): Gam
       sunk: update.sunkShip,
       next: update.nextTurn === player,
       self: nextPlayer(update.sourceEvent.player) === player,
+      won: gameWonByPlayer(player, update.gameResult),
     } as GameUpdatePayload,
     seq,
-  };
-}
-
-function gameCompletedFactory(player: Player, gameResult: GameResult): GameMessage {
-  const { winner } = gameResult;
-  return {
-    event: GameMessageType.GameCompleted,
-    data: {
-      won: winner === player,
-    },
   };
 }
 
@@ -125,4 +111,12 @@ function gameStartedFactory(player: Player, seq: number): GameMessage {
     data: { gameId: 'game1', next: player === Player.P1 },
     seq,
   };
+}
+
+function gameWonByPlayer(player: Player, gameResult: GameResult | undefined): boolean | undefined {
+  if (!gameResult) {
+    return;
+  }
+
+  return gameResult.winner === player;
 }

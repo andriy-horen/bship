@@ -41,9 +41,10 @@ export enum Player {
 export interface GameUpdatePayload {
   coord: Point;
   status: UpdateStatus;
-  sunk?: Rect;
   next: boolean;
   self: boolean;
+  won?: boolean;
+  sunk?: Rect;
 }
 
 export interface Battleship {

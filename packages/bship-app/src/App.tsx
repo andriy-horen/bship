@@ -54,6 +54,24 @@ function App() {
         switch (message.event) {
           case GameMessageType.GameUpdate:
             dispatch(addUpdate(message.data));
+            if (typeof message.data.won !== 'undefined') {
+              dispatch(gameReset());
+              showNotification(
+                message.data.won
+                  ? {
+                      title: 'Game Over',
+                      message: 'You won! Congrats GG EZ.',
+                      color: 'green',
+                      autoClose: false,
+                    }
+                  : {
+                      title: 'Game Over',
+                      message: 'You lost! Gonna cry?',
+                      color: 'orange',
+                      autoClose: false,
+                    }
+              );
+            }
             break;
           case GameMessageType.WaitForOpponent:
             dispatch(waitingForOpponent());
@@ -71,25 +89,6 @@ function App() {
                     title: 'Game started',
                     message: 'Opponent goes first. Good luck!',
                     color: 'green',
-                  }
-            );
-            break;
-
-          case GameMessageType.GameCompleted:
-            dispatch(gameReset());
-            showNotification(
-              message.data.won
-                ? {
-                    title: 'Game Over',
-                    message: 'You won! Congrats GG EZ.',
-                    color: 'green',
-                    autoClose: false,
-                  }
-                : {
-                    title: 'Game Over',
-                    message: 'You lost! Gonna cry?',
-                    color: 'orange',
-                    autoClose: false,
                   }
             );
             break;
