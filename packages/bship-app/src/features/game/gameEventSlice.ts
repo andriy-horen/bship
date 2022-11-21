@@ -7,6 +7,7 @@ export enum GameStatus {
   None,
   WaitingForOpponent,
   GameStarted,
+  GameOver,
 }
 
 export interface GameEventState {
@@ -43,6 +44,9 @@ export const gameEventSlice = createSlice({
   reducers: {
     addUpdate: (state, { payload }: PayloadAction<GameUpdatePayload>) => {
       state.gameUpdates.push(payload);
+      if (payload.won != null) {
+        state.status = GameStatus.GameOver;
+      }
     },
     waitingForOpponent: (state) => {
       state.status = GameStatus.WaitingForOpponent;

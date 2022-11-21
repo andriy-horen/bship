@@ -54,8 +54,7 @@ function App() {
         switch (message.event) {
           case GameMessageType.GameUpdate:
             dispatch(addUpdate(message.data));
-            if (typeof message.data.won !== 'undefined') {
-              dispatch(gameReset());
+            if (message.data.won != null) {
               showNotification(
                 message.data.won
                   ? {
@@ -93,7 +92,6 @@ function App() {
             );
             break;
           case GameMessageType.GameAborted:
-            dispatch(gameReset());
             showNotification({
               title: 'Game Aborted',
               message: 'Just start a new one, duh',
@@ -111,12 +109,14 @@ function App() {
       },
       onOpen() {},
       onClose() {
-        dispatch(gameReset());
-        showNotification({
-          title: 'Disconnect',
-          message: 'Try starting new game',
-          color: 'red',
-        });
+        if (gameStatus === GameStatus.GameStarted) {
+          dispatch(gameReset());
+          showNotification({
+            title: 'Disconnect',
+            message: 'Try starting new game',
+            color: 'red',
+          });
+        }
       },
     },
     connect
@@ -147,6 +147,8 @@ function App() {
   };
 
   const startGame = () => {
+    dispatch(gameReset());
+
     setConnect(true);
     sendJsonMessage({
       event: GameMessageType.CreateGame,
