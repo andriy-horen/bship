@@ -12,6 +12,6 @@ USER node
 # Node was not designed to run as PID 1 which leads to unexpected behaviour when running inside of Docker.
 # e.g. Node process running as PID 1 will not respond to SIGINT (CTRL-C) and similar signals.
 # Tiny properly handles running as PID 1.
-ENTRYPOINT ["/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 # Run the server
 CMD [ "node", "src/main.js" ]
