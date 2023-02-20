@@ -1,4 +1,3 @@
-import { IconShip } from '@tabler/icons';
 import { GameStatus } from '../game/gameEventSlice';
 import { PlayButton } from './PlayButton';
 
@@ -20,7 +19,6 @@ export function PlayButtonsContainer({
   return (
     <>
       <PlayButton color="green" onPlayButtonClick={onPlayOnlineClick} gameStatus={gameStatus}>
-        <IconShip style={{ ...iconStyle, transform: 'scaleX(-1)' }} size={18}></IconShip>
         Play online
       </PlayButton>
       {/* <PlayButton color="dark" onPlayButtonClick={onPlayComputerClick} gameStatus={gameStatus}>
