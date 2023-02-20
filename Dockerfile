@@ -15,8 +15,8 @@
 # FROM node:18.12-bullseye AS base
 # TBD
 
-#FROM node:18.12.1-bullseye-slim as base
-FROM node:18.12.1-bullseye as base
+#FROM node:19.6.1-bullseye-slim as base
+FROM node:19.6.1-bullseye as base
 RUN apt-get update && apt-get install -y --no-install-recommends tini
 WORKDIR /usr/src/app
 
