@@ -9,7 +9,7 @@
     "/dist"
   ],
   "scripts": {
-    "prebuild": "rimraf dist",
+    "prebuild": "rimraf ./dist",
     "build": "tsc --project tsconfig.esm.json & tsc --project tsconfig.cjs.json"
   },
   "author": "",

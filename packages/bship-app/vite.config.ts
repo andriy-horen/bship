@@ -4,8 +4,6 @@ import { defineConfig } from 'vite';
 import svgrPlugin from 'vite-plugin-svgr';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 
-console.log(__dirname);
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), viteTsconfigPaths(), svgrPlugin()],
@@ -26,6 +24,6 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../../dist/client',
+    outDir: './dist',
   },
 });

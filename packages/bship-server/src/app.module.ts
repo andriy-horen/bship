@@ -10,7 +10,8 @@ import { GameModule } from './game.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../..', 'client'),
+      // TODO: path below should not be hardcoded
+      rootPath: join(__dirname, '../../..', 'bship-app', 'dist'),
       exclude: ['/api*'],
     }),
     ConfigModule.forRoot({ load: [defaultConfiguration], isGlobal: true }),
