@@ -32,8 +32,16 @@ RUN npm run build --workspaces
 FROM base AS prod
 ENV NODE_ENV production
 COPY --from=build /usr/src/app/package*.json .
-RUN npm ci --only=production
-COPY --from=build /usr/src/app/dist ./dist/
+RUN npm ci --only=production && npm cache clean --force
+
+COPY --from=build /usr/src/app/packages/bship-app/dist ./packages/bship-app/dist
+COPY --from=build /usr/src/app/packages/bship-app/package*.json ./packages/bship-app
+
+COPY --from=build /usr/src/app/packages/bship-contracts/dist ./packages/bship-contracts/dist
+COPY --from=build /usr/src/app/packages/bship-contracts/package*.json ./packages/bship-contracts
+
+COPY --from=build /usr/src/app/packages/bship-server/dist ./packages/bship-server/dist
+COPY --from=build /usr/src/app/packages/bship-server/package*.json ./packages/bship-server
 
 EXPOSE 3001
 RUN chown -R node /usr/src/app
@@ -43,4 +51,4 @@ USER node
 # Tiny properly handles running as PID 1.
 ENTRYPOINT ["/usr/bin/tini", "--"]
 # Run the server
-CMD [ "node", "./dist/server/src/main.js" ]
+CMD [ "node", "./packages/bship-server/dist/src/main.js" ]
