@@ -1,4 +1,4 @@
-import { Container, Header } from '@mantine/core';
+import { Burger, Container } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { GameMessage, GameMessageType, PING, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
@@ -41,6 +41,7 @@ function App() {
   );
   const [websocketId, setWebsocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const { sendJsonMessage, sendMessage } = useWebSocket(
     websocketUrl,
@@ -187,17 +188,10 @@ function App() {
 
   return (
     <Container>
-      <Header height={40}>
-        <h3>bship.org</h3>
-      </Header>
-
+      <Burger opened={menuOpen} onClick={() => setMenuOpen(!menuOpen)} aria-label={'nav'} />
       <div className="grids-container">
-        <div className="grid-player">
-          <div>You</div>
-          {getPlayerGrid()}
-        </div>
+        <div className="grid-player">{getPlayerGrid()}</div>
         <div className="grid-opponent">
-          <div>Opponent</div>
           <Grid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
         </div>
 
