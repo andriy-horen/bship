@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import Twemoji from '../twemoji/Twemoji';
 import { getFlagEmoji } from './getFlagEmoji';
-import './Username.css';
+import styles from './Username.module.css';
 
 export interface UsernameProps {
   username: string;
@@ -14,7 +14,7 @@ export function Username({ username, countryCode }: UsernameProps) {
   return (
     <>
       <Twemoji emoji={flagEmoji}></Twemoji>
-      <span className="username">{username}</span>
+      <span className={styles.username}>{username}</span>
     </>
   );
 }
