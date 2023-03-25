@@ -192,8 +192,8 @@ function App() {
       <Burger opened={menuOpen} onClick={() => setMenuOpen(!menuOpen)} aria-label={'nav'} />
 
       <UserVersus
-        user1={{ username: 'player 1', countryCode: 'PL' }}
-        user2={{ username: 'player 2', countryCode: 'UA' }}
+        user1={{ username: 'mat_eusz', countryCode: 'PL' }}
+        user2={{ username: 'kometa', countryCode: 'UA' }}
       ></UserVersus>
 
       <div className="grids-container">
