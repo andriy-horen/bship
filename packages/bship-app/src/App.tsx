@@ -1,6 +1,5 @@
 import { Burger, Container } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconX } from '@tabler/icons-react';
 import { GameMessage, GameMessageType, PING, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
 import { nanoid } from 'nanoid';
@@ -27,7 +26,7 @@ import {
 import { GridLayer } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
 import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
-import { Username } from './features/username/Username';
+import { UserVersus } from './features/user-versus/UserVersus';
 import { toRect } from './utils';
 
 function App() {
@@ -192,11 +191,10 @@ function App() {
     <Container>
       <Burger opened={menuOpen} onClick={() => setMenuOpen(!menuOpen)} aria-label={'nav'} />
 
-      <div>
-        <Username username="player 1" countryCode="UA"></Username>
-        <IconX />
-        <Username username="player 2" countryCode="PL"></Username>
-      </div>
+      <UserVersus
+        user1={{ username: 'player 1', countryCode: 'PL' }}
+        user2={{ username: 'player 2', countryCode: 'UA' }}
+      ></UserVersus>
 
       <div className="grids-container">
         <div className="grid-player">{getPlayerGrid()}</div>

@@ -14,7 +14,7 @@ export function Username({ username, countryCode }: UsernameProps) {
   return (
     <>
       <Twemoji emoji={flagEmoji}></Twemoji>
-      <span>{username}</span>
+      <span className="username">{username}</span>
     </>
   );
 }
