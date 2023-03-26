@@ -1,4 +1,4 @@
-import { Burger, Container } from '@mantine/core';
+import { Burger, Container, Group, Header } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { GameMessage, GameMessageType, PING, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
@@ -26,6 +26,7 @@ import {
 import { GridLayer } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
 import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
+import { PlayersOnline } from './features/players-online/PlayersOnline';
 import { UserVersus } from './features/user-versus/UserVersus';
 import { toRect } from './utils';
 
@@ -189,7 +190,24 @@ function App() {
 
   return (
     <Container>
-      <Burger opened={menuOpen} onClick={() => setMenuOpen(!menuOpen)} aria-label={'nav'} />
+      <Header height={56} mb={16}>
+        <div
+          style={{
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Group>
+            <Burger opened={menuOpen} onClick={() => setMenuOpen(!menuOpen)} aria-label={'nav'} />
+          </Group>
+
+          <Group>
+            <PlayersOnline online={149}></PlayersOnline>
+          </Group>
+        </div>
+      </Header>
 
       <UserVersus
         user1={{ username: 'mat_eusz', countryCode: 'PL' }}
