@@ -28,6 +28,7 @@ import { Grid } from './features/grid/Grid';
 import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
 import { PlayersOnline } from './features/players-online/PlayersOnline';
 import { UserVersus } from './features/user-versus/UserVersus';
+import { selectUserIsEmpty } from './features/user/userSlice';
 import { UsernameModal } from './features/username-modal/UsernameModal';
 import { toRect } from './utils';
 
@@ -38,6 +39,7 @@ function App() {
   const playerFleet = useAppSelector(selectPlayerFleet);
   const opponentFleet = useAppSelector(selectOpponentFleet);
   const gameStatus = useAppSelector(selectGameStatus);
+  const userIsEmpty = useAppSelector(selectUserIsEmpty);
 
   const [websocketUrl] = useState(
     `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/game`
@@ -152,6 +154,10 @@ function App() {
 
   const startGame = () => {
     dispatch(gameReset());
+
+    if (userIsEmpty) {
+      console.log('boom');
+    }
 
     setConnect(true);
     sendJsonMessage({

@@ -1,9 +1,11 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import gameEventSlice from '../features/game/gameEventSlice';
+import userSlice from '../features/user/userSlice';
 
 export const store = configureStore({
   reducer: {
     gameEvent: gameEventSlice,
+    user: userSlice,
   },
 });
 

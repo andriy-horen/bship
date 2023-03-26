@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { RootState } from '../../app/store';
 
 export interface UserState {
   userId: string;
@@ -21,3 +22,8 @@ export const userSlice = createSlice({
     reducer: () => {},
   },
 });
+
+export const selectUserIsEmpty = (state: RootState) =>
+  state.user.userId === '' && state.user.username === '';
+
+export default userSlice.reducer;
