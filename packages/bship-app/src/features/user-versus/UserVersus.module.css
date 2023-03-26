@@ -1,5 +1,14 @@
 .userVersus {
   display: flex;
+  justify-content: center;
+}
+
+.user {
+  font-weight: bold;
+}
+
+.middleIcon {
+  color: #87899b;
 }
 
 .isActive::after {
