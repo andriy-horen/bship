@@ -154,10 +154,12 @@ export const gridSelector = (updates: GameUpdatePayload[]) => {
 
 export const selectPlayerGrid = ({ gameEvent: { gameUpdates: updates } }: RootState) =>
   gridSelector(updates.filter((update) => update.self));
+
 export const selectOpponentGrid = ({ gameEvent: { gameUpdates: updates } }: RootState) =>
   gridSelector(updates.filter((update) => !update.self));
 
 export const selectPlayerFleet = (state: RootState) => state.gameEvent.playerFleet;
+
 export const selectOpponentFleet = (state: RootState) => {
   return state.gameEvent.gameUpdates
     .filter((update) => !update.self && !!update.sunk)

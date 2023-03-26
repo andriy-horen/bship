@@ -1,4 +1,5 @@
 import { Burger, Container, Group, Header } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { GameMessage, GameMessageType, PING, Point } from 'bship-contracts';
 import { noop, range } from 'lodash-es';
@@ -29,7 +30,6 @@ import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContain
 import { PlayersOnline } from './features/players-online/PlayersOnline';
 import { UserVersus } from './features/user-versus/UserVersus';
 import { selectUserIsEmpty } from './features/user/userSlice';
-import { UsernameModal } from './features/username-modal/UsernameModal';
 import { toRect } from './utils';
 
 function App() {
@@ -152,11 +152,19 @@ function App() {
     } as any);
   };
 
+  // TODO: usernameModal string is a magic string and used also as mapping in index.tsx, needs to be extracted & refactored
+  const openModal = () =>
+    modals.openContextModal({
+      modal: 'usernameModal',
+      title: 'Player details',
+      innerProps: {},
+    });
+
   const startGame = () => {
     dispatch(gameReset());
 
     if (userIsEmpty) {
-      console.log('boom');
+      openModal();
     }
 
     setConnect(true);
@@ -220,8 +228,6 @@ function App() {
         user1={{ username: 'mateusz', countryCode: 'PL' }}
         user2={{ username: 'kometa', countryCode: 'UA' }}
       ></UserVersus>
-
-      <UsernameModal></UsernameModal>
 
       <div className="grids-container">
         <div className="grid-player">{getPlayerGrid()}</div>

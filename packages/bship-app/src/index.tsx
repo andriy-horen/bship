@@ -1,10 +1,12 @@
 import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import App from './App';
 import { store } from './app/store';
+import { UsernameModal } from './features/username-modal/UsernameModal';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 
@@ -15,8 +17,10 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <MantineProvider withGlobalStyles withNormalizeCSS>
-        <Notifications />
-        <App />
+        <ModalsProvider modals={{ usernameModal: UsernameModal }}>
+          <Notifications />
+          <App />
+        </ModalsProvider>
       </MantineProvider>
     </Provider>
   </React.StrictMode>
