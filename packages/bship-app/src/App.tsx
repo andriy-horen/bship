@@ -28,6 +28,7 @@ import { Grid } from './features/grid/Grid';
 import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
 import { PlayersOnline } from './features/players-online/PlayersOnline';
 import { UserVersus } from './features/user-versus/UserVersus';
+import { UsernameModal } from './features/username-modal/UsernameModal';
 import { toRect } from './utils';
 
 function App() {
@@ -210,9 +211,11 @@ function App() {
       </Header>
 
       <UserVersus
-        user1={{ username: 'mat_eusz', countryCode: 'PL' }}
+        user1={{ username: 'mateusz', countryCode: 'PL' }}
         user2={{ username: 'kometa', countryCode: 'UA' }}
       ></UserVersus>
+
+      <UsernameModal></UsernameModal>
 
       <div className="grids-container">
         <div className="grid-player">{getPlayerGrid()}</div>

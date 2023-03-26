@@ -40,7 +40,6 @@ const initialState: GameEventState = {
 export const gameEventSlice = createSlice({
   name: 'gameEvent',
   initialState,
-  // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     addUpdate: (state, { payload }: PayloadAction<GameUpdatePayload>) => {
       state.gameUpdates.push(payload);
