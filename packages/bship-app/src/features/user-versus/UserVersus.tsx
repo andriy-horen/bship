@@ -15,11 +15,11 @@ export interface UserVersusProps {
 export function UserVersus({ user1, user2 }: UserVersusProps) {
   return (
     <span className={css.userVersus}>
-      <span>
+      <span className={css.isActive}>
         <Username username={user1.username} countryCode={user1.countryCode}></Username>
       </span>
       <IconX />
-      <span className={css.secondUser}>
+      <span className={css.isActive}>
         <Username
           username={user2.username}
           countryCode={user2.countryCode}
