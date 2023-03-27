@@ -157,7 +157,11 @@ function App() {
     modals.openContextModal({
       modal: 'usernameModal',
       title: 'Player details',
-      innerProps: {},
+      innerProps: {
+        onSubmit: () => {
+          console.log('submit!');
+        },
+      },
     });
 
   const startGame = () => {
