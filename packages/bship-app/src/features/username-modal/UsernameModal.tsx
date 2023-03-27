@@ -1,6 +1,7 @@
 import { Alert, Button, Group, TextInput } from '@mantine/core';
 import { ContextModalProps } from '@mantine/modals';
 import { IconInfoCircle } from '@tabler/icons-react';
+import useSWR from 'swr';
 import Twemoji from '../twemoji/Twemoji';
 
 export interface UsernameModalProps {
@@ -9,6 +10,7 @@ export interface UsernameModalProps {
 
 export const UsernameModal = ({ innerProps }: ContextModalProps<UsernameModalProps>) => {
   const userFlag = '🇺🇦';
+  const { data, error, isLoading } = useSWR('/api/user');
 
   return (
     <>

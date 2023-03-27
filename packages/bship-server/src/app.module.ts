@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { CommonModule } from './common.module';
 import { defaultConfiguration } from './config/configuration';
 import { GameModule } from './game.module';
+import { UserController } from './user.controller';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { GameModule } from './game.module';
     CommonModule,
     GameModule,
   ],
-  controllers: [AppController],
+  // TODO: extract UserController into a user module
+  controllers: [AppController, UserController],
   providers: [Logger],
 })
 export class AppModule {}
