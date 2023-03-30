@@ -1,6 +1,6 @@
 import { Button, Loader, MantineColor } from '@mantine/core';
 import { noop } from 'lodash-es';
-import { GameStatus } from '../game/gameEventSlice';
+import { GameStatus } from '../../app/gameStore';
 
 export interface PlayButtonProps {
   gameStatus: GameStatus;

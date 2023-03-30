@@ -1,4 +1,4 @@
-import { GameStatus } from '../game/gameEventSlice';
+import { GameStatus } from '../../app/gameStore';
 import { PlayButton } from './PlayButton';
 
 export interface PlayButtonsContainerProps {

@@ -9,17 +9,12 @@ import {
 import classNames from 'classnames';
 import { useState } from 'react';
 import { useDrop } from 'react-dnd';
-import { useAppSelector } from '../../app/hooks';
-import { store } from '../../app/store';
+import { shallow } from 'zustand/shallow';
+import useGameStore from '../../app/gameStore';
 import { isValidCoordinate, toRect } from '../../utils';
 import { DraggableBattleship } from '../battleship/DraggableBattleship';
 import { ItemTypes } from '../dnd/itemTypes';
 import { snapToGrid } from '../dnd/snap';
-import {
-  selectPlayerFleet,
-  toggleShipOrientation,
-  updateShipPosition,
-} from '../game/gameEventSlice';
 import './FleetGrid.css';
 
 export interface FleetGridProps {
@@ -42,7 +37,11 @@ export function FleetGrid({ fleet }: FleetGridProps) {
     return validCoordinates && !intersectsOthers;
   };
 
-  const playerFleet = useAppSelector(selectPlayerFleet);
+  const playerFleet = useGameStore((state) => state.playerFleet);
+  const [toggleShipOrientation, updateShipPosition] = useGameStore(
+    (state) => [state.toggleShipOrientation, state.updateShipPosition],
+    shallow
+  );
 
   const [, drop] = useDrop(
     () => ({
@@ -50,12 +49,10 @@ export function FleetGrid({ fleet }: FleetGridProps) {
       drop(item: BattleshipModel, monitor) {
         const delta = monitor.getDifferenceFromInitialOffset() as { x: number; y: number };
 
-        store.dispatch(
-          updateShipPosition({
-            currentCoord: item.coordinates,
-            newCoord: getDropCoordinates(item.coordinates, delta),
-          })
-        );
+        updateShipPosition({
+          currentCoord: item.coordinates,
+          newCoord: getDropCoordinates(item.coordinates, delta),
+        });
       },
       canDrop(item, monitor) {
         const delta = monitor.getDifferenceFromInitialOffset() as { x: number; y: number };
@@ -80,7 +77,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
       return setShipErrorAnimation(index);
     }
 
-    store.dispatch(toggleShipOrientation(model.coordinates));
+    toggleShipOrientation(model.coordinates);
   };
 
   return (

@@ -3,10 +3,8 @@ import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Provider } from 'react-redux';
 import { SWRConfig } from 'swr';
 import App from './App';
-import { store } from './app/store';
 import { UsernameModal } from './features/username-modal/UsernameModal';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
@@ -19,20 +17,18 @@ const fetcher = (input: RequestInfo | URL, init?: RequestInit | undefined) =>
 
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <SWRConfig
-        value={{
-          fetcher,
-        }}
-      >
-        <MantineProvider withGlobalStyles withNormalizeCSS>
-          <ModalsProvider modals={{ usernameModal: UsernameModal }}>
-            <Notifications />
-            <App />
-          </ModalsProvider>
-        </MantineProvider>
-      </SWRConfig>
-    </Provider>
+    <SWRConfig
+      value={{
+        fetcher,
+      }}
+    >
+      <MantineProvider withGlobalStyles withNormalizeCSS>
+        <ModalsProvider modals={{ usernameModal: UsernameModal }}>
+          <Notifications />
+          <App />
+        </ModalsProvider>
+      </MantineProvider>
+    </SWRConfig>
   </React.StrictMode>
 );
 

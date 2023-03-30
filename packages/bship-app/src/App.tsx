@@ -8,38 +8,40 @@ import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import useWebSocket from 'react-use-websocket';
+import { shallow } from 'zustand/shallow';
 import './App.css';
-import { useAppDispatch, useAppSelector } from './app/hooks';
-import { CustomDragLayer } from './features/dnd/CustomDragLayer';
-import { FleetGrid } from './features/fleet-grid/FleetGrid';
-import {
-  addUpdateThunk as addUpdate,
-  gameReset,
-  gameStarted,
+import useGameStore, {
   GameStatus,
-  selectGameStatus,
   selectOpponentFleet,
   selectOpponentGrid,
-  selectPlayerFleet,
   selectPlayerGrid,
-  waitingForOpponent,
-} from './features/game/gameEventSlice';
+} from './app/gameStore';
+import { CustomDragLayer } from './features/dnd/CustomDragLayer';
+import { FleetGrid } from './features/fleet-grid/FleetGrid';
+
 import { GridLayer } from './features/grid-layer/GridLayer';
 import { Grid } from './features/grid/Grid';
 import { PlayButtonsContainer } from './features/play-buttons/PlayButtonsContainer';
 import { PlayersOnline } from './features/players-online/PlayersOnline';
 import { UserVersus } from './features/user-versus/UserVersus';
-import { selectUserIsEmpty } from './features/user/userSlice';
 import { toRect } from './utils';
 
 function App() {
-  const dispatch = useAppDispatch();
-  const playerGrid = useAppSelector(selectPlayerGrid);
-  const opponentGrid = useAppSelector(selectOpponentGrid);
-  const playerFleet = useAppSelector(selectPlayerFleet);
-  const opponentFleet = useAppSelector(selectOpponentFleet);
-  const gameStatus = useAppSelector(selectGameStatus);
-  const userIsEmpty = useAppSelector(selectUserIsEmpty);
+  const [gameStatus, playerFleet, gameUpdates] = useGameStore(
+    (state) => [state.status, state.playerFleet, state.gameUpdates],
+    shallow
+  );
+
+  const [addUpdate, waitingForOpponent, gameStarted, gameReset] = useGameStore(
+    (state) => [state.addUpdate, state.waitingForOpponent, state.gameStarted, state.gameReset],
+    shallow
+  );
+
+  const playerGrid = selectPlayerGrid(gameUpdates);
+  const opponentGrid = selectOpponentGrid(gameUpdates);
+  const opponentFleet = selectOpponentFleet(gameUpdates);
+
+  // const userIsEmpty = useAppSelector(selectUserIsEmpty);
 
   const [websocketUrl] = useState(
     `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/game`
@@ -59,7 +61,7 @@ function App() {
         const message = JSON.parse(data) as GameMessage;
         switch (message.event) {
           case GameMessageType.GameUpdate:
-            dispatch(addUpdate(message.data));
+            addUpdate(message.data);
             if (message.data.won != null) {
               showNotification(
                 message.data.won
@@ -79,10 +81,10 @@ function App() {
             }
             break;
           case GameMessageType.WaitForOpponent:
-            dispatch(waitingForOpponent());
+            waitingForOpponent();
             break;
           case GameMessageType.GameStarted:
-            dispatch(gameStarted(message.data.gameId));
+            gameStarted(message.data.gameId);
             showNotification(
               message.data.next
                 ? {
@@ -116,7 +118,7 @@ function App() {
       onOpen() {},
       onClose() {
         if (gameStatus === GameStatus.GameStarted) {
-          dispatch(gameReset());
+          gameReset();
           showNotification({
             title: 'Disconnect',
             message: 'Try starting new game',
@@ -165,11 +167,11 @@ function App() {
     });
 
   const startGame = () => {
-    dispatch(gameReset());
+    gameReset();
 
-    if (userIsEmpty) {
-      openModal();
-    }
+    // if (userIsEmpty) {
+    //   openModal();
+    // }
 
     setConnect(true);
     sendJsonMessage({
