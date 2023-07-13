@@ -13,7 +13,7 @@ function createLogger(): LoggerService {
         format: winston.format.combine(
           winston.format.timestamp(),
           winston.format.ms(),
-          utilities.format.nestLike(appName)
+          utilities.format.nestLike(appName),
         ),
       }),
     ],
@@ -24,6 +24,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: createLogger(),
   });
+
   app.useWebSocketAdapter(new WsAdapter(app));
   app.setGlobalPrefix('api');
   await app.listen(3001);

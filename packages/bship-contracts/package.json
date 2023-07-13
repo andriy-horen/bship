@@ -16,7 +16,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/node": "^18.15.10",
-    "rimraf": "^4.4.1"
+    "rimraf": "^5.0.1"
   },
   "exports": {
     "import": "./dist/esm/index.js",

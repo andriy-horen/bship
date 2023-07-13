@@ -69,7 +69,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
       event,
       // filters out last sunk ship because it's already checked
       targetFleet.filter((ship) => ship !== targetShip),
-      state
+      state,
     );
 
     // update: player hit & sunk a ship
@@ -85,7 +85,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
   private isFleetDestroyed(
     { player }: GameEvent,
     fleet: Rect[],
-    state: Map<GameEventString, GameUpdate>
+    state: Map<GameEventString, GameUpdate>,
   ): boolean {
     return fleet
       .flatMap((ship) => toPoints(ship))
@@ -95,7 +95,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
   private tryGetGameResult(
     event: GameEvent,
     fleet: Rect[],
-    state: Map<GameEventString, GameUpdate>
+    state: Map<GameEventString, GameUpdate>,
   ): GameResult | undefined {
     return this.isFleetDestroyed(event, fleet, state) ? { winner: event.player } : undefined;
   }
