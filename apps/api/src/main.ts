@@ -12,7 +12,7 @@ function createLogger(): LoggerService {
         format: winston.format.combine(
           winston.format.timestamp(),
           winston.format.ms(),
-          utilities.format.nestLike('bship')
+          utilities.format.nestLike('bship'),
         ),
       }),
     ],
