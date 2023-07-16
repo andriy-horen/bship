@@ -30,7 +30,7 @@ export class GameGateway implements OnGatewayConnection {
 
   constructor(
     private clientPairingService: ClientPairingService,
-    @Inject(Logger) private readonly logger: LoggerService
+    @Inject(Logger) private readonly logger: LoggerService,
   ) {}
 
   @SubscribeMessage(GameMessageType.CreateGame)

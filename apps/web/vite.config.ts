@@ -1,19 +1,31 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import fs from 'node:fs';
+import { defineConfig } from 'vite';
+import svgrPlugin from 'vite-plugin-svgr';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   cacheDir: '../../node_modules/.vite/web',
 
   server: {
-    port: 4200,
-    host: 'localhost',
-  },
-
-  preview: {
-    port: 4300,
-    host: 'localhost',
+    port: 443,
+    strictPort: true,
+    host: 'dev.bship.works',
+    https: {
+      key: fs.readFileSync('./.cert/devcert.key'),
+      cert: fs.readFileSync('./.cert/devcert.crt'),
+    },
+    open: true,
+    proxy: {
+      '/game': {
+        target: 'ws://localhost:3001',
+        ws: true,
+      },
+      '/api': {
+        target: 'http://localhost:3001',
+      },
+    },
   },
 
   plugins: [
@@ -21,6 +33,7 @@ export default defineConfig({
     viteTsConfigPaths({
       root: '../../',
     }),
+    svgrPlugin(),
   ],
 
   // Uncomment this if you are using workers.

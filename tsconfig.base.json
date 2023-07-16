@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@bship/contracts": ["libs/contracts/src/index.ts"]
-    }
+    },
+    "strict": true
   },
   "exclude": ["node_modules", "tmp"]
 }
