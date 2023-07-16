@@ -1,13 +1,32 @@
-import { StrictMode } from 'react';
-import * as ReactDOM from 'react-dom/client';
-
+import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
+import { Notifications } from '@mantine/notifications';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { SWRConfig } from 'swr';
 import App from './app/app';
+import { UsernameModal } from './app/username-modal/UsernameModal';
+import './styles.css';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const container = document.getElementById('root')!;
+const root = createRoot(container);
+
+const fetcher = (input: RequestInfo | URL, init?: RequestInit | undefined) =>
+  fetch(input, init).then((res) => res.json());
+
 root.render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+  <React.StrictMode>
+    <SWRConfig
+      value={{
+        fetcher,
+      }}
+    >
+      <MantineProvider withGlobalStyles withNormalizeCSS>
+        <ModalsProvider modals={{ usernameModal: UsernameModal }}>
+          <Notifications />
+          <App />
+        </ModalsProvider>
+      </MantineProvider>
+    </SWRConfig>
+  </React.StrictMode>
 );

@@ -1,4 +1,4 @@
-import { Battleship as BattleshipModel } from 'bship-contracts';
+import { Battleship as BattleshipModel } from '@bship/contracts';
 import classNames from 'classnames';
 import { range } from 'lodash-es';
 import './Battleship.css';

@@ -1,4 +1,4 @@
-import { Battleship, Point } from 'bship-contracts';
+import { Battleship, Point } from '@bship/contracts';
 import { range } from 'lodash-es';
 import { FleetLayer } from '../fleet-layer/FleetLayer';
 import { GridLayer, GridSquare } from '../grid-layer/GridLayer';

@@ -3,7 +3,7 @@ import type { XYCoord } from 'react-dnd';
 import { useDragLayer } from 'react-dnd';
 import { ItemTypes } from './itemTypes';
 
-import { Battleship as BattleshipModel } from 'bship-contracts';
+import { Battleship as BattleshipModel } from '@bship/contracts';
 import { Battleship } from '../battleship/Battleship';
 import { snapToGrid } from './snap';
 

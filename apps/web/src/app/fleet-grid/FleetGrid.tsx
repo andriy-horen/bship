@@ -5,16 +5,16 @@ import {
   isEqual,
   Point,
   Rect,
-} from 'bship-contracts';
+} from '@bship/contracts';
 import classNames from 'classnames';
 import { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { shallow } from 'zustand/shallow';
-import useGameStore from '../../app/gameStore';
-import { isValidCoordinate, toRect } from '../../utils';
 import { DraggableBattleship } from '../battleship/DraggableBattleship';
 import { ItemTypes } from '../dnd/itemTypes';
 import { snapToGrid } from '../dnd/snap';
+import useGameStore from '../store/gameStore';
+import { isValidCoordinate, toRect } from '../utils';
 import './FleetGrid.css';
 
 export interface FleetGridProps {

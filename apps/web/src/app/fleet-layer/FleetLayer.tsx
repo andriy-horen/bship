@@ -1,4 +1,4 @@
-import { Battleship as BattleshipModel } from 'bship-contracts';
+import { Battleship as BattleshipModel } from '@bship/contracts';
 import { Battleship } from '../battleship/Battleship';
 import './FleetLayer.css';
 

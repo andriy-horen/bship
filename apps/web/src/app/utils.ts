@@ -5,7 +5,7 @@ import {
   Orientation,
   Point,
   Rect,
-} from 'bship-contracts';
+} from '@bship/contracts';
 import { range } from 'lodash-es';
 
 export function toRect(ship: Battleship): Rect {

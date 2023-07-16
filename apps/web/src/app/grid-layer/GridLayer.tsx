@@ -1,4 +1,4 @@
-import { Point } from 'bship-contracts';
+import { Point } from '@bship/contracts';
 import './GridLayer.css';
 
 export enum GridSquare {
