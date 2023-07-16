@@ -3,8 +3,9 @@ import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import { SWRConfig } from 'swr';
-import App from './app/app';
+import { App } from './app/app';
 import { UsernameModal } from './app/username-modal/UsernameModal';
 import './styles.css';
 
@@ -24,9 +25,11 @@ root.render(
       <MantineProvider withGlobalStyles withNormalizeCSS>
         <ModalsProvider modals={{ usernameModal: UsernameModal }}>
           <Notifications />
-          <App />
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
         </ModalsProvider>
       </MantineProvider>
     </SWRConfig>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
