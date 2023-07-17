@@ -5,7 +5,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { SWRConfig } from 'swr';
-import { App } from './app/app';
+import { App } from './app/App';
 import { UsernameModal } from './app/username-modal/UsernameModal';
 import './styles.css';
 
