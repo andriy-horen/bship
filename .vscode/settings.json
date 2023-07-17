@@ -1,0 +1,11 @@
+{
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    ".cert": true,
+    // TODO: drop below config after old packages are deleted
+    "packages": true
+  }
+}
