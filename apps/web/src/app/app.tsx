@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import Game from './game/game';
+import Game from './game/Game';
 import { Lobby } from './lobby/lobby';
 
 export function App() {

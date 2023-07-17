@@ -2,7 +2,10 @@
   "name": "@bship/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "nx run-many -t build",
+    "serve": "nx run-many -t serve"
+  },
   "private": true,
   "dependencies": {
     "@mantine/core": "^6.0.16",
