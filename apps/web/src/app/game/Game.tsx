@@ -1,5 +1,4 @@
 import { GameMessage, GameMessageType, PING, Point } from '@bship/contracts';
-import { Burger, Container, Group, Header } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { noop, range } from 'lodash-es';
@@ -14,7 +13,6 @@ import { FleetGrid } from '../fleet-grid/FleetGrid';
 import { GridLayer } from '../grid-layer/GridLayer';
 import { Grid } from '../grid/Grid';
 import { PlayButtonsContainer } from '../play-buttons/PlayButtonsContainer';
-import { PlayersOnline } from '../players-online/PlayersOnline';
 import useGameStore, {
   GameStatus,
   selectOpponentFleet,
@@ -47,7 +45,6 @@ function App() {
   );
   const [websocketId, setWebsocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const { sendJsonMessage, sendMessage } = useWebSocket(
     websocketUrl,
@@ -208,26 +205,7 @@ function App() {
   }
 
   return (
-    <Container>
-      <Header height={56} mb={16}>
-        <div
-          style={{
-            height: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Group>
-            <Burger opened={menuOpen} onClick={() => setMenuOpen(!menuOpen)} aria-label={'nav'} />
-          </Group>
-
-          <Group>
-            <PlayersOnline online={149}></PlayersOnline>
-          </Group>
-        </div>
-      </Header>
-
+    <>
       <UserVersus
         user1={{ username: 'mateusz', countryCode: 'PL' }}
         user2={{ username: 'kometa', countryCode: 'UA' }}
@@ -247,7 +225,7 @@ function App() {
           ></PlayButtonsContainer>
         </div>
       </div>
-    </Container>
+    </>
   );
 }
 
