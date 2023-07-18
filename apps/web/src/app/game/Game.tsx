@@ -1,7 +1,7 @@
 import { GameMessage, GameMessageType, PING, Point } from '@bship/contracts';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { noop, range } from 'lodash-es';
+import { noop } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
@@ -9,9 +9,10 @@ import { TouchBackend } from 'react-dnd-touch-backend';
 import useWebSocket from 'react-use-websocket';
 import { shallow } from 'zustand/shallow';
 import { CustomDragLayer } from '../dnd/CustomDragLayer';
-import { FleetGrid } from '../fleet-grid/FleetGrid';
-import { GridLayer } from '../grid-layer/GridLayer';
-import { Grid } from '../grid/Grid';
+import { FleetGrid } from '../grids/fleet-grid/FleetGrid';
+import { GridLabels } from '../grids/grid-labels/GridLabels';
+import { GridLayer } from '../grids/grid-layer/GridLayer';
+import { PlayGrid } from '../grids/grid/PlayGrid';
 import { PlayButtonsContainer } from '../play-buttons/PlayButtonsContainer';
 import useGameStore, {
   GameStatus,
@@ -182,26 +183,18 @@ function App() {
     if (gameStatus === GameStatus.None) {
       return (
         <div className="player-grid">
-          <div className="vertical-labels">
-            {Array.from('ABCDEFGHIJ').map((label) => (
-              <div key={label}>{label}</div>
-            ))}
-          </div>
-          <DndProvider backend={TouchBackend} options={{ enableMouseEvents: true }}>
-            <FleetGrid fleet={playerFleet} />
-            <CustomDragLayer />
-          </DndProvider>
-          <GridLayer grid={playerGrid} />
-          <div className="horizontal-labels">
-            {range(1, 11).map((label) => (
-              <div key={label}>{label}</div>
-            ))}
-          </div>
+          <GridLabels>
+            <DndProvider backend={TouchBackend} options={{ enableMouseEvents: true }}>
+              <FleetGrid fleet={playerFleet} />
+              <CustomDragLayer />
+            </DndProvider>
+            <GridLayer grid={playerGrid} />
+          </GridLabels>
         </div>
       );
     }
 
-    return <Grid fleet={playerFleet} grid={playerGrid} onSquareClick={noop} />;
+    return <PlayGrid fleet={playerFleet} grid={playerGrid} onSquareClick={noop} />;
   }
 
   return (
@@ -214,7 +207,7 @@ function App() {
       <div className="grids-container">
         <div className="grid-player">{getPlayerGrid()}</div>
         <div className="grid-opponent">
-          <Grid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
+          <PlayGrid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
         </div>
 
         <div className="buttons-container">

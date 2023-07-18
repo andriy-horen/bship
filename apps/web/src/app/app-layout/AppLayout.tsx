@@ -1,8 +1,10 @@
 import { Burger, Container, Group, Header } from '@mantine/core';
-import { useState } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import { PlayersOnline } from '../players-online/PlayersOnline';
 
-export function AppLayout({ children }) {
+export type AppLayoutProps = PropsWithChildren<Record<never, never>>;
+
+export const AppLayout: React.FunctionComponent<AppLayoutProps> = ({ children }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -28,4 +30,4 @@ export function AppLayout({ children }) {
       <main>{children}</main>
     </Container>
   );
-}
+};

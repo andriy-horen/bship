@@ -10,11 +10,11 @@ import classNames from 'classnames';
 import { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { shallow } from 'zustand/shallow';
-import { DraggableBattleship } from '../battleship/DraggableBattleship';
-import { ItemTypes } from '../dnd/itemTypes';
-import { snapToGrid } from '../dnd/snap';
-import useGameStore from '../store/gameStore';
-import { isValidCoordinate, toRect } from '../utils';
+import { DraggableBattleship } from '../../battleship/DraggableBattleship';
+import { ItemTypes } from '../../dnd/itemTypes';
+import { snapToGrid } from '../../dnd/snap';
+import useGameStore from '../../store/gameStore';
+import { isValidCoordinate, toRect } from '../../utils';
 import './FleetGrid.css';
 
 export interface FleetGridProps {
@@ -31,7 +31,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
     const validCoordinates = newShip.every((coord) => isValidCoordinate(coord));
     const intersectsOthers = playerFleet.some(
       (ship) =>
-        !isEqual(ship.coordinates, current) && intersects(expandBy(toRect(ship), 1), newShip)
+        !isEqual(ship.coordinates, current) && intersects(expandBy(toRect(ship), 1), newShip),
     );
 
     return validCoordinates && !intersectsOthers;
@@ -40,7 +40,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
   const playerFleet = useGameStore((state) => state.playerFleet);
   const [toggleShipOrientation, updateShipPosition] = useGameStore(
     (state) => [state.toggleShipOrientation, state.updateShipPosition],
-    shallow
+    shallow,
   );
 
   const [, drop] = useDrop(
@@ -62,7 +62,7 @@ export function FleetGrid({ fleet }: FleetGridProps) {
         return isValidNewPosition(dropShip, item.coordinates);
       },
     }),
-    [playerFleet]
+    [playerFleet],
   );
 
   const [shipErrorAnimation, setShipErrorAnimation] = useState<number>();
