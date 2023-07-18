@@ -12,7 +12,7 @@ import { CustomDragLayer } from '../dnd/CustomDragLayer';
 import { FleetGrid } from '../grids/fleet-grid/FleetGrid';
 import { GridLabels } from '../grids/grid-labels/GridLabels';
 import { GridLayer } from '../grids/grid-layer/GridLayer';
-import { PlayGrid } from '../grids/grid/PlayGrid';
+import { PlayGrid } from '../grids/play-grid/PlayGrid';
 import { PlayButtonsContainer } from '../play-buttons/PlayButtonsContainer';
 import useGameStore, {
   GameStatus,
