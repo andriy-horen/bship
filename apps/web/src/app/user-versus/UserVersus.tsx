@@ -1,6 +1,6 @@
 import { IconX } from '@tabler/icons-react';
 import { Username } from '../username/Username';
-import css from './UserVersus.module.css';
+import styles from './UserVersus.module.css';
 
 export interface UserWithFlag {
   username: string;
@@ -14,12 +14,12 @@ export interface UserVersusProps {
 
 export function UserVersus({ user1, user2 }: UserVersusProps) {
   return (
-    <span className={css.userVersus}>
-      <span className={`${css.user} ${css.isActive}`}>
+    <span className={styles.userVersus}>
+      <span className={`${styles.user} ${styles.isActive}`}>
         <Username username={user1.username} countryCode={user1.countryCode}></Username>
       </span>
-      <IconX className={css.middleIcon} />
-      <span className={css.user}>
+      <IconX className={styles.middleIcon} />
+      <span className={styles.user}>
         <Username
           username={user2.username}
           countryCode={user2.countryCode}

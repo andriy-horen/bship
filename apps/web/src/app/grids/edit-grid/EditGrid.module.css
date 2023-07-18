@@ -1,0 +1,8 @@
+.playerGrid {
+  position: relative;
+  width: 250px;
+}
+
+.fleetGrid {
+  position: absolute;
+}

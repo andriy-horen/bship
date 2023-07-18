@@ -1,16 +1,16 @@
-.horizontal-labels,
-.vertical-labels {
+.horizontal,
+.vertical {
   font-size: 8px;
   font-weight: bold;
   color: #87899b;
 }
 
-.horizontal-labels {
+.horizontal {
   display: flex;
   justify-content: space-around;
 }
 
-.vertical-labels {
+.vertical {
   display: flex;
   flex-direction: column;
   position: absolute;
