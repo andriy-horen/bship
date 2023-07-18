@@ -4,14 +4,9 @@ import { showNotification } from '@mantine/notifications';
 import { noop } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { TouchBackend } from 'react-dnd-touch-backend';
 import useWebSocket from 'react-use-websocket';
 import { shallow } from 'zustand/shallow';
-import { CustomDragLayer } from '../dnd/CustomDragLayer';
-import { FleetGrid } from '../grids/fleet-grid/FleetGrid';
-import { GridLabels } from '../grids/grid-labels/GridLabels';
-import { GridLayer } from '../grids/grid-layer/GridLayer';
+import { EditGrid } from '../grids/edit-grid/EditGrid';
 import { PlayGrid } from '../grids/play-grid/PlayGrid';
 import { PlayButtonsContainer } from '../play-buttons/PlayButtonsContainer';
 import useGameStore, {
@@ -22,7 +17,7 @@ import useGameStore, {
 } from '../store/gameStore';
 import { UserVersus } from '../user-versus/UserVersus';
 import { toRect } from '../utils';
-import './game.css';
+import './Game.css';
 
 function App() {
   const [gameStatus, playerFleet, gameUpdates] = useGameStore(
@@ -178,18 +173,11 @@ function App() {
     } as any);
   };
 
-  // TODO: extract editable grid
   function getPlayerGrid() {
     if (gameStatus === GameStatus.None) {
       return (
         <div className="player-grid">
-          <GridLabels>
-            <DndProvider backend={TouchBackend} options={{ enableMouseEvents: true }}>
-              <FleetGrid fleet={playerFleet} />
-              <CustomDragLayer />
-            </DndProvider>
-            <GridLayer grid={playerGrid} />
-          </GridLabels>
+          <EditGrid fleet={playerFleet} grid={playerGrid}></EditGrid>
         </div>
       );
     }

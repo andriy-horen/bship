@@ -1,9 +1,14 @@
+import React from 'react';
 import { shallow } from 'zustand/shallow';
-import { FleetGrid } from '../grids/fleet-grid/FleetGrid';
-import useGameStore from '../store/gameStore';
+import { EditGrid } from '../grids/edit-grid/EditGrid';
+import useGameStore, { selectPlayerGrid } from '../store/gameStore';
 
-export function Lobby() {
-  const playerFleet = useGameStore((state) => state.playerFleet, shallow);
+export const Lobby: React.FunctionComponent = () => {
+  const [playerFleet, gameUpdates] = useGameStore(
+    (state) => [state.playerFleet, state.gameUpdates],
+    shallow,
+  );
+  const playerGrid = selectPlayerGrid(gameUpdates);
 
-  return <FleetGrid fleet={playerFleet}></FleetGrid>;
-}
+  return <EditGrid fleet={playerFleet} grid={playerGrid}></EditGrid>;
+};
