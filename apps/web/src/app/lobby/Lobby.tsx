@@ -1,4 +1,5 @@
-import React from 'react';
+import { Button, Flex, Group } from '@mantine/core';
+import React, { useState } from 'react';
 import { shallow } from 'zustand/shallow';
 import { EditGrid } from '../grids/edit-grid/EditGrid';
 import useGameStore, { selectPlayerGrid } from '../store/gameStore';
@@ -10,5 +11,28 @@ export const Lobby: React.FunctionComponent = () => {
   );
   const playerGrid = selectPlayerGrid(gameUpdates);
 
-  return <EditGrid fleet={playerFleet} grid={playerGrid}></EditGrid>;
+  const [inProgress, setInProgress] = useState(false);
+
+  return (
+    <Flex gap="md">
+      <EditGrid fleet={playerFleet} grid={playerGrid}></EditGrid>
+      <div>
+        <Group mt={8}>
+          <Button loading={inProgress} color="green" onClick={() => setInProgress(!inProgress)}>
+            {inProgress ? 'Waiting for Opponent' : 'Play Online'}
+          </Button>
+        </Group>
+        <Group mt={8}>
+          <Button disabled={inProgress} color="green">
+            Play a Friend
+          </Button>
+        </Group>
+        <Group mt={8}>
+          <Button disabled={inProgress} color="dark">
+            Play Computer
+          </Button>
+        </Group>
+      </div>
+    </Flex>
+  );
 };

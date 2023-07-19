@@ -8,7 +8,6 @@ import useWebSocket from 'react-use-websocket';
 import { shallow } from 'zustand/shallow';
 import { EditGrid } from '../grids/edit-grid/EditGrid';
 import { PlayGrid } from '../grids/play-grid/PlayGrid';
-import { PlayButtonsContainer } from '../play-buttons/PlayButtonsContainer';
 import useGameStore, {
   GameStatus,
   selectOpponentFleet,
@@ -196,14 +195,6 @@ function App() {
         <div className="grid-player">{getPlayerGrid()}</div>
         <div className="grid-opponent">
           <PlayGrid fleet={opponentFleet} grid={opponentGrid} onSquareClick={handleSquareClick} />
-        </div>
-
-        <div className="buttons-container">
-          <PlayButtonsContainer
-            gameStatus={gameStatus}
-            onPlayOnlineClick={startGame}
-            onPlayComputerClick={noop}
-          ></PlayButtonsContainer>
         </div>
       </div>
     </>
