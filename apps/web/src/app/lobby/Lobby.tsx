@@ -15,7 +15,7 @@ export const Lobby: React.FunctionComponent = () => {
 
   return (
     <Flex gap="md">
-      <EditGrid fleet={playerFleet} grid={playerGrid}></EditGrid>
+      <EditGrid readonly={inProgress} fleet={playerFleet} grid={playerGrid}></EditGrid>
       <div>
         <Group mt={8}>
           <Button loading={inProgress} color="green" onClick={() => setInProgress(!inProgress)}>
