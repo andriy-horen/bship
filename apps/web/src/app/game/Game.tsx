@@ -36,7 +36,7 @@ function App() {
   // const userIsEmpty = useAppSelector(selectUserIsEmpty);
 
   const [websocketUrl] = useState(
-    `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/game`,
+    `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`,
   );
   const [websocketId, setWebsocketId] = useState(nanoid(21));
   const [connect, setConnect] = useState(false);

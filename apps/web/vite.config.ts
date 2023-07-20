@@ -18,7 +18,7 @@ export default defineConfig({
     },
     open: true,
     proxy: {
-      '/game': {
+      '/ws': {
         target: 'ws://localhost:3001',
         ws: true,
       },

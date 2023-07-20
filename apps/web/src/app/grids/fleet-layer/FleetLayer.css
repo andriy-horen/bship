@@ -5,4 +5,5 @@
 .ship-location {
   position: absolute;
   z-index: 1;
+  cursor: move;
 }
