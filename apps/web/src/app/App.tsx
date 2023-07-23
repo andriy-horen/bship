@@ -8,7 +8,7 @@ export function App() {
     <AppLayout>
       <Routes>
         <Route path="/" element={<Lobby />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/game/:gameId" element={<Game />} />
       </Routes>
     </AppLayout>
   );
