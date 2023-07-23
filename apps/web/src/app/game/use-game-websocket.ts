@@ -1,7 +1,8 @@
-import { GameMessage, GameMessageType } from '@bship/contracts';
+import { Battleship, GameMessage, GameMessageType, PING } from '@bship/contracts';
 import { nanoid } from 'nanoid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
+import { toRect } from '../utils';
 
 export interface WebsocketGameEvents {
   onGameUpdate: (payload: GameMessage) => void;
@@ -19,11 +20,21 @@ export const useGameWebsocket = (
   );
 
   const [websocketId, setWebsocketId] = useState(nanoid(21));
-  const [connect, setConnect] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   const resetConnection = () => {
-    setConnect(false);
+    setConnected(false);
     setWebsocketId(nanoid(21));
+  };
+
+  const createGame = (playerFleet: Battleship[]) => {
+    setConnected(true);
+    sendJsonMessage({
+      event: GameMessageType.CreateGame,
+      data: {
+        fleet: playerFleet.map((ship) => toRect(ship)),
+      },
+    } as any);
   };
 
   const { sendJsonMessage, sendMessage } = useWebSocket(
@@ -37,16 +48,16 @@ export const useGameWebsocket = (
         const message = JSON.parse(data) as GameMessage;
         switch (message.event) {
           case GameMessageType.GameUpdate:
-            onGameUpdate(data);
+            onGameUpdate(message);
             break;
           case GameMessageType.WaitForOpponent:
-            onWaitForOpponent(data);
+            onWaitForOpponent(message);
             break;
           case GameMessageType.GameStarted:
-            onGameStarted(data);
+            onGameStarted(message);
             break;
           case GameMessageType.GameAborted:
-            onGameAborted(data);
+            onGameAborted(message);
             break;
         }
 
@@ -61,8 +72,18 @@ export const useGameWebsocket = (
         onClose?.(event);
       },
     },
-    connect,
+    connected,
   );
 
-  return { sendJsonMessage, sendMessage, resetConnection };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!connected) {
+        return;
+      }
+      sendMessage(PING, false);
+    }, 5_000);
+    return () => clearInterval(interval);
+  }, [connected, sendMessage]);
+
+  return { sendJsonMessage, sendMessage, resetConnection, createGame };
 };

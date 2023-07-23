@@ -20,7 +20,7 @@ export interface GameWebSocket extends WebSocket {
 }
 
 @WebSocketGateway({
-  path: '/game',
+  path: '/ws',
 })
 export class GameGateway implements OnGatewayConnection {
   @WebSocketServer() server!: Server;

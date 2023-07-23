@@ -1,20 +1,80 @@
 import { Button, Flex, Group } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import React, { useState } from 'react';
 import { shallow } from 'zustand/shallow';
+import { useGameWebsocket } from '../game/use-game-websocket';
 import { EditGrid } from '../grids/edit-grid/EditGrid';
 import useGameStore, { selectPlayerGrid } from '../store/gameStore';
 
 export const Lobby: React.FunctionComponent = () => {
-  const [playerFleet, gameUpdates] = useGameStore(
-    (state) => [state.playerFleet, state.gameUpdates],
+  const [gameStatus, playerFleet, gameUpdates] = useGameStore(
+    (state) => [state.status, state.playerFleet, state.gameUpdates],
+    shallow,
+  );
+
+  const [addUpdate, waitingForOpponent, gameStarted, gameReset] = useGameStore(
+    (state) => [state.addUpdate, state.waitingForOpponent, state.gameStarted, state.gameReset],
     shallow,
   );
   const playerGrid = selectPlayerGrid(gameUpdates);
+  // const opponentGrid = selectOpponentGrid(gameUpdates);
+  // const opponentFleet = selectOpponentFleet(gameUpdates);
 
   const [inProgress, setInProgress] = useState(false);
 
+  const { createGame } = useGameWebsocket({
+    onGameUpdate({ data }) {
+      addUpdate(data);
+      if (data.won != null) {
+        showNotification(
+          data.won
+            ? {
+                title: 'Game Over',
+                message: 'You won! Congrats GG EZ.',
+                color: 'green',
+                autoClose: false,
+              }
+            : {
+                title: 'Game Over',
+                message: 'You lost! Gonna cry?',
+                color: 'orange',
+                autoClose: false,
+              },
+        );
+      }
+    },
+    onGameAborted() {
+      showNotification({
+        title: 'Game Aborted',
+        message: 'Just start a new one, duh',
+        color: 'red',
+      });
+    },
+    onGameStarted({ data }) {
+      gameStarted(data.gameId);
+      showNotification(
+        data.next
+          ? {
+              title: 'Game started',
+              message: 'You go first. Good luck!',
+              color: 'green',
+            }
+          : {
+              title: 'Game started',
+              message: 'Opponent goes first. Good luck!',
+              color: 'green',
+            },
+      );
+    },
+    onWaitForOpponent() {
+      waitingForOpponent();
+    },
+  });
+
   const startGame = () => {
     setInProgress(!inProgress);
+    gameReset();
+    createGame(playerFleet);
   };
 
   return (
