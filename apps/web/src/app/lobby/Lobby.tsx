@@ -13,12 +13,16 @@ export const Lobby: React.FunctionComponent = () => {
 
   const [inProgress, setInProgress] = useState(false);
 
+  const startGame = () => {
+    setInProgress(!inProgress);
+  };
+
   return (
     <Flex gap="md">
       <EditGrid readonly={inProgress} fleet={playerFleet} grid={playerGrid}></EditGrid>
       <div>
         <Group mt={8}>
-          <Button loading={inProgress} color="green" onClick={() => setInProgress(!inProgress)}>
+          <Button loading={inProgress} color="green" onClick={startGame}>
             {inProgress ? 'Waiting for Opponent' : 'Play Online'}
           </Button>
         </Group>
