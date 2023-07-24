@@ -1,5 +1,6 @@
 import { Battleship } from '@bship/contracts';
 import { noop } from 'lodash-es';
+import { FunctionComponent } from 'react';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { CustomDragLayer } from '../../dnd/CustomDragLayer';
@@ -15,11 +16,7 @@ export interface EditGridProps {
   readonly?: boolean;
 }
 
-export const EditGrid: React.FunctionComponent<EditGridProps> = ({
-  fleet,
-  grid,
-  readonly = false,
-}) => {
+export const EditGrid: FunctionComponent<EditGridProps> = ({ fleet, grid, readonly = false }) => {
   if (readonly) {
     return (
       <div className={styles.playerGrid}>

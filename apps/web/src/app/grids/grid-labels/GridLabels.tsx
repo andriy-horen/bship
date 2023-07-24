@@ -1,10 +1,10 @@
 import { range } from 'lodash-es';
-import { PropsWithChildren } from 'react';
+import { FunctionComponent, PropsWithChildren } from 'react';
 import styles from './GridLabels.module.css';
 
 export type GridLabelsProps = PropsWithChildren<Record<never, never>>;
 
-export const GridLabels: React.FunctionComponent<GridLabelsProps> = ({ children }) => {
+export const GridLabels: FunctionComponent<GridLabelsProps> = ({ children }) => {
   return (
     <>
       <div className={styles.vertical}>

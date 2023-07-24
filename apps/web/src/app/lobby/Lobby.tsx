@@ -1,13 +1,13 @@
 import { Button, Flex, Group } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import React, { useState } from 'react';
+import { FunctionComponent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { shallow } from 'zustand/shallow';
 import { useGameWebsocket } from '../game/use-game-websocket';
 import { EditGrid } from '../grids/edit-grid/EditGrid';
 import useGameStore, { GameStatus, selectPlayerGrid } from '../store/gameStore';
 
-export const Lobby: React.FunctionComponent = () => {
+export const Lobby: FunctionComponent = () => {
   const navigate = useNavigate();
 
   const [gameStatus, playerFleet, gameUpdates] = useGameStore(
