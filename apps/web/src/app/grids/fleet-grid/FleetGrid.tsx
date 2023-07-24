@@ -13,7 +13,7 @@ import { shallow } from 'zustand/shallow';
 import { DraggableBattleship } from '../../battleship/DraggableBattleship';
 import { ItemTypes } from '../../dnd/itemTypes';
 import { snapToGrid } from '../../dnd/snap';
-import useGameStore from '../../store/gameStore';
+import { useGameStore } from '../../store/gameStore';
 import { isValidCoordinate, toRect } from '../../utils';
 import './FleetGrid.css';
 

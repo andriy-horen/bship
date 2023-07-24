@@ -1,18 +1,25 @@
-import { Point } from '@bship/contracts';
+import { GameMessageType, Point } from '@bship/contracts';
 import { noop } from 'lodash-es';
+import { FunctionComponent } from 'react';
 import { shallow } from 'zustand/shallow';
 import { EditGrid } from '../grids/edit-grid/EditGrid';
 import { PlayGrid } from '../grids/play-grid/PlayGrid';
-import useGameStore, {
+import {
   GameStatus,
   selectOpponentFleet,
   selectOpponentGrid,
   selectPlayerGrid,
+  useGameStore,
 } from '../store/gameStore';
 import { UserVersus } from '../user-versus/UserVersus';
 import './Game.css';
+import { GameWebsocket } from './use-game-websocket';
 
-function App() {
+export interface GameProps {
+  ws: GameWebsocket;
+}
+
+export const Game: FunctionComponent<GameProps> = ({ ws }) => {
   const [gameStatus, playerFleet, gameUpdates] = useGameStore(
     (state) => [state.status, state.playerFleet, state.gameUpdates],
     shallow,
@@ -24,12 +31,12 @@ function App() {
 
   // TODO: uncomment when ws is passed into Game component
   const handleSquareClick = (coordinates: Point) => {
-    // sendJsonMessage({
-    //   event: GameMessageType.GameEvent,
-    //   data: {
-    //     coordinates,
-    //   },
-    // } as any);
+    ws.sendJsonMessage({
+      event: GameMessageType.GameEvent,
+      data: {
+        coordinates,
+      },
+    } as any);
   };
 
   // // TODO: usernameModal string is a magic string and used also as mapping in index.tsx, needs to be extracted & refactored
@@ -71,6 +78,4 @@ function App() {
       </div>
     </>
   );
-}
-
-export default App;
+};

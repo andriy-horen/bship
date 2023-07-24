@@ -2,6 +2,7 @@ import { Battleship, GameMessage, GameMessageType, PING } from '@bship/contracts
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
+import { SendJsonMessage, SendMessage } from 'react-use-websocket/dist/lib/types';
 import { toRect } from '../utils';
 
 export interface WebsocketGameEvents {
@@ -11,10 +12,17 @@ export interface WebsocketGameEvents {
   onGameAborted: (payload: GameMessage) => void;
 }
 
+export interface GameWebsocket {
+  sendJsonMessage: SendJsonMessage;
+  sendMessage: SendMessage;
+  resetConnection: () => void;
+  createGame: (playerFleet: Battleship[]) => void;
+}
+
 export const useGameWebsocket = (
   { onGameStarted, onGameAborted, onGameUpdate, onWaitForOpponent }: WebsocketGameEvents,
   onClose?: (event: CloseEvent) => void,
-) => {
+): GameWebsocket => {
   const [websocketUrl] = useState(
     `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`,
   );

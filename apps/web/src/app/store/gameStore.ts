@@ -61,7 +61,7 @@ const initialState: GameState = {
 //     }
 //   };
 
-const useGameStore = create<GameState & GameAction>((set) => ({
+export const useGameStore = create<GameState & GameAction>((set) => ({
   ...initialState,
   addUpdate: (payload: GameUpdatePayload) =>
     set((state) => ({
@@ -122,8 +122,6 @@ const useGameStore = create<GameState & GameAction>((set) => ({
       }),
     })),
 }));
-
-export default useGameStore;
 
 // SELECTORS
 
