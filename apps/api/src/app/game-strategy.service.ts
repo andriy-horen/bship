@@ -8,40 +8,43 @@ import {
   upperBound,
 } from '@bship/contracts';
 import { Injectable } from '@nestjs/common';
-import { GameEvent, GameEventString, GameResult, gameStateKey, GameUpdate } from './game-state';
+import {
+  GameEvent,
+  GameEventString,
+  GameResult,
+  GameSnapshot,
+  gameStateKey,
+  GameUpdate,
+} from './game-state';
 import { nextPlayer } from './utils';
 
 export const GAME_UPDATE_STRATEGY = 'GAME_UPDATE_STRATEGY';
 
-export interface GameUpdateContext {
-  event: GameEvent;
-  state: Map<GameEventString, GameUpdate>;
-  fleet1: Rect[];
-  fleet2: Rect[];
-}
-
 export interface GameUpdateStrategy {
-  canUpdate(context: GameUpdateContext): boolean;
-  getNextUpdate(context: GameUpdateContext): GameUpdate;
+  canUpdate(event: GameEvent, snapshot: GameSnapshot): boolean;
+  getNextUpdate(event: GameEvent, snapshot: GameSnapshot): GameUpdate;
 }
 
 @Injectable()
 export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
-  // TODO: should come from game config
+  // TODO: should come from the game config
   private readonly GRID_SIZE = 10;
 
-  canUpdate({ event, state }: GameUpdateContext): boolean {
+  canUpdate(event: GameEvent, { state: updateHistory }: GameSnapshot): boolean {
     const isInsideBounds = upperBound(event.coord, this.GRID_SIZE);
-    const isDuplicate = this.checkIfDuplicate(event, state);
-    const outOfTurn = this.checkIfOutOfTurn(event, state);
+    const isDuplicate = this.checkIfDuplicate(event, updateHistory);
+    const outOfTurn = this.checkIfOutOfTurn(event, updateHistory);
 
     return isInsideBounds && !isDuplicate && !outOfTurn;
   }
 
-  getNextUpdate({ event, state, fleet1, fleet2 }: GameUpdateContext): GameUpdate {
+  getNextUpdate(
+    event: GameEvent,
+    { state: updateHistory, fleet1, fleet2 }: GameSnapshot,
+  ): GameUpdate {
     const { player, coord } = event;
     const targetFleet = player === Player.P1 ? fleet2 : fleet1;
-    const targetShip = targetFleet.find((ship) => contains(coord, ship));
+    const targetShip = targetFleet.find((ship) => contains(coord, ship as Rect));
     // update: player missed
     if (!targetShip) {
       return {
@@ -51,9 +54,9 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
       };
     }
 
-    const isSunk = toPoints(targetShip)
+    const isSunk = toPoints(targetShip as Rect)
       .filter((shipCoord) => !isEqual(coord, shipCoord))
-      .every((shipCoord) => state.get(gameStateKey({ player, coord: shipCoord })));
+      .every((shipCoord) => updateHistory.get(gameStateKey({ player, coord: shipCoord })));
 
     // update: player hit
     if (!isSunk) {
@@ -69,7 +72,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
       event,
       // filters out last sunk ship because it's already checked
       targetFleet.filter((ship) => ship !== targetShip),
-      state
+      updateHistory,
     );
 
     // update: player hit & sunk a ship
@@ -84,18 +87,18 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
 
   private isFleetDestroyed(
     { player }: GameEvent,
-    fleet: Rect[],
-    state: Map<GameEventString, GameUpdate>
+    fleet: Readonly<Rect>[],
+    state: Map<GameEventString, Readonly<GameUpdate>>,
   ): boolean {
     return fleet
-      .flatMap((ship) => toPoints(ship))
+      .flatMap((ship) => toPoints(ship as Rect))
       .every((coord) => state.has(gameStateKey({ player, coord })));
   }
 
   private tryGetGameResult(
     event: GameEvent,
-    fleet: Rect[],
-    state: Map<GameEventString, GameUpdate>
+    fleet: Readonly<Rect>[],
+    state: Map<GameEventString, Readonly<GameUpdate>>,
   ): GameResult | undefined {
     return this.isFleetDestroyed(event, fleet, state) ? { winner: event.player } : undefined;
   }
@@ -117,10 +120,10 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
 
 @Injectable()
 export class HasbroGameUpdateStrategy implements GameUpdateStrategy {
-  canUpdate(context: GameUpdateContext): boolean {
+  canUpdate(event: GameEvent, snapshot: GameSnapshot): boolean {
     throw new Error('Method not implemented.');
   }
-  getNextUpdate(context: GameUpdateContext): GameUpdate {
+  getNextUpdate(event: GameEvent, snapshot: GameSnapshot): GameUpdate {
     throw new Error('Method not implemented.');
   }
 }

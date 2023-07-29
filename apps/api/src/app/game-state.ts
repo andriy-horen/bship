@@ -16,42 +16,54 @@ export interface GameUpdate {
   nextTurn: Player;
   status: UpdateStatus;
   gameResult?: GameResult;
-  sunkShip?: Rect;
+  sunkShip?: Readonly<Rect>;
+}
+
+export interface GameSnapshot {
+  state: Map<GameEventString, Readonly<GameUpdate>>;
+  fleet1: Readonly<Rect>[];
+  fleet2: Readonly<Rect>[];
 }
 
 export class GameState {
-  private readonly _state = new Map<GameEventString, GameUpdate>();
-  private readonly _gameUpdateSubject = new ReplaySubject<GameUpdate>();
+  private readonly _state = new Map<GameEventString, Readonly<GameUpdate>>();
+  private readonly _gameUpdateSubject = new ReplaySubject<Readonly<GameUpdate>>();
+  private readonly _fleet1: Readonly<Rect>[];
+  private readonly _fleet2: Readonly<Rect>[];
 
   private _gameResult: GameResult | null = null;
 
   constructor(
     private readonly _gameUpdateStrategy: GameUpdateStrategy,
-    private readonly _fleet1: Rect[],
-    private readonly _fleet2: Rect[]
-  ) {}
+    fleet1: Rect[],
+    fleet2: Rect[],
+  ) {
+    this._fleet1 = fleet1.map((s) => Object.freeze(s));
+    this._fleet2 = fleet2.map((s) => Object.freeze(s));
+  }
 
   readonly stateUpdate = this._gameUpdateSubject.pipe(
-    takeWhile((update) => !update.gameResult, true)
+    takeWhile((update) => !update.gameResult, true),
   );
+
+  get snapshot(): GameSnapshot {
+    return {
+      state: new Map(this._state),
+      fleet1: [...this._fleet1],
+      fleet2: [...this._fleet2],
+    };
+  }
 
   update(event: GameEvent): boolean {
     if (this.isGameCompleted) {
       return false;
     }
 
-    const context = {
-      event,
-      state: this._state,
-      fleet1: this._fleet1,
-      fleet2: this._fleet2,
-    };
-
-    if (!this._gameUpdateStrategy.canUpdate(context)) {
+    if (!this._gameUpdateStrategy.canUpdate(event, this.snapshot)) {
       return false;
     }
 
-    const update = this._gameUpdateStrategy.getNextUpdate(context);
+    const update = Object.freeze(this._gameUpdateStrategy.getNextUpdate(event, this.snapshot));
 
     this._state.set(gameStateKey(event), update);
     this._gameUpdateSubject.next(update);

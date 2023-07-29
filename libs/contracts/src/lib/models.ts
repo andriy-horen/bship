@@ -20,7 +20,7 @@ export function isGameMessage(message: any): message is GameMessage {
 export enum GameMessageType {
   CreateGame = 'create',
   GameStarted = 'started',
-  WaitForOpponent = 'wait_start',
+  WaitForOpponent = 'wait',
   GameEvent = 'event',
   GameUpdate = 'update',
   GameCompleted = 'completed',
@@ -45,6 +45,18 @@ export interface GameUpdatePayload {
   self: boolean;
   won?: boolean;
   sunk?: Rect;
+  grids: [GridEntry[], GridEntry[]];
+}
+
+export interface GridEntry {
+  coord: Point | Rect;
+  type: GridEntryType;
+}
+
+export enum GridEntryType {
+  HitSquare = 'hit',
+  MissSquare = 'miss',
+  SunkenShip = 'sunk',
 }
 
 export interface Battleship {
