@@ -20,16 +20,16 @@ export interface GameUpdate {
 }
 
 export interface GameSnapshot {
-  state: Map<GameEventString, Readonly<GameUpdate>>;
-  fleet1: Readonly<Rect>[];
-  fleet2: Readonly<Rect>[];
+  state: ReadonlyMap<GameEventString, Readonly<GameUpdate>>;
+  fleet1: ReadonlyArray<Rect>;
+  fleet2: ReadonlyArray<Rect>;
 }
 
 export class GameState {
   private readonly _state = new Map<GameEventString, Readonly<GameUpdate>>();
   private readonly _gameUpdateSubject = new ReplaySubject<Readonly<GameUpdate>>();
-  private readonly _fleet1: Readonly<Rect>[];
-  private readonly _fleet2: Readonly<Rect>[];
+  private readonly _fleet1: ReadonlyArray<Rect>;
+  private readonly _fleet2: ReadonlyArray<Rect>;
 
   private _gameResult: GameResult | null = null;
 
@@ -38,8 +38,8 @@ export class GameState {
     fleet1: Rect[],
     fleet2: Rect[],
   ) {
-    this._fleet1 = fleet1.map((s) => Object.freeze(s));
-    this._fleet2 = fleet2.map((s) => Object.freeze(s));
+    this._fleet1 = fleet1.map((s) => Object.freeze(s) as Rect);
+    this._fleet2 = fleet2.map((s) => Object.freeze(s) as Rect);
   }
 
   readonly stateUpdate = this._gameUpdateSubject.pipe(

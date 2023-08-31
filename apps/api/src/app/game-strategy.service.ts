@@ -88,7 +88,7 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
   private isFleetDestroyed(
     { player }: GameEvent,
     fleet: Readonly<Rect>[],
-    state: Map<GameEventString, Readonly<GameUpdate>>,
+    state: ReadonlyMap<GameEventString, Readonly<GameUpdate>>,
   ): boolean {
     return fleet
       .flatMap((ship) => toPoints(ship as Rect))
@@ -98,16 +98,22 @@ export class SeaBattleGameUpdateStrategy implements GameUpdateStrategy {
   private tryGetGameResult(
     event: GameEvent,
     fleet: Readonly<Rect>[],
-    state: Map<GameEventString, Readonly<GameUpdate>>,
+    state: ReadonlyMap<GameEventString, Readonly<GameUpdate>>,
   ): GameResult | undefined {
     return this.isFleetDestroyed(event, fleet, state) ? { winner: event.player } : undefined;
   }
 
-  private checkIfDuplicate(event: GameEvent, state: Map<GameEventString, GameUpdate>): boolean {
+  private checkIfDuplicate(
+    event: GameEvent,
+    state: ReadonlyMap<GameEventString, Readonly<GameUpdate>>,
+  ): boolean {
     return state.has(gameStateKey(event));
   }
 
-  private checkIfOutOfTurn(event: GameEvent, state: Map<GameEventString, GameUpdate>): boolean {
+  private checkIfOutOfTurn(
+    event: GameEvent,
+    state: ReadonlyMap<GameEventString, Readonly<GameUpdate>>,
+  ): boolean {
     if (state.size === 0) {
       // TODO: first player to move should be configurable
       return event.player !== Player.P1;
