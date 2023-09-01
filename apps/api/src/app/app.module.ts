@@ -7,6 +7,7 @@ import { CommonModule } from './common.module';
 import { defaultConfiguration } from './config/configuration';
 import { GameModule } from './game.module';
 import { UserController } from './user.controller';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserController } from './user.controller';
     ConfigModule.forRoot({ load: [defaultConfiguration], isGlobal: true }),
     CommonModule,
     GameModule,
+    AuthModule,
   ],
   // TODO: extract UserController into a user module
   controllers: [AppController, UserController],
