@@ -23,7 +23,7 @@ function createLogger(): LoggerService {
 }
 
 async function bootstrap() {
-  const SESSION_MAXAGE = 86400000; // 24 hr
+  const SESSION_MAXAGE = 1000 * 60 * 60 * 24;
   const app = await NestFactory.create(AppModule, {
     logger: createLogger(),
   });
